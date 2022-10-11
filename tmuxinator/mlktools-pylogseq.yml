@@ -1,0 +1,18 @@
+# Set GIT home if the MLK_GIT_HOME env var exists
+# If not set, defaults to /home/git
+<% GITDIR=ENV["MLK_GIT_HOME"] %>
+<% if GITDIR=="" %>
+<% GITDIRF="/home/git" %>
+<% else %>
+<% GITDIRF=GITDIR %>
+<% end %>
+
+name: pylogseq
+root: <%= GITDIRF %>/mlktools/mlktools-pylogseq
+
+windows:
+  - docker: >
+      cd docker ;
+      sleep 0.2 ;
+      clear ;
+      echo Run dev environment at 010
