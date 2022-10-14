@@ -1,9 +1,11 @@
 {
-  "image": "malkab/python:3.9-buster",
+  "image": "malkab/grass:holistic_hornet",
 
   "customizations": {
     "vscode": {
       "extensions": [ "ms-python.python" ]
     }
-  }
+  },
+
+  "remoteUser": "1000"
 }
