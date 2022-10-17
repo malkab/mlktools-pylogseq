@@ -1,13 +1,16 @@
 {
+  "image": "malkab/grass:holistic_hornet",
+  "name": "pylogseq-dev-container",
+
+  "runArgs": [
+    "--network=marvel"
+  ],
+
   "customizations": {
     "vscode": {
       "extensions": [ "ms-python.python" ]
     }
   },
-  "workspaceFolder": "/workspace/src",
-  "service": "api",
-
-  "dockerComposeFile": [ "docker-compose.yaml" ],
 
   "remoteUser": "1000"
 }
