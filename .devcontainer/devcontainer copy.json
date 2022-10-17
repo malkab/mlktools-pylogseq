@@ -4,7 +4,7 @@
       "extensions": [ "ms-python.python" ]
     }
   },
-  "workspaceFolder": "/workspace/src",
+  "workspaceFolder": "/workspace",
   "service": "api",
 
   "dockerComposeFile": [ "docker-compose.yaml" ],
