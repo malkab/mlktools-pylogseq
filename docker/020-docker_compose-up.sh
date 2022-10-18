@@ -5,4 +5,4 @@
 # Runs the Compose.
 #
 # -----------------------------------------------------------------
-docker-compose -p marvel up -d
+docker compose -p marvel up -d

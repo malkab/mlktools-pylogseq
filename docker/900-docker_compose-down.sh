@@ -5,4 +5,4 @@
 # Runs the Compose.
 #
 # -----------------------------------------------------------------
-docker-compose -p marvel down
+docker compose -p marvel down
