@@ -1,5 +1,5 @@
 {
-  "image": "malkab/grass:holistic_hornet",
+  "image": "malkab/python:3.9-buster",
   "name": "pylogseq-dev-container",
 
   "runArgs": [

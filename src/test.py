@@ -1,14 +1,33 @@
 #!/usr/bin/env python3
 # coding=UTF8
 
-a = 6
+import sys
 
-print("AAA")
+print(sys.path)
 
-b = 2
+from marko import Markdown
+from mdlogseq import Logseq
 
-print("BBB")
+# g = Logseq()
 
-print("CCC")
+# print(g.elements)
 
-print(a+b)
+# markdown = Markdown(extensions=[Logseq])
+
+# # a = marko.parse("**whatever bold** whatever normal")
+
+# # print(a.get_type())
+
+# # print(a.children)
+
+# # print()
+
+# f = open("grafo_ejemplo_gestion/journals/a.md")
+
+# md = f.read()
+
+# b = markdown.parse(md)
+
+# print(b)
+
+# print()
