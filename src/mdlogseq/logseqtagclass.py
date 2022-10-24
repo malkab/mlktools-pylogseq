@@ -1,10 +1,10 @@
 from marko import inline
 
-class LogseqComposedTag(inline.InlineElement):
+class LogseqTag(inline.InlineElement):
 
-  pattern = r'\#\[\[ *(.+?) *\]\]'
+  pattern = r'\#*(.+?)'
   parse_children = True
-  priority = 7
+  priority = 6
 
   def __init__(self, match):
     self.target = match.group(1)

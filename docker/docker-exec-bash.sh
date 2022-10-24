@@ -9,5 +9,6 @@
 docker exec -ti \
   -u 1000:1000 \
   -w /workspaces/mlktools-pylogseq/src \
-  confident_poincare \
+  eloquent_burnell \
   /bin/bash
+  #confident_poincare \

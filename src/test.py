@@ -8,13 +8,13 @@ print(sys.path)
 from marko import Markdown
 from mdlogseq import Logseq
 
-# g = Logseq()
+g = Logseq()
 
-# print(g.elements)
+print(g.elements)
 
-# markdown = Markdown(extensions=[Logseq])
+markdown = Markdown(extensions=[Logseq])
 
-# # a = marko.parse("**whatever bold** whatever normal")
+a = markdown.parse("- #[[Actividad diaria]] #[[A B]] #GGG **Actividad**")
 
 # # print(a.get_type())
 
@@ -30,4 +30,4 @@ from mdlogseq import Logseq
 
 # print(b)
 
-# print()
+print()
