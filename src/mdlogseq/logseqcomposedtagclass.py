@@ -2,7 +2,7 @@ from marko import inline
 
 class LogseqComposedTag(inline.InlineElement):
 
-  pattern = r'\#\[\[ *(.+?) *\]\]'
+  pattern = r'#\[\[*(.+?)\]\]'
   parse_children = True
   priority = 7
 

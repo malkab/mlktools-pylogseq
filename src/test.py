@@ -14,7 +14,15 @@ print(g.elements)
 
 markdown = Markdown(extensions=[Logseq])
 
-a = markdown.parse("- #[[Actividad diaria]] #[[A B]] #GGG **Actividad**")
+a = markdown.parse("""
+- #[[Actividad diaria]] #[[A B]] #GGG **Actividad**
+  :LOGBOOK:
+  CLOCK: [2022-10-24 Mon 07:54:14]--[2022-10-24 Mon 08:26:28] =>  00:32:14
+  CLOCK: [2022-10-25 Mon 07:54:14]--[2022-10-25 Mon 08:26:28] =>  00:32:14
+  CLOCK: [2022-10-26 Mon 07:54:14]--[2022-10-26 Mon 08:26:28] =>  00:32:14
+  CLOCK: [2022-10-27 Mon 07:54:14]--[2022-10-27 Mon 08:26:28] =>  00:32:14
+  :END:
+""")
 
 # # print(a.get_type())
 

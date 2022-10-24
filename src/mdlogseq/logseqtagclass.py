@@ -2,7 +2,7 @@ from marko import inline
 
 class LogseqTag(inline.InlineElement):
 
-  pattern = r'\#*(.+?)'
+  pattern = r'#(\b.+?\b)'
   parse_children = True
   priority = 6
 
