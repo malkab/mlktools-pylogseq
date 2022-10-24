@@ -1,4 +1,5 @@
 from marko import inline
+from .processmultitags import processMultiTags
 
 class LogseqComposedTag(inline.InlineElement):
 
@@ -7,4 +8,4 @@ class LogseqComposedTag(inline.InlineElement):
   priority = 7
 
   def __init__(self, match):
-    self.target = match.group(1)
+    self.target = processMultiTags(match.group(1))

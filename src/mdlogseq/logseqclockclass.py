@@ -1,10 +1,26 @@
 from marko import inline
+import re
 
 class LogseqClock(inline.InlineElement):
 
-  pattern = r"(\s?CLOCK:)\s\[(.*)\s(.*)\s(.*)\]--\[(.*)\s(.*)\s(.*)\] =>  (.*)\n"
+  pattern = r"\s*(CLOCK:.*\n?)"
   parse_children = False
-  priority = 3
+  priority = 10
 
   def __init__(self, match):
-    self.target = [ match.group(1), match.group(2), match.group(3), match.group(4) ]
+    str = match.group(1)
+    pattern = r"(\s?CLOCK:)\s\[(.*)\s(.*)\s(.*)\]--\[(.*)\s(.*)\s(.*)\] =>  (.*)\n"
+
+    m = re.match(pattern, str)
+
+    self.target = {
+      "startDate": m.group(2),
+      "startDay": m.group(3),
+      "startHour": m.group(4),
+
+      "endDate": m.group(5),
+      "endDay": m.group(6),
+      "endHour": m.group(7),
+
+      "elapsedTime": m.group(8)
+    }

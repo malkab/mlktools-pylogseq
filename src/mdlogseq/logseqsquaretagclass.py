@@ -1,9 +1,9 @@
 from marko import inline
 from .processmultitags import processMultiTags
 
-class LogseqTag(inline.InlineElement):
+class LogseqSquareTag(inline.InlineElement):
 
-  pattern = r'#(\b.+?\s)'
+  pattern = r"\[\[(\b.+?\b)\]\]"
   parse_children = True
   priority = 6
 
