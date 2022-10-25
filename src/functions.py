@@ -40,7 +40,7 @@ def zeroPad(s):
 # Recursive node processing function
 #
 # ------------------------------------
-def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh):
+def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsToBlock):
   try:
     type = node.get_type()
 
@@ -91,19 +91,29 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh):
         if limitLow <= start <= limitHigh:
           # Iterate the tags found in the parent ListItem
           for t in tags:
-            # Check if the startDate has an entry in timeData
-            if timeTag not in timeData:
-              timeData[timeTag] = {}
+            # Check the tag is not blocked
+            if t not in tagsToBlock:
+              # Check if the startDate has an entry in timeData
+              if timeTag not in timeData:
+                timeData[timeTag] = {}
 
-            # Check if the tag has an entry for the day
-            if t not in timeData[timeTag]:
-              timeData[timeTag][t] = end - start
-            # Both entries exists
-            else:
-              timeData[timeTag][t] += end - start
+              # Total clock
+              if "#TOTAL CLOCK" not in timeData[timeTag]:
+                timeData[timeTag]["#TOTAL CLOCK"] = timedelta(seconds=0)
+
+              if "/" not in t:
+                timeData[timeTag]["#TOTAL CLOCK"] += end - start
+
+              # Check if the tag has an entry for the day
+              if t not in timeData[timeTag]:
+                timeData[timeTag][t] = end - start
+
+              # Both entries exists
+              else:
+                timeData[timeTag][t] += end - start
 
     for i in node.children:
-      processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh)
+      processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh, tagsToBlock)
 
   except:
     pass

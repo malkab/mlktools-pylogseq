@@ -11,6 +11,14 @@ from functions import help, processNode
 
 # ------------------------------------
 #
+# Constants
+#
+# ------------------------------------
+TAGSTOBLOCK = [ "BLK", "A]", "B]", "C]" ]
+
+
+# ------------------------------------
+#
 # Command line options
 #
 # ------------------------------------
@@ -67,6 +75,7 @@ for (dirpath, dirnames, filenames) in os.walk(path):
       if "logseq/bak/" not in dirpath:
         files.append(os.path.join(dirpath, f))
 
+
 # ------------------------------------
 #
 # Calculate time limits
@@ -117,7 +126,8 @@ for file in files:
 
   # Process initial children
   for i in b.children:
-    processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh)
+    processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh, TAGSTOBLOCK)
+
 
 # ------------------------------------
 #
@@ -138,6 +148,12 @@ for k in skeys:
 
   stimes = sorted(dt.keys())
 
-  for d in stimes:
+  total = timeData[k]["#TOTAL CLOCK"]
+
+  print("    %s%s %s" % ("TOTAL", " "*(maxLen - len("TOTAL")), \
+    timeData[k]["#TOTAL CLOCK"]))
+
+  for d in stimes[1:]:
     padding = maxLen - len(d)
-    print("    %s%s %s" % (d, " "*padding, timeData[k][d]))
+    print("    %s%s %s (%s%%)" % (d, " "*padding, timeData[k][d], \
+      round(timeData[k][d] / total * 100)))
