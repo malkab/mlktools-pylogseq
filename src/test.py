@@ -3,7 +3,8 @@
 
 from marko import Markdown
 from mdlogseq import Logseq
-import datetime
+from datetime import datetime, timedelta, date
+import calendar
 
 g = Logseq()
 
@@ -23,7 +24,39 @@ f = open("grafo_ejemplo_gestion/journals/2022_10_24.md")
 
 md = f.read()
 
+# Parameters
+# Time limit:    today (default), week, month, year, all
+# Desagregación: diario (default), semanal, mensual, total
+
 b = markdown.parse(md)
+
+# Time limit
+tl = "month"
+
+if tl == "today":
+  limitLow = date.today()
+  limitHigh = date.today() + timedelta(days=1)
+
+if tl == "week":
+  limitLow = date.today() - timedelta(days=date.today().weekday())
+  limitHigh = limitLow + timedelta(days=7)
+
+if tl == "month":
+  t = date.today()
+  mr = calendar.monthrange(t.year, t.month)
+  print("HHH", mr)
+
+  limitLow = datetime(t.year, t.month, 1)
+  limitHigh = datetime(t.year, t.month, mr[1]) + timedelta(days=1)
+
+if tl == "year":
+  t = date.today()
+  limitLow = datetime(t.year, 1, 1)
+  limitHigh = datetime(t.year, 12, 31) + timedelta(days=1)
+
+print(tl, limitLow, limitHigh)
+
+timeData = {}
 
 def processNode(node, tags):
   try:
@@ -41,9 +74,19 @@ def processNode(node, tags):
       if node.target["startDate"] != node.target["endDate"]:
         print("WARNING! Clocking in different days: ", node.target)
 
-      start = datetime.datetime("%s %s" % (node.target["startDate"], node.target["endDate"]))
+      start = datetime.strptime("%s %s" % (node.target["startDate"], node.target["startHour"]), '%Y-%m-%d %H:%M:%S')
+      end = datetime.strptime("%s %s" % (node.target["endDate"], node.target["endHour"]), '%Y-%m-%d %H:%M:%S')
 
-      print(start)
+      print("date: ", start, end, end - start)
+
+      if start >= datetime.now() - filter:
+        for t in tags:
+          if node.target["startDate"] not in timeData:
+            timeData[node.target["startDate"]] = {}
+          elif t not in timeData[node.target["startDate"]]:
+            timeData[node.target["startDate"]][t] = end - start
+          else:
+            timeData[node.target["startDate"]][t] += end - start
 
       print("Clock", node.target, tags)
 
@@ -57,5 +100,7 @@ tags = []
 
 for i in b.children:
   processNode(i, tags)
+
+print(timeData)
 
 print()
