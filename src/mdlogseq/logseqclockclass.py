@@ -13,14 +13,17 @@ class LogseqClock(inline.InlineElement):
 
     m = re.match(pattern, str)
 
-    self.target = {
-      "startDate": m.group(2),
-      "startDay": m.group(3),
-      "startHour": m.group(4),
+    if m == None:
+      self.target = { "errorInCLOCK": str }
+    else:
+      self.target = {
+        "startDate": m.group(2),
+        "startDay": m.group(3),
+        "startHour": m.group(4),
 
-      "endDate": m.group(5),
-      "endDay": m.group(6),
-      "endHour": m.group(7),
+        "endDate": m.group(5),
+        "endDay": m.group(6),
+        "endHour": m.group(7),
 
-      "elapsedTime": m.group(8)
-    }
+        "elapsedTime": m.group(8)
+      }

@@ -6,5 +6,6 @@
 # VSCode Dev Containers.
 #
 # -----------------------------------------------------------------
-pip install \
-  marko
+pip install -U \
+  marko \
+  pyinstaller
