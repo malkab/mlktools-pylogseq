@@ -6,8 +6,8 @@ def processMultiTags(tag):
 
   for i in sp:
     if len(out) == 0:
-      out.append(i)
+      out.append(i.strip())
     else:
-      out.append(out[-1]+"/"+i)
+      out.append((out[-1]+"/"+i).strip())
 
   return out

@@ -63,7 +63,9 @@ for (dirpath, dirnames, filenames) in os.walk(path):
     ext = os.path.splitext(f)[1].lower()
 
     if ext == ".md":
-      files.append(os.path.join(dirpath, f))
+      # Filter logseq/bak/ pages
+      if "logseq/bak/" not in dirpath:
+        files.append(os.path.join(dirpath, f))
 
 # ------------------------------------
 #

@@ -1,8 +1,2 @@
-import re
-from datetime import datetime
-
-print(datetime.strptime("2022-10-24 09:23:00", '%Y-%m-%d %H:%M:%S').year)
-
-d = { "A": 33 }
-
-print("A" not in d)
+print("logseq/bak/" in "grafo_ejemplo_gestion/logseq/bafk/journals/2022_10_20")
+print("   4    ".strip())
