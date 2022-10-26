@@ -23,7 +23,7 @@ TAGSTOBLOCK = [ "BLK", "A]", "B]", "C]" ]
 #
 # ------------------------------------
 try:
-  opts, args = getopt.getopt(sys.argv[1:], "t:d:h")
+  opts, args = getopt.getopt(sys.argv[1:], "t:d:wh")
 
 except getopt.GetoptError as err:
   print("Error: ", err)
@@ -37,6 +37,8 @@ timeLimit = "today"
 dessagre = "daily"
 # Graph path
 path = "."
+# Only Work/ tags
+onlyWork = True
 
 # Process options
 for o, a in opts:
@@ -44,6 +46,8 @@ for o, a in opts:
     timeLimit = a
   if o == "-d":
     dessagre = a
+  if o == "-w":
+    onlyWork = False
   if o == "-h":
     help()
     sys.exit(0)
@@ -126,7 +130,7 @@ for file in files:
 
   # Process initial children
   for i in b.children:
-    processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh, TAGSTOBLOCK)
+    processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh, TAGSTOBLOCK, onlyWork)
 
 
 # ------------------------------------

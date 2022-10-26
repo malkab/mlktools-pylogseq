@@ -11,7 +11,7 @@ Scans a Logseq graph to check for CLOCK entries and aggregate
 them by tags and time.
 
 Usage:
-  mlkgraphclock [-t lapse] [-d dessagregation] [-h] [path to graph]
+  mlkgraphclock [-t lapse] [-d dessagregation] [-w] [-h] [path to graph]
 
 Arguments:
   [path to graph]    Path to graph, defaults to .
@@ -19,6 +19,7 @@ Arguments:
 Options:
   -t        Time lapse: today (default), week, month, year
   -d        Time dessagregation: daily (default), weekly, monthly, yearly
+  -w        Process tags not prefixed by Work/ or Gestión general
   -h        This help
 """)
 
@@ -40,7 +41,7 @@ def zeroPad(s):
 # Recursive node processing function
 #
 # ------------------------------------
-def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsToBlock):
+def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsToBlock, onlyWork):
   try:
     type = node.get_type()
 
@@ -51,7 +52,15 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
 
     # If a tag, add the tag to the tags list
     if type == "LogseqComposedTag" or type == "LogseqTag" or type == "LogseqSquareTag":
-      tags.extend(node.target)
+      t = node.target
+
+      # Filter Work tags
+      if onlyWork:
+        tagsD = [ i for i in t if i[0:4] == "Work" or i == "Gestión general" ]
+      else:
+        tagsD = [ i for i in t if not(i[0:4] == "Work" or i == "Gestión ") ]
+
+      tags.extend(tagsD)
 
     # If a CLOCK, process
     if type == "LogseqClock":
@@ -113,7 +122,7 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
                 timeData[timeTag][t] += end - start
 
     for i in node.children:
-      processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh, tagsToBlock)
+      processNode(timeData, file, i, tags, dessagre, limitLow, limitHigh, tagsToBlock, onlyWork)
 
   except:
     pass
