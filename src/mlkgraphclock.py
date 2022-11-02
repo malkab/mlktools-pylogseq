@@ -66,6 +66,23 @@ if dessagre not in [ "daily", "weekly", "monthly", "yearly" ]:
 if len(args) > 0:
   path = args[0]
 
+
+# --------------------------------------
+#
+# Debug data imposting command line options
+#
+# --------------------------------------
+path = "grafo_ejemplo_gestion"
+timeLimit = "year"
+
+print("D: ", path, timeLimit, dessagre)
+
+
+# --------------------------------------
+#
+# Find .md files in graph
+#
+# --------------------------------------
 # To store .md files to iterate and process
 files = []
 

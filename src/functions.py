@@ -45,10 +45,17 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
   try:
     type = node.get_type()
 
+    print("D: ", type)
+
     # If the node is a ListItem, reset the tags. CLOCK entries will be
     # added to parent node tags, and not goes upwards more than that
     if type == "ListItem":
       tags = []
+
+    if type == "Paragraph":
+      print("D: ", node)
+
+
 
     # If a tag, add the tag to the tags list
     if type == "LogseqComposedTag" or type == "LogseqTag" or type == "LogseqSquareTag":
