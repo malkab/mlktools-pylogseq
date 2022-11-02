@@ -2,9 +2,10 @@
 
 # -----------------------------------------------------------------
 #
-# Install packages in pip with this script. Virtualenv is not
-# versioned, so this guarantee the environment reproducibility.
+# Install packages in pip with this script. For initializing
+# VSCode Dev Containers.
 #
 # -----------------------------------------------------------------
-pip install \
-  ipython
+pip install -U \
+  marko \
+  pyinstaller

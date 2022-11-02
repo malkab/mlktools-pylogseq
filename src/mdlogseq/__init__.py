@@ -1,0 +1,1 @@
+from .logseqclass import Logseq
