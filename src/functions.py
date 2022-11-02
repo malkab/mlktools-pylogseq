@@ -55,6 +55,8 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
     if type == "Paragraph":
       print("D: ", node)
 
+      recomposeParagraph(node)
+
 
 
     # If a tag, add the tag to the tags list
@@ -133,3 +135,13 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
 
   except:
     pass
+
+
+# ------------------------------------
+#
+# Recompose a Paragraph node
+#
+# ------------------------------------
+def recomposeParagraph(node):
+
+  print("D: ", node)
