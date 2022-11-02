@@ -58,7 +58,7 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
       if onlyWork:
         tagsD = [ i for i in t if i[0:4] == "Work" or i == "Gestión general" ]
       else:
-        tagsD = [ i for i in t if not(i[0:4] == "Work" or i == "Gestión ") ]
+        tagsD = [ i for i in t if not(i[0:4] == "Work" or i == "Gestión general") ]
 
       tags.extend(tagsD)
 
