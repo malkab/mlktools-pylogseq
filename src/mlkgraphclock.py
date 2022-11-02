@@ -72,10 +72,10 @@ if len(args) > 0:
 # Debug data imposting command line options
 #
 # --------------------------------------
-path = "grafo_ejemplo_gestion"
-timeLimit = "year"
+# path = "grafo_ejemplo_gestion"
+# timeLimit = "year"
 
-print("D: ", path, timeLimit, dessagre)
+# print("D: ", path, timeLimit, dessagre)
 
 
 # --------------------------------------

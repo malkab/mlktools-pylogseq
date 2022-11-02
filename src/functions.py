@@ -45,19 +45,10 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
   try:
     type = node.get_type()
 
-    print("D: ", type)
-
     # If the node is a ListItem, reset the tags. CLOCK entries will be
     # added to parent node tags, and not goes upwards more than that
     if type == "ListItem":
       tags = []
-
-    if type == "Paragraph":
-      print("D: ", node)
-
-      recomposeParagraph(node)
-
-
 
     # If a tag, add the tag to the tags list
     if type == "LogseqComposedTag" or type == "LogseqTag" or type == "LogseqSquareTag":
@@ -67,7 +58,7 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
       if onlyWork:
         tagsD = [ i for i in t if i[0:4] == "Work" or i == "Gestión general" ]
       else:
-        tagsD = [ i for i in t if not(i[0:4] == "Work" or i == "Gestión ") ]
+        tagsD = [ i for i in t if not(i[0:4] == "Work" or i == "Gestión general") ]
 
       tags.extend(tagsD)
 
@@ -135,13 +126,3 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
 
   except:
     pass
-
-
-# ------------------------------------
-#
-# Recompose a Paragraph node
-#
-# ------------------------------------
-def recomposeParagraph(node):
-
-  print("D: ", node)

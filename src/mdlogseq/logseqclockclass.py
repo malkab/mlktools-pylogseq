@@ -13,8 +13,6 @@ class LogseqClock(inline.InlineElement):
 
     m = re.match(pattern, str)
 
-    print("D: ", match)
-
     if m == None:
       self.target = { "errorInCLOCK": str }
     else:
