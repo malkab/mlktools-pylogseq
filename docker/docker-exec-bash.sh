@@ -9,5 +9,5 @@
 docker exec -ti \
   -u 1000:1000 \
   -w /workspaces/mlktools-pylogseq/src \
-  dazzling_galileo \
+  hardcore_villani \
   /bin/bash
