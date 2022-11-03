@@ -5,19 +5,18 @@
 # ------------------------------------
 def help():
   print("""
-Scans a Logseq graph to check for CLOCK entries and aggregate
-them by tags and time.
+Scans a Logseq graph to check for CLOCK entries and log tasks
+done on a daily basis.
 
 Usage:
-  mlkgraphclock [-t lapse] [-d dessagregation] [-w] [-h] [path to graph]
+  mlkgraphlog [-a] [-d day] [path to graph]
 
 Arguments:
   [path to graph]    Path to graph, defaults to .
 
 Options:
-  -t        Time lapse: today (default), week, month, year
-  -d        Time dessagregation: daily (default), weekly, monthly, yearly
-  -w        Process tags not prefixed by Work/ or Gestión general
+  -a        Logs all days
+  -d        A given day to log in YYYY-MM-DD format, defaults to the last day
   -h        This help
 """)
 

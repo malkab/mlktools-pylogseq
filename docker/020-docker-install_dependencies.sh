@@ -7,7 +7,8 @@
 #
 # -----------------------------------------------------------------
 docker exec -ti \
-  -u 1000:1000 \
-  -w /workspaces/mlktools-pylogseq/src \
-  priceless_hoover \
-  /bin/bash
+  -u 0:0 \
+  -w /workspaces/mlktools-pylogseq \
+  -e PYTHONPATH=$PYTHONPATH:/workspaces/mlktools-pylogseq/src \
+  eloquent_agnesi \
+  /bin/bash -c "./pip_install.sh"

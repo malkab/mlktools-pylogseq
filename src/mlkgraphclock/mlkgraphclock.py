@@ -8,9 +8,7 @@ import getopt
 import sys
 from functions import help, processNode
 from common.mdlogseq import LogseqParseClock
-from common.findmdfiles import findMdFiles
-
-sys.path.append("..")
+from common import findMdFiles, shortenString
 
 
 # ------------------------------------
@@ -77,9 +75,16 @@ if len(args) > 0:
 #
 # --------------------------------------
 # path = "grafo_ejemplo_gestion"
+# #path = "../../grafo_ejemplo_gestion/"
 # timeLimit = "year"
+# dessagre = "year"
+# onlyWork = False
 
-# print("D: ", path, timeLimit, dessagre)
+# print("D: path", path)
+# print("D: timeLimit", timeLimit)
+# print("D: dessagre", dessagre)
+# print("D: onlyWork", onlyWork)
+# print()
 
 
 # --------------------------------------
@@ -87,22 +92,12 @@ if len(args) > 0:
 # Find .md files in graph
 #
 # --------------------------------------
-# # To store .md files to iterate and process
-# files = []
-
-# # Generate list of .md files
-# for (dirpath, dirnames, filenames) in os.walk(path):
-#   for f in filenames:
-#     ext = os.path.splitext(f)[1].lower()
-
-#     if ext == ".md":
-#       # Filter logseq/bak/ pages
-#       if "logseq/bak/" not in dirpath:
-#         files.append(os.path.join(dirpath, f))
-
-# TEST THIS NEXT TIME
 files = findMdFiles(path)
-print("D: files", files)
+
+# No graph found
+if files == []:
+  print("ERROR! No .md files found")
+  sys.exit(1)
 
 
 # ------------------------------------
@@ -172,18 +167,12 @@ for k in skeys:
   print(k)
   dt = timeData[k]
 
-  lengths = [ len(i) for i in dt.keys()]
-
-  maxLen = max(lengths)
-
   stimes = sorted(dt.keys())
 
   total = timeData[k]["#TOTAL CLOCK"]
 
-  print("    %s%s %s" % ("TOTAL", " "*(maxLen - len("TOTAL")), \
-    timeData[k]["#TOTAL CLOCK"]))
+  print("    %s   %s" % (shortenString("TOTAL", 30), timeData[k]["#TOTAL CLOCK"]))
 
   for d in stimes[1:]:
-    padding = maxLen - len(d)
-    print("    %s%s %s (%s%%)" % (d, " "*padding, timeData[k][d], \
+    print("    %s   %s (%s%%)" % (shortenString(d, 30), timeData[k][d], \
       round(timeData[k][d] / total * 100)))
