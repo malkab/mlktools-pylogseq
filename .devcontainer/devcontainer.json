@@ -8,5 +8,9 @@
     }
   },
 
+  "containerEnv": {
+    "PYTHONPATH": "/workspaces/mlktools-pylogseq/src"
+  },
+
   "remoteUser": "1000"
 }

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from common import clockError
 
 # ------------------------------------
 #
@@ -67,7 +68,7 @@ def processNode(timeData, file, node, tags, dessagre, limitLow, limitHigh, tagsT
 
       # Check for error
       if "errorInCLOCK" in node.target.keys():
-        print("Error in parsing file %s, %s" % (file, node.target["errorInCLOCK"]))
+        clockError(node.target, file)
 
       else:
         if node.target["startDate"] != node.target["endDate"]:
