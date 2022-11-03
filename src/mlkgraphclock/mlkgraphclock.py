@@ -6,10 +6,12 @@ from datetime import datetime, timedelta, date
 import calendar
 import getopt
 import sys
-sys.path.append("..")
 from functions import help, processNode
 from common.mdlogseq import LogseqParseClock
 from common.findmdfiles import findMdFiles
+
+sys.path.append("..")
+
 
 # ------------------------------------
 #
