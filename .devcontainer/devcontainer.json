@@ -1,5 +1,5 @@
 {
-  "image": "malkab/python:3.9-buster",
+  "image": "malkab/python:3.11-bullseye",
   "name": "pylogseq-dev-container",
 
   "customizations": {
@@ -8,9 +8,9 @@
     }
   },
 
-  "containerEnv": {
-    "PYTHONPATH": "/workspaces/mlktools-pylogseq/src"
-  },
+  "remoteUser": "1000",
 
-  "remoteUser": "1000"
+  "postCreateCommand": "bash -c \"./pip_install.sh\"",
+
+  "postStartCommand": "bash -c \"echo postStartCommand\""
 }
