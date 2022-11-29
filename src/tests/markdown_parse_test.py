@@ -27,7 +27,7 @@ class TestMarkdownParser:
     g = LogseqParse()
     mark = Markdown(extensions=[LogseqParse])
 
-    markdown = """- DONE #[[Gestión general]]
+    markdown = """- DONE #[[Gestión/Gestión general]] Something
   :LOGBOOK:
   CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
   CLOCK: [2022-11-25 Fri 10:01:13]--[2022-11-25 Fri 10:01:17] =>  00:00:04
@@ -41,4 +41,10 @@ class TestMarkdownParser:
     print("D: ", parsed.children[0])
 
     assert isinstance(parsed, marko.block.Document) == True
+    assert isinstance(parsed.children[0], marko.block.List) == True
+
+    listItem = parsed.children[0].children[0]
+
+    assert isinstance(listItem, marko.block.ListItem) == True
+
     # assert isinstance(parsed.children, marko.block.List) == True
