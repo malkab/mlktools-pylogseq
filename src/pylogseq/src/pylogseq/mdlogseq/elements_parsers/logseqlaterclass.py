@@ -1,21 +1,20 @@
 from marko import inline
-from .processmultitags import processMultiTags
 from re import Match
 
 # --------------------------------------
 #
-# Parser element: Logseg simple #A tag
+# Parse element: Logseq LATER
 #
 # --------------------------------------
-class LogseqTag(inline.InlineElement):
-  """Parser element for Logseq simple #A tag."""
+class LogseqLater(inline.InlineElement):
+  """Parser element for Logseq LATER mark."""
 
   # --------------------------------------
   #
   # The pattern to match.
   #
   # --------------------------------------
-  pattern = r'#(.+?) '
+  pattern: str = r'(LATER)'
   """The pattern to match."""
 
   # --------------------------------------
@@ -31,7 +30,7 @@ class LogseqTag(inline.InlineElement):
   # Priority.
   #
   # --------------------------------------
-  priority = 2
+  priority = 6
   """Priority."""
 
   # --------------------------------------
@@ -45,4 +44,4 @@ class LogseqTag(inline.InlineElement):
     Args:
         match (Match): The match from the pattern.
     """
-    self.target = processMultiTags(match.group(1))
+    self.target = match.group(0)

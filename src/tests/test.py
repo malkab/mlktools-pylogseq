@@ -7,56 +7,48 @@ import pytest
 from marko import Markdown
 from pylogseq.src.pylogseq.mdlogseq.logseqparse import LogseqParse
 from pylogseq.src.pylogseq.block import Block
+from pylogseq.src.pylogseq.page import Page
 
-g = LogseqParse()
+# g = LogseqParse()
 mark = Markdown(extensions=[LogseqParse])
 
+p = Page()
+
 markdown = """
-- DONE #[[A/B/C/Gestión general]] Something
+- DONE #[[A/B/C/Gestión general]] #H/N/T [[P/YU]] Something
   :LOGBOOK:
-  CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
+  CLOCK: [2022-11-25 Fri 08:50:00]--[2022-11-25 Fri 09:00:00] =>  00:12:33
   CLOCK: [2022-11-25 Fri 10:01:13]--[2022-11-25 Fri 10:01:17] =>  00:00:04
   CLOCK: [2022-11-25 Fri 10:01:18]--[2022-11-25 Fri 10:07:58] =>  00:06:40
   CLOCK: [2022-11-25 Fri 12:17:38]--[2022-11-25 Fri 12:19:27] =>  00:01:49
   CLOCK: [2022-11-25 Fri 14:49:56]--[2022-11-25 Fri 14:54:06] =>  00:04:10
   :END:
-  - A
-  - B
-  """
+  - LATER [#C] Algo que se escribe así como el que no quiere la cosa
+  - [#B] Otra cosa escrita a voleo total
+    - [#A] KKKKK
+      - [#C] 44444
+  - [#C] #H/N/T Ya estoy un poco cansado
+    ```txt
+    jejwer
+    kekrwer
 
-parsed = mark.parse(markdown)
+    4k3k3
+    lk3k4
 
-items = [parsed]
+    eker
+    34343
+    ```
 
-loop = True
+    ```Python
+    a = 4
+    ```
+- LATER [#C] #A/J/O Something in the way
+"""
 
-txt = ""
+blocks = p.getBlocks(p.parseMarkdown(mark, markdown))
 
-blocks = []
-
-while loop:
-
-  loop = False
-
-  for i in items:
-    t = type(i).__name__
-
-    print("\nTYPE: ", t)
-
-    if t in [ "Document", "List", "Paragraph"]:
-      loop = True
-      items = i.children
-
-    if t == "ListItem" :
-      blocks.append(i)
-      loop = True
-      items = i.children
-
-    if t == "RawText":
-      print(i)
-
-print(blocks)
-
-print(blocks[0])
-
-print()
+for x in blocks:
+  print("\n\nBlocks str:")
+  print(x.strBlock)
+  print(x.tags)
+  print(x.highestPriority)

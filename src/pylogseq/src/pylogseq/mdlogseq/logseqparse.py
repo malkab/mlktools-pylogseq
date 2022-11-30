@@ -5,7 +5,21 @@ from .elements_parsers.logseqlogbookclass import LogseqLogBook
 from .elements_parsers.logseqsquaretagclass import LogseqSquareTag
 from .elements_parsers.logseqtagclass import LogseqTag
 from .elements_parsers.logseqdoneclass import LogseqDone
+from .elements_parsers.logseqlaterclass import LogseqLater
+from .elements_parsers.logseqpriorityclass import LogseqPriority
 
+# --------------------------------------
+#
+# The Logseq parser.
+#
+# --------------------------------------
 class LogseqParse:
-  elements = [ LogseqDone, LogseqClock, LogseqLogBook, LogseqEnd, LogseqComposedTag,
-    LogseqTag, LogseqSquareTag ]
+
+  # --------------------------------------
+  #
+  # Elements to parse.
+  #
+  # --------------------------------------
+  elements = [ LogseqDone, LogseqLater, LogseqClock, LogseqLogBook, LogseqEnd, LogseqComposedTag,
+    LogseqTag, LogseqSquareTag, LogseqPriority ]
+  """Elements to parse."""
