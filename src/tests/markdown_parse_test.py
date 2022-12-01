@@ -24,10 +24,7 @@ class TestMarkdownParser:
   #
   # --------------------------------------
   def test_clock(self):
-
     mark = Markdown(extensions=[LogseqParse])
-
-    print("D: jjej3")
 
     markdown = """- DONE #[[Gestión/Gestión general]] Something
       :LOGBOOK:
@@ -52,8 +49,9 @@ class TestMarkdownParser:
   # Errores de parseo de clocks
   #
   # --------------------------------------
-  def test_error_clock_undefined(self):
 
+  # Parseo indeterminado
+  def test_error_clock_undefined(self):
     with pytest.raises(ErrorClock) as e:
 
       mark = Markdown(extensions=[LogseqParse])
@@ -67,8 +65,8 @@ class TestMarkdownParser:
 
     assert e.value.message == "CLOCK error: undefined error parsing CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33"
 
+  # Error de parseo de la starting timestamp
   def test_error_clock_starting_timestamp(self):
-
     with pytest.raises(ErrorClock) as e:
 
       mark = Markdown(extensions=[LogseqParse])
@@ -82,9 +80,8 @@ class TestMarkdownParser:
 
     assert e.value.message == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
 
-
+  # Error de parseo de la ending timestamp
   def test_error_clock_ending_timestamp(self):
-
     with pytest.raises(ErrorClock) as e:
 
       mark = Markdown(extensions=[LogseqParse])
@@ -98,11 +95,8 @@ class TestMarkdownParser:
 
     assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
 
-
-
-
+  # Error en clocking en días diferentes
   def test_error_clock_different_days(self):
-
     with pytest.raises(ErrorClock) as e:
 
       mark = Markdown(extensions=[LogseqParse])
@@ -114,4 +108,20 @@ class TestMarkdownParser:
 
       parsed = mark.parse(markdown)
 
-    assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
+    assert e.value.message == "CLOCK error: clocking in different days 2022-11-25 <> 2022-11-26"
+
+  # Error en que la hora de comienzo es mayor que la de finalización
+  def test_error_clock_start_bigger(self):
+
+    with pytest.raises(ErrorClock) as e:
+
+      mark = Markdown(extensions=[LogseqParse])
+
+      markdown = """- DONE #[[Gestión/Gestión general]] Something
+        :LOGBOOK:
+        CLOCK: [2022-11-26 Fri 09:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
+        :END:"""
+
+      parsed = mark.parse(markdown)
+
+    assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 Fri 09:57:12 > 2022-11-26 Sat 09:09:45"
