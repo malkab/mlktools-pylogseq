@@ -1,5 +1,6 @@
 from marko import inline
 from datetime import datetime
+from ..exceptions.errorclock import ErrorClock
 import re
 
 class LogseqClock(inline.InlineElement):
@@ -15,57 +16,40 @@ class LogseqClock(inline.InlineElement):
     m = re.match(pattern, str)
 
     if m == None:
-      self.target = {
-        "errorInCLOCK": "unparseableCLOCK",
-        "CLOCK": str
-      }
+
+      # Generic error
+      raise ErrorClock(("CLOCK error: undefined error parsing %s" % str).strip("\n"))
 
     else:
-      # Store the start and end time as timestamps
+
+      # Unparseable start time
       try:
-        start = datetime.strptime("%s %s" % \
+        start = datetime.strptime("%s %s" %
           (m.group(2), m.group(4)), '%Y-%m-%d %H:%M:%S')
 
       except:
-        self.target = {
-          "errorInCLOCK": "unparseableTimestamp",
-          "timestamp": "%s %s" % (m.group(2), m.group(4))
-        }
+        raise ErrorClock("CLOCK error: unparseable start timestamp %s %s" %
+          (m.group(2), m.group(4)))
 
-        return
-
+      # Unparseable end time
       try:
         end = datetime.strptime("%s %s" % \
           (m.group(5), m.group(7)), '%Y-%m-%d %H:%M:%S')
 
       except:
-        self.target = {
-          "errorInCLOCK": "unparseableTimestamp",
-          "timestamp": "%s %s" % (m.group(5), m.group(7))
-        }
-
-        return
+        raise ErrorClock("CLOCK error: unparseable ending timestamp %s %s" %
+          (m.group(5), m.group(7)))
 
       # Check different days clocking
       if m.group(2) != m.group(5):
-        self.target = {
-          "errorInCLOCK": "differentDays",
-          "startDate": m.group(2),
-          "endDate": m.group(5)
-        }
+        raise ErrorClock("CLOCK error: clocking in different days %s <> %s" %
+          (m.group(2), m.group(5)))
 
       elif end<start:
-        self.target = {
-          "errorInCLOCK": "startBiggerThanEnd",
-          "startDate": m.group(2),
-          "startDay": m.group(3),
-          "startHour": m.group(4),
-          "start": start,
-          "endDate": m.group(5),
-          "endDay": m.group(6),
-          "endHour": m.group(7),
-          "end": end,
-        }
+        raise ErrorClock("ERROR! Start time bigger than end time %s > %s" % (
+            "%s%s%s" % (m.group(2), m.group(3), m.group(4)),
+            "%s%s%s" % (m.group(5), m.group(6), m.group(7))
+          ))
 
       else:
         self.target = {

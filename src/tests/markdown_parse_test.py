@@ -7,6 +7,7 @@ import pytest
 from marko import Markdown
 import marko
 from pylogseq.src.pylogseq.mdlogseq.logseqparse import LogseqParse
+from pylogseq.src.pylogseq.mdlogseq.exceptions.errorclock import ErrorClock
 
 # --------------------------------------
 #
@@ -24,21 +25,20 @@ class TestMarkdownParser:
   # --------------------------------------
   def test_clock(self):
 
-    g = LogseqParse()
     mark = Markdown(extensions=[LogseqParse])
 
+    print("D: jjej3")
+
     markdown = """- DONE #[[Gestión/Gestión general]] Something
-  :LOGBOOK:
-  CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
-  CLOCK: [2022-11-25 Fri 10:01:13]--[2022-11-25 Fri 10:01:17] =>  00:00:04
-  CLOCK: [2022-11-25 Fri 10:01:18]--[2022-11-25 Fri 10:07:58] =>  00:06:40
-  CLOCK: [2022-11-25 Fri 12:17:38]--[2022-11-25 Fri 12:19:27] =>  00:01:49
-  CLOCK: [2022-11-25 Fri 14:49:56]--[2022-11-25 Fri 14:54:06] =>  00:04:10
-  :END:"""
+      :LOGBOOK:
+      CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
+      CLOCK: [2022-11-25 Fri 10:01:13]--[2022-11-25 Fri 10:01:17] =>  00:00:04
+      CLOCK: [2022-11-25 Fri 10:01:18]--[2022-11-25 Fri 10:07:58] =>  00:06:40
+      CLOCK: [2022-11-25 Fri 12:17:38]--[2022-11-25 Fri 12:19:27] =>  00:01:49
+      CLOCK: [2022-11-25 Fri 14:49:56]--[2022-11-25 Fri 14:54:06] =>  00:04:10
+      :END:"""
 
     parsed = mark.parse(markdown)
-
-    print("D: ", parsed.children[0])
 
     assert isinstance(parsed, marko.block.Document) == True
     assert isinstance(parsed.children[0], marko.block.List) == True
@@ -47,4 +47,71 @@ class TestMarkdownParser:
 
     assert isinstance(listItem, marko.block.ListItem) == True
 
-    # assert isinstance(parsed.children, marko.block.List) == True
+  # --------------------------------------
+  #
+  # Errores de parseo de clocks
+  #
+  # --------------------------------------
+  def test_error_clock_undefined(self):
+
+    with pytest.raises(ErrorClock) as e:
+
+      mark = Markdown(extensions=[LogseqParse])
+
+      markdown = """- DONE #[[Gestión/Gestión general]] Something
+        :LOGBOOK:
+        CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
+        :END:"""
+
+      parsed = mark.parse(markdown)
+
+    assert e.value.message == "CLOCK error: undefined error parsing CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33"
+
+  def test_error_clock_starting_timestamp(self):
+
+    with pytest.raises(ErrorClock) as e:
+
+      mark = Markdown(extensions=[LogseqParse])
+
+      markdown = """- DONE #[[Gestión/Gestión general]] Something
+        :LOGBOOK:
+        CLOCK: [2022-11-25.3 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
+        :END:"""
+
+      parsed = mark.parse(markdown)
+
+    assert e.value.message == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
+
+
+  def test_error_clock_ending_timestamp(self):
+
+    with pytest.raises(ErrorClock) as e:
+
+      mark = Markdown(extensions=[LogseqParse])
+
+      markdown = """- DONE #[[Gestión/Gestión general]] Something
+        :LOGBOOK:
+        CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25.6 Fri 09:09:45] =>  00:12:33
+        :END:"""
+
+      parsed = mark.parse(markdown)
+
+    assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
+
+
+
+
+  def test_error_clock_different_days(self):
+
+    with pytest.raises(ErrorClock) as e:
+
+      mark = Markdown(extensions=[LogseqParse])
+
+      markdown = """- DONE #[[Gestión/Gestión general]] Something
+        :LOGBOOK:
+        CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
+        :END:"""
+
+      parsed = mark.parse(markdown)
+
+    assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
