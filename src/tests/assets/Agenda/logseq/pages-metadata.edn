@@ -1,0 +1,1086 @@
+[{:block/name "",
+  :block/created-at 1671706571745,
+  :block/updated-at 1671706571745}
+ {:block/name "[[kepler",
+  :block/created-at 1669710959456,
+  :block/updated-at 1669710959456}
+ {:block/name "a",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "actividad diaria",
+  :block/created-at 1669710960785,
+  :block/updated-at 1669710960785}
+ {:block/name "alberto asuero",
+  :block/created-at 1669710960572,
+  :block/updated-at 1669710960572}
+ {:block/name "alfonso f. tabales",
+  :block/created-at 1669710960666,
+  :block/updated-at 1669710960666}
+ {:block/name "andrés romero",
+  :block/created-at 1669710962187,
+  :block/updated-at 1669710962187}
+ {:block/name "antonio cabrera",
+  :block/created-at 1669710962185,
+  :block/updated-at 1669710962185}
+ {:block/name "antonio campos",
+  :block/created-at 1669710960224,
+  :block/updated-at 1669710960224}
+ {:block/name "antonio gavilán",
+  :block/created-at 1669710961659,
+  :block/updated-at 1669710961659}
+ {:block/name "antonio prieto",
+  :block/created-at 1669710959795,
+  :block/updated-at 1669710959795}
+ {:block/name "api",
+  :block/created-at 1669710958591,
+  :block/updated-at 1669710958591}
+ {:block/name "apt",
+  :block/created-at 1669710958577,
+  :block/updated-at 1669710958577}
+ {:block/name "arcgis",
+  :block/created-at 1669710961584,
+  :block/updated-at 1669710961584}
+ {:block/name "audio",
+  :block/created-at 1669710962008,
+  :block/updated-at 1669710962008}
+ {:block/name "b",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "blk",
+  :block/created-at 1669710962109,
+  :block/updated-at 1669710962109}
+ {:block/name "c",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "canceled",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "cancelled",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "card",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "carto",
+  :block/created-at 1669710961595,
+  :block/updated-at 1669710961595}
+ {:block/name "carto/workflows",
+  :block/created-at 1669710959512,
+  :block/updated-at 1669710959512}
+ {:block/name "cell",
+  :block/created-at 1669710959420,
+  :block/updated-at 1669710959420}
+ {:block/name "cell_db",
+  :block/created-at 1669710959420,
+  :block/updated-at 1669710959420}
+ {:block/name "contents",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "css",
+  :block/created-at 1669710958323,
+  :block/updated-at 1669710958323}
+ {:block/name "curl",
+  :block/created-at 1669710958592,
+  :block/updated-at 1669710958592}
+ {:block/name "d3",
+  :block/created-at 1669710958594,
+  :block/updated-at 1669710958594}
+ {:block/name "daniel romero",
+  :block/created-at 1669710962187,
+  :block/updated-at 1669710962187}
+ {:block/name "dat_catastro_2020",
+  :block/created-at 1669710959457,
+  :block/updated-at 1669710959457}
+ {:block/name "data",
+  :block/created-at 1669710959458,
+  :block/updated-at 1669710959458}
+ {:block/name "datascience",
+  :block/created-at 1669710958467,
+  :block/updated-at 1669710958467}
+ {:block/name "dev containers",
+  :block/created-at 1671389966105,
+  :block/updated-at 1671389966105}
+ {:block/name "docker",
+  :block/created-at 1669710960359,
+  :block/updated-at 1669710960359}
+ {:block/name "docker/postgis",
+  :block/created-at 1669710960359,
+  :block/updated-at 1669710960359}
+ {:block/name "documentación",
+  :block/created-at 1669710961760,
+  :block/updated-at 1669710961760}
+ {:block/name "doing",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "done",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "dropbox",
+  :block/created-at 1669710960965,
+  :block/updated-at 1669710960965}
+ {:block/name "dropbox/freelancing-cloudia",
+  :block/created-at 1669710959572,
+  :block/updated-at 1669710959572}
+ {:block/name "dropbox/freelancing-cloudia/scientific",
+  :block/created-at 1669710959572,
+  :block/updated-at 1669710959572}
+ {:block/name
+  "dropbox/freelancing-cloudia/scientific/wp-2022-11-03-010-documentacion_tests_prototipos_guadaltel_cotesa",
+  :block/created-at 1669710959570,
+  :block/updated-at 1669710959570}
+ {:block/name "dropbox/freelancing-soologic",
+  :block/created-at 1669710958602,
+  :block/updated-at 1669710958602}
+ {:block/name "dropbox/freelancing-soologic/management",
+  :block/created-at 1669710958603,
+  :block/updated-at 1669710958603}
+ {:block/name
+  "dropbox/freelancing-soologic/management/010-documentacion_previa",
+  :block/created-at 1669710958600,
+  :block/updated-at 1669710958600}
+ {:block/name "dropbox/freelancing-us",
+  :block/created-at 1669710960966,
+  :block/updated-at 1669710960966}
+ {:block/name "dropbox/freelancing-us/scientific",
+  :block/created-at 1669710960966,
+  :block/updated-at 1669710960966}
+ {:block/name
+  "dropbox/freelancing-us/scientific/2022-09-29-00-visor_erosion_codeigniter_tests",
+  :block/created-at 1669710960964,
+  :block/updated-at 1669710960964}
+ {:block/name "dropbox/sunntics",
+  :block/created-at 1669710959361,
+  :block/updated-at 1669710959361}
+ {:block/name "dropbox/sunntics/scientific",
+  :block/created-at 1669710959361,
+  :block/updated-at 1669710959361}
+ {:block/name
+  "dropbox/sunntics/scientific/2022-11-07-010-demodata_visualizador_ssparc",
+  :block/created-at 1669710959358,
+  :block/updated-at 1669710959358}
+ {:block/name "dropbox/sunntics/scientific/2022-12-19",
+  :block/created-at 1671729275881,
+  :block/updated-at 1671729275881}
+ {:block/name "dropboxtags",
+  :block/created-at 1669710959359,
+  :block/updated-at 1669710959359}
+ {:block/name "empleo",
+  :block/created-at 1669710961659,
+  :block/updated-at 1669710961659}
+ {:block/name "eoi",
+  :block/created-at 1669710962014,
+  :block/updated-at 1669710962014}
+ {:block/name "erebus",
+  :block/created-at 1669710961789,
+  :block/updated-at 1669710961789}
+ {:block/name "erosionvisor5",
+  :block/created-at 1669710964463,
+  :block/updated-at 1669710964463}
+ {:block/name "esperanza sánchez",
+  :block/created-at 1669710960581,
+  :block/updated-at 1669710960581}
+ {:block/name "esri",
+  :block/created-at 1669756817372,
+  :block/updated-at 1669756817372}
+ {:block/name "euler",
+  :block/created-at 1669710961787,
+  :block/updated-at 1669710961787}
+ {:block/name "exa",
+  :block/created-at 1669710958574,
+  :block/updated-at 1669710958574}
+ {:block/name "favorites",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "fechas clave",
+  :block/created-at 1669710961770,
+  :block/updated-at 1669710961770}
+ {:block/name "file geodatabase",
+  :block/created-at 1669756817373,
+  :block/updated-at 1669756817373}
+ {:block/name "friday, 2022",
+  :block/created-at 1669710961676,
+  :block/updated-at 1669710961676}
+ {:block/name "friday, 2022/08",
+  :block/created-at 1669979459931,
+  :block/updated-at 1669979459931}
+ {:block/name "friday, 2022/08/26",
+  :block/created-at 1669979459929,
+  :block/updated-at 1669979459929}
+ {:block/name "friday, 2022/09",
+  :block/created-at 1669979459561,
+  :block/updated-at 1669979459561}
+ {:block/name "friday, 2022/09/09",
+  :block/created-at 1669979459559,
+  :block/updated-at 1669979459559}
+ {:block/name "friday, 2022/09/16",
+  :block/created-at 1669979459366,
+  :block/updated-at 1669979459366}
+ {:block/name "friday, 2022/09/23",
+  :block/created-at 1669979459247,
+  :block/updated-at 1669979459247}
+ {:block/name "friday, 2022/09/30",
+  :block/created-at 1669979459144,
+  :block/updated-at 1670950535703}
+ {:block/name "friday, 2022/10",
+  :block/created-at 1669979459001,
+  :block/updated-at 1669979459001}
+ {:block/name "friday, 2022/10/07",
+  :block/created-at 1669979459000,
+  :block/updated-at 1671705315523}
+ {:block/name "friday, 2022/10/14",
+  :block/created-at 1669979458834,
+  :block/updated-at 1671621316536}
+ {:block/name "friday, 2022/10/21",
+  :block/created-at 1669979458608,
+  :block/updated-at 1669979458608}
+ {:block/name "friday, 2022/10/28",
+  :block/created-at 1669979458381,
+  :block/updated-at 1669979458381}
+ {:block/name "friday, 2022/11",
+  :block/created-at 1669710959541,
+  :block/updated-at 1669710959541}
+ {:block/name "friday, 2022/11/04",
+  :block/created-at 1669979457772,
+  :block/updated-at 1669979457772}
+ {:block/name "friday, 2022/11/11",
+  :block/created-at 1669710958580,
+  :block/updated-at 1670951316429}
+ {:block/name "friday, 2022/11/18",
+  :block/created-at 1669979456412,
+  :block/updated-at 1671094317892}
+ {:block/name "friday, 2022/11/25",
+  :block/created-at 1669710958023,
+  :block/updated-at 1669710958023}
+ {:block/name "friday, 2022/12",
+  :block/created-at 1669979455954,
+  :block/updated-at 1669979455954}
+ {:block/name "friday, 2022/12/02",
+  :block/created-at 1669979455952,
+  :block/updated-at 1671705150288}
+ {:block/name "friday, 2022/12/09",
+  :block/created-at 1670577176305,
+  :block/updated-at 1670951030622}
+ {:block/name "friday, 2022/12/16",
+  :block/created-at 1671094298687,
+  :block/updated-at 1671197286876}
+ {:block/name "friday, 2022/12/23",
+  :block/created-at 1671784491825,
+  :block/updated-at 1671801630681}
+ {:block/name "gameideas",
+  :block/created-at 1669710959152,
+  :block/updated-at 1669710959152}
+ {:block/name "gdal",
+  :block/created-at 1669756817381,
+  :block/updated-at 1669756817381}
+ {:block/name "geo",
+  :block/created-at 1669710959230,
+  :block/updated-at 1669710959230}
+ {:block/name "geos",
+  :block/created-at 1669710960358,
+  :block/updated-at 1669710960358}
+ {:block/name "geowhale",
+  :block/created-at 1669888449483,
+  :block/updated-at 1669888449483}
+ {:block/name "gesti?n general",
+  :block/created-at 1671389962725,
+  :block/updated-at 1671389962725}
+ {:block/name "gestión",
+  :block/created-at 1669710962017,
+  :block/updated-at 1671625303909}
+ {:block/name "gestión general",
+  :block/created-at 1669710962108,
+  :block/updated-at 1669710962108}
+ {:block/name "gestión/it",
+  :block/created-at 1669710961791,
+  :block/updated-at 1669710961791}
+ {:block/name "gestión/tareas repetitivas",
+  :block/created-at 1669710961841,
+  :block/updated-at 1671708197587}
+ {:block/name "git",
+  :block/created-at 1669710961832,
+  :block/updated-at 1669710961832}
+ {:block/name "github",
+  :block/created-at 1669710961832,
+  :block/updated-at 1669710961832}
+ {:block/name "gitrepo",
+  :block/created-at 1669710961340,
+  :block/updated-at 1669710961340}
+ {:block/name "gitrepo/boilerplates",
+  :block/created-at 1669710959586,
+  :block/updated-at 1669710959586}
+ {:block/name "gitrepo/boilerplates/boilerplates",
+  :block/created-at 1669710959583,
+  :block/updated-at 1669710959583}
+ {:block/name "gitrepo/freelancing_us",
+  :block/created-at 1669710961340,
+  :block/updated-at 1669710961340}
+ {:block/name "gitrepo/freelancing_us/cell_db",
+  :block/created-at 1669710961341,
+  :block/updated-at 1669710961341}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db/2022-10-06-010-cell_db_infrastructure",
+  :block/created-at 1669710961338,
+  :block/updated-at 1669710961338}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db/wp-2021-06-12-00-etl-renta_espe",
+  :block/created-at 1669710959088,
+  :block/updated-at 1669710959088}
+ {:block/name "gitrepo/freelancing_us/cell_db_2022",
+  :block/created-at 1669710960223,
+  :block/updated-at 1669710960223}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/010-process-integracion_datos_poblacion_2020",
+  :block/created-at 1671611773328,
+  :block/updated-at 1671611773328}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/020-cell_db_infrastructure",
+  :block/created-at 1669710960221,
+  :block/updated-at 1669710960221}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/025-etl-renta_espe_2019",
+  :block/created-at 1671646657050,
+  :block/updated-at 1671646657050}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/030-etl-renta_espe_2020",
+  :block/created-at 1671611767172,
+  :block/updated-at 1671611767172}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/050-etl-catastro_2020",
+  :block/created-at 1669710959446,
+  :block/updated-at 1669710959446}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/060-it-main_kerdes_db",
+  :block/created-at 1669710959122,
+  :block/updated-at 1669710959122}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/070-adscripcion_variable_a",
+  :block/created-at 1671611767926,
+  :block/updated-at 1671611767926}
+ {:block/name
+  "gitrepo/freelancing_us/cell_db_2022/080-adscripcion_variable_b",
+  :block/created-at 1671611767354,
+  :block/updated-at 1671611767354}
+ {:block/name "gitrepo/freelancing_us/kerdes_main_db_management",
+  :block/created-at 1669710958607,
+  :block/updated-at 1669710958607}
+ {:block/name "gitrepo/freelancing_us/visor_erosion",
+  :block/created-at 1669710964467,
+  :block/updated-at 1669710964467}
+ {:block/name
+  "gitrepo/freelancing_us/visor_erosion/wp-2022-09-14-010-version_5_anyos",
+  :block/created-at 1669710964465,
+  :block/updated-at 1669710964465}
+ {:block/name "gitrepo/libraries",
+  :block/created-at 1669710958508,
+  :block/updated-at 1669710958508}
+ {:block/name "gitrepo/libraries/postgresql_lib",
+  :block/created-at 1669710958506,
+  :block/updated-at 1669710958506}
+ {:block/name "gitrepo/sunnsaas",
+  :block/created-at 1669977871622,
+  :block/updated-at 1669977871622}
+ {:block/name "gitrepo/sunnsaas/sunnsaas_v1",
+  :block/created-at 1669977871620,
+  :block/updated-at 1669977871620}
+ {:block/name "gitrepo/sunntics",
+  :block/created-at 1669710958570,
+  :block/updated-at 1669710958570}
+ {:block/name "gitrepo/sunntics-core-restricted",
+  :block/created-at 1669977871638,
+  :block/updated-at 1669977871638}
+ {:block/name
+  "gitrepo/sunntics-core-restricted/algorithm-ready-sunnsaas",
+  :block/created-at 1669982326481,
+  :block/updated-at 1669982326481}
+ {:block/name
+  "gitrepo/sunntics-core-restricted/monolithic-core-algorithms",
+  :block/created-at 1669977871637,
+  :block/updated-at 1669977871637}
+ {:block/name "gitrepo/sunntics-generic-libraries",
+  :block/created-at 1669735929108,
+  :block/updated-at 1669735929108}
+ {:block/name "gitrepo/sunntics-generic-libraries/libsunnsaasbackend",
+  :block/created-at 1669982326484,
+  :block/updated-at 1669982326484}
+ {:block/name
+  "gitrepo/sunntics-generic-libraries/libsunnsaasbackend/test",
+  :block/created-at 1671456975733,
+  :block/updated-at 1671456975733}
+ {:block/name "gitrepo/sunntics/sunnsaas_help",
+  :block/created-at 1669710958569,
+  :block/updated-at 1669710958569}
+ {:block/name "gmail",
+  :block/created-at 1669710962001,
+  :block/updated-at 1669710962001}
+ {:block/name "google",
+  :block/created-at 1669710959224,
+  :block/updated-at 1669710959224}
+ {:block/name "grafo",
+  :block/created-at 1669710961996,
+  :block/updated-at 1669710961996}
+ {:block/name "graph",
+  :block/created-at 1670581579409,
+  :block/updated-at 1670581579409}
+ {:block/name "graph/fun",
+  :block/created-at 1670835461573,
+  :block/updated-at 1670835461573}
+ {:block/name "grass",
+  :block/created-at 1669710960358,
+  :block/updated-at 1669710960358}
+ {:block/name "guadaltel",
+  :block/created-at 1669710957866,
+  :block/updated-at 1669710957866}
+ {:block/name "helios",
+  :block/created-at 1669710961790,
+  :block/updated-at 1669710961790}
+ {:block/name "holistic_hornet",
+  :block/created-at 1669710964435,
+  :block/updated-at 1669710964435}
+ {:block/name "html",
+  :block/created-at 1669710958323,
+  :block/updated-at 1669710958323}
+ {:block/name "ideas",
+  :block/created-at 1669710959192,
+  :block/updated-at 1669710959192}
+ {:block/name "in-progress",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "ismael vallejo",
+  :block/created-at 1671622187206,
+  :block/updated-at 1671622187206}
+ {:block/name "it",
+  :block/created-at 1670430756194,
+  :block/updated-at 1670430756194}
+ {:block/name "it/sunntics",
+  :block/created-at 1670430756195,
+  :block/updated-at 1670430756195}
+ {:block/name "it/sunntics/beta",
+  :block/created-at 1670430756193,
+  :block/updated-at 1670430756193}
+ {:block/name "javascript",
+  :block/created-at 1669710958340,
+  :block/updated-at 1669710958340}
+ {:block/name "javier aragón",
+  :block/created-at 1669710960742,
+  :block/updated-at 1669710960742}
+ {:block/name "jc",
+  :block/created-at 1669710961044,
+  :block/updated-at 1669710961044}
+ {:block/name "jesús rodríguez",
+  :block/created-at 1669710962200,
+  :block/updated-at 1669710962200}
+ {:block/name "juanma camarillo",
+  :block/created-at 1669710962150,
+  :block/updated-at 1669710962150}
+ {:block/name "kepler",
+  :block/created-at 1669710961828,
+  :block/updated-at 1669710961828}
+ {:block/name "kerdes",
+  :block/created-at 1669710959457,
+  :block/updated-at 1669710959457}
+ {:block/name "kerdoc01",
+  :block/created-at 1669710964464,
+  :block/updated-at 1669710964464}
+ {:block/name "later",
+  :block/created-at 1669463941500,
+  :block/updated-at 1671625139311}
+ {:block/name "latex",
+  :block/created-at 1669710958450,
+  :block/updated-at 1669710958450}
+ {:block/name "libsunnsaasbackend",
+  :block/created-at 1669710960531,
+  :block/updated-at 1669710960531}
+ {:block/name "linux",
+  :block/created-at 1669710958575,
+  :block/updated-at 1669710958575}
+ {:block/name "logseq",
+  :block/created-at 1669710962114,
+  :block/updated-at 1669710962114}
+ {:block/name "ls",
+  :block/created-at 1669710958574,
+  :block/updated-at 1669710958574}
+ {:block/name "machine learning",
+  :block/created-at 1669710959207,
+  :block/updated-at 1669710959207}
+ {:block/name "macos",
+  :block/created-at 1669710958333,
+  :block/updated-at 1669710958333}
+ {:block/name "manolo quero",
+  :block/created-at 1669710961673,
+  :block/updated-at 1669710961673}
+ {:block/name "mapbox",
+  :block/created-at 1669710958595,
+  :block/updated-at 1669710958595}
+ {:block/name "mapserver",
+  :block/created-at 1669710959229,
+  :block/updated-at 1669710959229}
+ {:block/name "markdown",
+  :block/created-at 1669710958450,
+  :block/updated-at 1669710958450}
+ {:block/name "marvel champions lcg",
+  :block/created-at 1669710959147,
+  :block/updated-at 1669710959147}
+ {:block/name "maths",
+  :block/created-at 1669710958318,
+  :block/updated-at 1669710958318}
+ {:block/name "matías",
+  :block/created-at 1669710962186,
+  :block/updated-at 1669710962186}
+ {:block/name "michiel erkelens",
+  :block/created-at 1669710961578,
+  :block/updated-at 1669710961578}
+ {:block/name "mkdocs",
+  :block/created-at 1669710958573,
+  :block/updated-at 1669710958573}
+ {:block/name "mlkctxt",
+  :block/created-at 1669710960213,
+  :block/updated-at 1669710960213}
+ {:block/name "mocha",
+  :block/created-at 1669710958596,
+  :block/updated-at 1669710958596}
+ {:block/name "monday, 2022",
+  :block/created-at 1669710961650,
+  :block/updated-at 1669710961650}
+ {:block/name "monday, 2022/09",
+  :block/created-at 1669979459906,
+  :block/updated-at 1669979459906}
+ {:block/name "monday, 2022/09/05",
+  :block/created-at 1669979459904,
+  :block/updated-at 1669979459904}
+ {:block/name "monday, 2022/09/12",
+  :block/created-at 1669979459504,
+  :block/updated-at 1670587351779}
+ {:block/name "monday, 2022/09/19",
+  :block/created-at 1669979459350,
+  :block/updated-at 1669979459350}
+ {:block/name "monday, 2022/09/26",
+  :block/created-at 1669979459239,
+  :block/updated-at 1669979459239}
+ {:block/name "monday, 2022/10",
+  :block/created-at 1669979459116,
+  :block/updated-at 1669979459116}
+ {:block/name "monday, 2022/10/03",
+  :block/created-at 1669979459115,
+  :block/updated-at 1669979459115}
+ {:block/name "monday, 2022/10/10",
+  :block/created-at 1669979458966,
+  :block/updated-at 1669979458966}
+ {:block/name "monday, 2022/10/17",
+  :block/created-at 1669979458779,
+  :block/updated-at 1670409129956}
+ {:block/name "monday, 2022/10/24",
+  :block/created-at 1669979458538,
+  :block/updated-at 1669979458538}
+ {:block/name "monday, 2022/10/31",
+  :block/created-at 1669979458346,
+  :block/updated-at 1669979458346}
+ {:block/name "monday, 2022/11",
+  :block/created-at 1669710959461,
+  :block/updated-at 1669710959461}
+ {:block/name "monday, 2022/11/07",
+  :block/created-at 1669979457691,
+  :block/updated-at 1670951629282}
+ {:block/name "monday, 2022/11/14",
+  :block/created-at 1669979456709,
+  :block/updated-at 1671705308786}
+ {:block/name "monday, 2022/11/21",
+  :block/created-at 1669710958089,
+  :block/updated-at 1669977907156}
+ {:block/name "monday, 2022/11/28",
+  :block/created-at 1669979456138,
+  :block/updated-at 1671096597123}
+ {:block/name "monday, 2022/12",
+  :block/created-at 1670228789988,
+  :block/updated-at 1670228789988}
+ {:block/name "monday, 2022/12/05",
+  :block/created-at 1670228782214,
+  :block/updated-at 1670266235154}
+ {:block/name "monday, 2022/12/12",
+  :block/created-at 1670831436302,
+  :block/updated-at 1671626882996}
+ {:block/name "monday, 2022/12/19",
+  :block/created-at 1671404400941,
+  :block/updated-at 1671627321607}
+ {:block/name "nextjs",
+  :block/created-at 1669710959212,
+  :block/updated-at 1669710959212}
+ {:block/name "node",
+  :block/created-at 1671389966104,
+  :block/updated-at 1671389966104}
+ {:block/name "now",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "pandoc",
+  :block/created-at 1669710958451,
+  :block/updated-at 1669710958451}
+ {:block/name "patrician4",
+  :block/created-at 1669710959148,
+  :block/updated-at 1669710959148}
+ {:block/name "pepe ojeda",
+  :block/created-at 1669710962199,
+  :block/updated-at 1669710962199}
+ {:block/name "postgis",
+  :block/created-at 1669710959538,
+  :block/updated-at 1669710959538}
+ {:block/name "postgis-devel@lists.osgeo.org",
+  :block/created-at 1669710960360,
+  :block/updated-at 1669710960360}
+ {:block/name "postgresql",
+  :block/created-at 1669710959521,
+  :block/updated-at 1669710959521}
+ {:block/name "procesar",
+  :block/created-at 1669710962015,
+  :block/updated-at 1669710962015}
+ {:block/name "python",
+  :block/created-at 1669710959583,
+  :block/updated-at 1669710959583}
+ {:block/name "react",
+  :block/created-at 1669710961014,
+  :block/updated-at 1669710961014}
+ {:block/name "redis",
+  :block/created-at 1669710958438,
+  :block/updated-at 1669710958438}
+ {:block/name "reference",
+  :block/created-at 1669710958438,
+  :block/updated-at 1669710958438}
+ {:block/name "referencia",
+  :block/created-at 1669710961759,
+  :block/updated-at 1669710961759}
+ {:block/name "resumen semanal",
+  :block/created-at 1669710960564,
+  :block/updated-at 1669710960564}
+ {:block/name "reunión",
+  :block/created-at 1669710961550,
+  :block/updated-at 1669710961550}
+ {:block/name "reunón",
+  :block/created-at 1669720303988,
+  :block/updated-at 1669720303988}
+ {:block/name "rocío mingorance",
+  :block/created-at 1669719518903,
+  :block/updated-at 1669719518903}
+ {:block/name "rol",
+  :block/created-at 1669710959154,
+  :block/updated-at 1669710959154}
+ {:block/name "rol/sw",
+  :block/created-at 1669710959153,
+  :block/updated-at 1669710959153}
+ {:block/name "rsync.sh",
+  :block/created-at 1669710960213,
+  :block/updated-at 1669710960213}
+ {:block/name "saturday, 2022",
+  :block/created-at 1669979459916,
+  :block/updated-at 1669979459916}
+ {:block/name "saturday, 2022/09",
+  :block/created-at 1669979459916,
+  :block/updated-at 1669979459916}
+ {:block/name "saturday, 2022/09/03",
+  :block/created-at 1669979459915,
+  :block/updated-at 1669979459915}
+ {:block/name "saturday, 2022/09/10",
+  :block/created-at 1669979459538,
+  :block/updated-at 1669979459538}
+ {:block/name "saturday, 2022/10",
+  :block/created-at 1669979458365,
+  :block/updated-at 1669979458365}
+ {:block/name "saturday, 2022/10/29",
+  :block/created-at 1669979458363,
+  :block/updated-at 1669979458363}
+ {:block/name "saturday, 2022/11",
+  :block/created-at 1669979456753,
+  :block/updated-at 1669979456753}
+ {:block/name "saturday, 2022/11/12",
+  :block/created-at 1669979456752,
+  :block/updated-at 1671193464677}
+ {:block/name "seo",
+  :block/created-at 1669710959224,
+  :block/updated-at 1669710959224}
+ {:block/name "silhouette",
+  :block/created-at 1669710959149,
+  :block/updated-at 1669710959149}
+ {:block/name "software",
+  :block/created-at 1669710962003,
+  :block/updated-at 1669710962003}
+ {:block/name "soologic",
+  :block/created-at 1669710960361,
+  :block/updated-at 1669710960361}
+ {:block/name "sql",
+  :block/created-at 1669710959205,
+  :block/updated-at 1669710959205}
+ {:block/name "sunday, 2022",
+  :block/created-at 1669979457717,
+  :block/updated-at 1669979457717}
+ {:block/name "sunday, 2022/11",
+  :block/created-at 1669979457718,
+  :block/updated-at 1669979457718}
+ {:block/name "sunday, 2022/11/06",
+  :block/created-at 1669979457716,
+  :block/updated-at 1669979457716}
+ {:block/name "sunday, 2022/12",
+  :block/created-at 1671389961802,
+  :block/updated-at 1671389961802}
+ {:block/name "sunday, 2022/12/18",
+  :block/created-at 1671389961801,
+  :block/updated-at 1671389961801}
+ {:block/name "sunnsaas",
+  :block/created-at 1669982326480,
+  :block/updated-at 1669982326480}
+ {:block/name "sunnsaas api",
+  :block/created-at 1669982326468,
+  :block/updated-at 1669982326468}
+ {:block/name "sunnsaas stable",
+  :block/created-at 1669710959787,
+  :block/updated-at 1669710959787}
+ {:block/name "sunntics",
+  :block/created-at 1670951554784,
+  :block/updated-at 1670951554784}
+ {:block/name "tarea repetitiva",
+  :block/created-at 1669710961840,
+  :block/updated-at 1669710961840}
+ {:block/name "templates",
+  :block/created-at 1669710962117,
+  :block/updated-at 1671707205029}
+ {:block/name "teresa rodríguez",
+  :block/created-at 1669710962201,
+  :block/updated-at 1669710962201}
+ {:block/name "thursday, 2022",
+  :block/created-at 1669710961349,
+  :block/updated-at 1669710961349}
+ {:block/name "thursday, 2022/09",
+  :block/created-at 1669979459604,
+  :block/updated-at 1669979459604}
+ {:block/name "thursday, 2022/09/08",
+  :block/created-at 1669979459603,
+  :block/updated-at 1669979459603}
+ {:block/name "thursday, 2022/09/15",
+  :block/created-at 1669979459412,
+  :block/updated-at 1669979459412}
+ {:block/name "thursday, 2022/09/22",
+  :block/created-at 1669979459275,
+  :block/updated-at 1671705592054}
+ {:block/name "thursday, 2022/09/29",
+  :block/created-at 1669979459158,
+  :block/updated-at 1669979459158}
+ {:block/name "thursday, 2022/10",
+  :block/created-at 1669979459015,
+  :block/updated-at 1669979459015}
+ {:block/name "thursday, 2022/10/06",
+  :block/created-at 1669979459013,
+  :block/updated-at 1669979459013}
+ {:block/name "thursday, 2022/10/13",
+  :block/created-at 1669979458876,
+  :block/updated-at 1669979458876}
+ {:block/name "thursday, 2022/10/20",
+  :block/created-at 1669979458643,
+  :block/updated-at 1670951415520}
+ {:block/name "thursday, 2022/10/27",
+  :block/created-at 1669979458451,
+  :block/updated-at 1669979458451}
+ {:block/name "thursday, 2022/11",
+  :block/created-at 1669979457836,
+  :block/updated-at 1669979457836}
+ {:block/name "thursday, 2022/11/03",
+  :block/created-at 1669979457834,
+  :block/updated-at 1671705269318}
+ {:block/name "thursday, 2022/11/10",
+  :block/created-at 1669979456816,
+  :block/updated-at 1671705266633}
+ {:block/name "thursday, 2022/11/17",
+  :block/created-at 1669979456441,
+  :block/updated-at 1669979456441}
+ {:block/name "thursday, 2022/11/24",
+  :block/created-at 1669979456240,
+  :block/updated-at 1671626834967}
+ {:block/name "thursday, 2022/12",
+  :block/created-at 1669833211730,
+  :block/updated-at 1669833211730}
+ {:block/name "thursday, 2022/12/01",
+  :block/created-at 1669833211714,
+  :block/updated-at 1669984263220}
+ {:block/name "thursday, 2022/12/15",
+  :block/created-at 1671010358221,
+  :block/updated-at 1671191367672}
+ {:block/name "thursday, 2022/12/22",
+  :block/created-at 1671701281557,
+  :block/updated-at 1671785290206}
+ {:block/name "todo",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "tuesday, 2022",
+  :block/created-at 1669710961621,
+  :block/updated-at 1669710961621}
+ {:block/name "tuesday, 2022/09",
+  :block/created-at 1669979459880,
+  :block/updated-at 1669979459880}
+ {:block/name "tuesday, 2022/09/06",
+  :block/created-at 1669979459878,
+  :block/updated-at 1671705652675}
+ {:block/name "tuesday, 2022/09/13",
+  :block/created-at 1669979459458,
+  :block/updated-at 1669979459458}
+ {:block/name "tuesday, 2022/09/20",
+  :block/created-at 1669979459327,
+  :block/updated-at 1669979459327}
+ {:block/name "tuesday, 2022/09/27",
+  :block/created-at 1669979459228,
+  :block/updated-at 1671705388539}
+ {:block/name "tuesday, 2022/10",
+  :block/created-at 1669979459084,
+  :block/updated-at 1669979459084}
+ {:block/name "tuesday, 2022/10/04",
+  :block/created-at 1669979459082,
+  :block/updated-at 1669979459082}
+ {:block/name "tuesday, 2022/10/11",
+  :block/created-at 1669979458926,
+  :block/updated-at 1671390243315}
+ {:block/name "tuesday, 2022/10/18",
+  :block/created-at 1669979458735,
+  :block/updated-at 1671390359962}
+ {:block/name "tuesday, 2022/10/25",
+  :block/created-at 1669979458500,
+  :block/updated-at 1669979458500}
+ {:block/name "tuesday, 2022/11",
+  :block/created-at 1669710960090,
+  :block/updated-at 1669710960090}
+ {:block/name "tuesday, 2022/11/01",
+  :block/created-at 1669979458302,
+  :block/updated-at 1669979458302}
+ {:block/name "tuesday, 2022/11/08",
+  :block/created-at 1669979457490,
+  :block/updated-at 1669979457490}
+ {:block/name "tuesday, 2022/11/15",
+  :block/created-at 1669710958401,
+  :block/updated-at 1671705294860}
+ {:block/name "tuesday, 2022/11/22",
+  :block/created-at 1669979456326,
+  :block/updated-at 1669979456326}
+ {:block/name "tuesday, 2022/11/29",
+  :block/created-at 1669979456094,
+  :block/updated-at 1671801354093}
+ {:block/name "tuesday, 2022/12",
+  :block/created-at 1670948813103,
+  :block/updated-at 1670948813103}
+ {:block/name "tuesday, 2022/12/13",
+  :block/created-at 1670948813101,
+  :block/updated-at 1671706532058}
+ {:block/name "turf",
+  :block/created-at 1669710959208,
+  :block/updated-at 1669710959208}
+ {:block/name "typescript",
+  :block/created-at 1669710959213,
+  :block/updated-at 1669710959213}
+ {:block/name "ubuntu",
+  :block/created-at 1669710958338,
+  :block/updated-at 1669710958338}
+ {:block/name "us-dgf-001",
+  :block/created-at 1669710961422,
+  :block/updated-at 1669710961422}
+ {:block/name "vampire tes",
+  :block/created-at 1669710959146,
+  :block/updated-at 1669710959146}
+ {:block/name "visor",
+  :block/created-at 1669710962131,
+  :block/updated-at 1669710962131}
+ {:block/name "visor/erosion",
+  :block/created-at 1669710962130,
+  :block/updated-at 1669710962130}
+ {:block/name "visual studio code",
+  :block/created-at 1669710961614,
+  :block/updated-at 1669710961614}
+ {:block/name "wait",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "waiting",
+  :block/created-at 1669463941500,
+  :block/updated-at 1669463941500}
+ {:block/name "web",
+  :block/created-at 1669710961554,
+  :block/updated-at 1669710961554}
+ {:block/name "web/ciencia",
+  :block/created-at 1669710959217,
+  :block/updated-at 1669710959217}
+ {:block/name "web/datos",
+  :block/created-at 1669710959222,
+  :block/updated-at 1669710959222}
+ {:block/name "web/documentación",
+  :block/created-at 1669710961554,
+  :block/updated-at 1669710961554}
+ {:block/name "web/empresas",
+  :block/created-at 1669710959215,
+  :block/updated-at 1669710959215}
+ {:block/name "web/geo",
+  :block/created-at 1669710959800,
+  :block/updated-at 1669710959800}
+ {:block/name "web/geo/diseño",
+  :block/created-at 1669710959232,
+  :block/updated-at 1669710959232}
+ {:block/name "web/geo/postgis",
+  :block/created-at 1669710959799,
+  :block/updated-at 1669710959799}
+ {:block/name "web/geo/visores",
+  :block/created-at 1669710959226,
+  :block/updated-at 1669710959226}
+ {:block/name "web/herramientas",
+  :block/created-at 1669710959236,
+  :block/updated-at 1669710959236}
+ {:block/name "web/junta de andalucía",
+  :block/created-at 1669710959221,
+  :block/updated-at 1669710959221}
+ {:block/name "web/linux",
+  :block/created-at 1669710959375,
+  :block/updated-at 1669710959375}
+ {:block/name "web/medio ambiente",
+  :block/created-at 1669710959222,
+  :block/updated-at 1669710959222}
+ {:block/name "web/organización",
+  :block/created-at 1669710959220,
+  :block/updated-at 1669710959220}
+ {:block/name "web/organización/us",
+  :block/created-at 1669710957957,
+  :block/updated-at 1669710957957}
+ {:block/name "web/typescript",
+  :block/created-at 1669710959526,
+  :block/updated-at 1669710959526}
+ {:block/name "web/visores",
+  :block/created-at 1669710959409,
+  :block/updated-at 1669710959409}
+ {:block/name "web/visores/propio",
+  :block/created-at 1669710959407,
+  :block/updated-at 1669710959407}
+ {:block/name "wednesday, 2022",
+  :block/created-at 1669710961467,
+  :block/updated-at 1669710961467}
+ {:block/name "wednesday, 2022/09",
+  :block/created-at 1669979459728,
+  :block/updated-at 1669979459728}
+ {:block/name "wednesday, 2022/09/07",
+  :block/created-at 1669979459727,
+  :block/updated-at 1671705625052}
+ {:block/name "wednesday, 2022/09/14",
+  :block/created-at 1669979459433,
+  :block/updated-at 1669979459433}
+ {:block/name "wednesday, 2022/09/21",
+  :block/created-at 1669979459313,
+  :block/updated-at 1669979459313}
+ {:block/name "wednesday, 2022/09/28",
+  :block/created-at 1669979459192,
+  :block/updated-at 1669979459192}
+ {:block/name "wednesday, 2022/10",
+  :block/created-at 1669979459051,
+  :block/updated-at 1669979459051}
+ {:block/name "wednesday, 2022/10/05",
+  :block/created-at 1669979459050,
+  :block/updated-at 1669979459050}
+ {:block/name "wednesday, 2022/10/19",
+  :block/created-at 1669979458686,
+  :block/updated-at 1671097729273}
+ {:block/name "wednesday, 2022/10/26",
+  :block/created-at 1669979458478,
+  :block/updated-at 1669979458478}
+ {:block/name "wednesday, 2022/11",
+  :block/created-at 1669710960795,
+  :block/updated-at 1669710960795}
+ {:block/name "wednesday, 2022/11/02",
+  :block/created-at 1669979458245,
+  :block/updated-at 1671192249981}
+ {:block/name "wednesday, 2022/11/09",
+  :block/created-at 1669979456952,
+  :block/updated-at 1669979456952}
+ {:block/name "wednesday, 2022/11/16",
+  :block/created-at 1669710960792,
+  :block/updated-at 1670951301239}
+ {:block/name "wednesday, 2022/11/23",
+  :block/created-at 1669979456290,
+  :block/updated-at 1671192106657}
+ {:block/name "wednesday, 2022/11/30",
+  :block/created-at 1669795127744,
+  :block/updated-at 1669882959717}
+ {:block/name "wednesday, 2022/12",
+  :block/created-at 1670401055803,
+  :block/updated-at 1670401055803}
+ {:block/name "wednesday, 2022/12/07",
+  :block/created-at 1670401048688,
+  :block/updated-at 1670950988865}
+ {:block/name "wednesday, 2022/12/14",
+  :block/created-at 1670948827622,
+  :block/updated-at 1671094160548}
+ {:block/name "wednesday, 2022/12/21",
+  :block/created-at 1671611563948,
+  :block/updated-at 1671706091931}
+ {:block/name "wk32",
+  :block/created-at 1669710959151,
+  :block/updated-at 1669710959151}
+ {:block/name "worflow",
+  :block/created-at 1669710962009,
+  :block/updated-at 1669710962009}
+ {:block/name "work",
+  :block/created-at 1669710962256,
+  :block/updated-at 1669710962256}
+ {:block/name "work/37north",
+  :block/created-at 1669710959144,
+  :block/updated-at 1669710959144}
+ {:block/name "work/cell",
+  :block/created-at 1669710959138,
+  :block/updated-at 1669710959138}
+ {:block/name "work/freelancing",
+  :block/created-at 1669710962203,
+  :block/updated-at 1669710962203}
+ {:block/name "work/freelancing/cloudia",
+  :block/created-at 1669710962139,
+  :block/updated-at 1669710962139}
+ {:block/name "work/freelancing/eoi",
+  :block/created-at 1669710960824,
+  :block/updated-at 1669710960824}
+ {:block/name "work/freelancing/iot",
+  :block/created-at 1669710962166,
+  :block/updated-at 1669710962166}
+ {:block/name "work/freelancing/soologic",
+  :block/created-at 1669710962188,
+  :block/updated-at 1669710962188}
+ {:block/name "work/freelancing/us",
+  :block/created-at 1669710962202,
+  :block/updated-at 1671785131341}
+ {:block/name "work/phd",
+  :block/created-at 1669710959117,
+  :block/updated-at 1669710959117}
+ {:block/name "work/sunntics",
+  :block/created-at 1669710962257,
+  :block/updated-at 1669710962257}
+ {:block/name "work/sunntics/algorithm",
+  :block/created-at 1669977871653,
+  :block/updated-at 1669977871653}
+ {:block/name "work/sunntics/documentación",
+  :block/created-at 1669710961579,
+  :block/updated-at 1669710961579}
+ {:block/name "work/sunntics/investorspitch",
+  :block/created-at 1669710962210,
+  :block/updated-at 1669710962210}
+ {:block/name "work/sunntics/it",
+  :block/created-at 1669710959506,
+  :block/updated-at 1669710959506}
+ {:block/name "work/sunntics/sunnsaas",
+  :block/created-at 1669710962256,
+  :block/updated-at 1669710962256}
+ {:block/name "work/sunntics/sunnsaas/api",
+  :block/created-at 1669710962226,
+  :block/updated-at 1669710962226}
+ {:block/name "work/sunntics/sunnsaas/frontend",
+  :block/created-at 1669710962242,
+  :block/updated-at 1669710962242}
+ {:block/name "work/sunntics/sunnsaas/help",
+  :block/created-at 1669710958295,
+  :block/updated-at 1669710958295}
+ {:block/name "work/sunntics/workers",
+  :block/created-at 1669710961280,
+  :block/updated-at 1669710961280}
+ {:block/name "work/toolsresearch",
+  :block/created-at 1669710961646,
+  :block/updated-at 1669710961646}
+ {:block/name "work/toolsresearch/geowhale",
+  :block/created-at 1669710958105,
+  :block/updated-at 1669710958105}
+ {:block/name "work/toolsresearch/pylogseq",
+  :block/created-at 1671457150188,
+  :block/updated-at 1671457150188}
+ {:block/name "workflow",
+  :block/created-at 1669710962014, 
+  :block/updated-at 1669710962014}]

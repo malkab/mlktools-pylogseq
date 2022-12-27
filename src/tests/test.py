@@ -43,6 +43,9 @@ markdown = """
     a = 4
     ```
 - LATER [#C] #A/J/O Something in the way
+- A
+- B
+- C
 """
 
 blocks = p.getBlocks(p.parseMarkdown(mark, markdown))

@@ -1,0 +1,25 @@
+- Servidor **[[us-dgf-001]]**
+  id:: 6320b30d-c58b-4166-aeef-01505d7765be
+  collapsed:: true
+	- Servidor en el CICA puesto por la AMAYA.
+	- Necesita la VPN del CICA.
+	- No parece tener dominio.
+	- Datos comprometidos en VIM.
+	- Tenemos acceso sudo.
+	- 4 núcleos, 16GB de RAM y 1TB HHD (no hay SSD por ahora).
+	- Tenemos un directorio de devops en **Dropbox/devops**.
+	- Configurado y listo para usar.
+	- IP: 172.20.20.254
+	- Sólo tiene accesible el puerto 80, parece que ninguno más
+	- Apps, en **/home/apps**:
+		- **main-postgres:** es la PostGIS principal, su código de despliegue está en **devops**
+		- **erosionvisor5:** versión de hace 5 años del visor de erosión, proveniente del repo **freelancing_us/visor_erosion**
+		- **nginx_proxy_certbot:** proxy NGINX
+		- **system_config:** configuración de sistema
+- Aplicación [[erosionvisor5]]
+	- Visor de erosión tal y como lo entregó Jose hace 5 años. Versión muy primitiva comparada con la desplegada en [[kerdoc01]] que es disfuncional actualmente.
+	- Proviene del repo **[[GitRepo/freelancing_us/visor_erosion/wp-2022-09-14-010-version_5_anyos]]**.
+	- Desplegada en [[us-dgf-001]] en las siguientes URL
+		- este despliegue no funciona y está a la espera de respuesta del CICA
+		- **[http://erosion5.37north.io](http://erosion5.37north.io)**: visor
+		- **[http://geoserver.erosion5.37north.io/geoserver](http://geoserver.erosion5.37north.io/geoserver):** su GeoServer, credenciales en vim

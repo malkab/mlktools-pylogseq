@@ -1,0 +1,7 @@
+- #DevOps Instrucciones para montar un servidor en casa tras una IP dinámica:
+  - primero, hay que configurar en el router los **puertos** adecuados, el **80** y el del **HTTPS**;
+  - contratar una cuenta en [[no-ip]] y configurar **registros DNS**
+    - ![Screenshot 2022-09-16 at 23.26.45.png](../assets/Screenshot_2022-09-16_at_23.26.45_1663363882978_0.png){:height 231, :width 716}
+  - configurar el cliente **noip2** en el servidor. Con su ejecución se refresca la IP, se debería poner en ejecución al inicio.
+- Tenemos una cuenta, hemos llegado a pagar un mes de prueba, todo bien
+- #procesar

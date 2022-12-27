@@ -62,8 +62,6 @@ class Page():
       except:
         pass
 
-    print("D: jjjj", blocks)
-
     # Process Blocks
     for b in blocks:
       x = Block()
@@ -71,3 +69,26 @@ class Page():
       out.append(x)
 
     return out
+
+  # --------------------------------------
+  #
+  # Read the page file.
+  #
+  # --------------------------------------
+  def readPageFile(self, path: str) -> str:
+    """
+    Docstring
+
+    Parameters
+    ----------
+    var : type
+        Doc
+
+    Returns
+    -------
+    type
+        Doc
+    """
+    # Read the page file
+    with open(path, "r") as f:
+      return f.read()

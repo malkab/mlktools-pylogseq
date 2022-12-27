@@ -1,0 +1,3 @@
+- Utilizar [[VIM]] para editar JSON grandes
+- Utilizar [[Dadroit JSON Viewer]] para explorarlos, pero no puede editar
+- Utilizar [[jq]] para editarlos por consola

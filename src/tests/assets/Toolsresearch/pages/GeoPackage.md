@@ -1,0 +1,1 @@
+- El [[GeoPackage]] no admite múltiples columnas geométricas, así que hay que exportar múltiples copias de la info desde [[PostGIS]] en el caso de tablas multi geom
