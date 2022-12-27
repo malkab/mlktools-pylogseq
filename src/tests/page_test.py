@@ -2,6 +2,8 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from pylogseq.src.pylogseq.page import Page
+
 import pytest
 
 # --------------------------------------
@@ -16,10 +18,15 @@ class TestPage:
   # Loads a page from file.
   #
   # --------------------------------------
-  def test_a(self):
+  def test_read_page_file(self):
+    # A Page object
+    p = Page()
 
-    assert True == True;
+    # Read a page
+    p.readPageFile("src/tests/assets/Agenda/pages/Fechas clave.md")
 
-    assert 3 > 2;
+    # Check the content
+    assert p.content == "- #procesar\n- Las fechas clave de verdad tienen que estar en **000-Gestión**, aquí puede haber algunas, pero no es su sitio de verdad\n"
 
-    assert 2 > 3;
+    # Check the blocks
+    p.parseMarkdown()

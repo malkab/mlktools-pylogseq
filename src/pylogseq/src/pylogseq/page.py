@@ -9,7 +9,43 @@ from typing import List
 #
 # --------------------------------------
 class Page():
-  """Models a Logseq page."""
+  """
+  Docstring
+
+  Attributes
+  ----------
+  exposure : float
+      Exposure in seconds.
+
+  Methods
+  -------
+  colorspace(c='rgb')
+      Represent the photo in the given colorspace.
+  gamma(n=1.0)
+      Change the photo's gamma exposure.
+  """
+
+  # --------------------------------------
+  #
+  # Constructor.
+  #
+  # --------------------------------------
+  def __init__(self):
+    """
+    Docstring
+
+    Parameters
+    ----------
+    var : type
+        Doc
+
+    Returns
+    -------
+    type
+        Doc
+    """
+    self.content: str = ""
+    self.blocks: List[Block] = []
 
   # --------------------------------------
   #
@@ -33,7 +69,7 @@ class Page():
   # Get and process blocks from a parsed Markdown.
   #
   # --------------------------------------
-  def getBlocks(self, parsedMark: any) -> List[Block]:
+  def getBlocks(self, parsedMark: any) -> any:
     """Get and process blocks from a parsed Markdown.
 
     Args:
@@ -66,16 +102,16 @@ class Page():
     for b in blocks:
       x = Block()
       x.process(b)
-      out.append(x)
+      self.blocks.append(x)
 
-    return out
+    return self
 
   # --------------------------------------
   #
   # Read the page file.
   #
   # --------------------------------------
-  def readPageFile(self, path: str) -> str:
+  def readPageFile(self, path: str) -> any:
     """
     Docstring
 
@@ -87,8 +123,9 @@ class Page():
     Returns
     -------
     type
-        Doc
+        Page
     """
     # Read the page file
     with open(path, "r") as f:
-      return f.read()
+      self.content = f.read()
+      return self
