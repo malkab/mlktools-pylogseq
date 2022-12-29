@@ -1,18 +1,18 @@
 from marko.block import ListItem, FencedCode
 from typing import List
 
-START HERE: A BLOCK IS ONLY A - WHATEVER SEGMENT
-START BY PROVIDING A BLOCK LITERAL STRING (STORE IT FOR LATER
-RECONSTRUCTION) AND PARSE IT, STORING ALL KIND OF INFORMATION
+# START HERE: A BLOCK IS ONLY A - WHATEVER SEGMENT
+# START BY PROVIDING A BLOCK LITERAL STRING (STORE IT FOR LATER
+# RECONSTRUCTION) AND PARSE IT, STORING ALL KIND OF INFORMATION
 
-THEN, GO TO THE PAGE LEVEL, WHERE A MD IS READ AND THE INDIVIDUAL,
-TOP LEVEL "- " BLOCKS ARE STORED SEPARATELY (WITH ANY FRONT
-MATTER, IF ANY) AND CONVERTED TO BLOCKS LIKE THIS ONE. THE PAGE
-WILL CONTAIN A LIST OF PARSED BLOCKS, IN ORDER OF APPEARANCE,
-EASY TO CONVERT BACK TO STRING TO PUT INTO A NEW MD FILE.
+# THEN, GO TO THE PAGE LEVEL, WHERE A MD IS READ AND THE INDIVIDUAL,
+# TOP LEVEL "- " BLOCKS ARE STORED SEPARATELY (WITH ANY FRONT
+# MATTER, IF ANY) AND CONVERTED TO BLOCKS LIKE THIS ONE. THE PAGE
+# WILL CONTAIN A LIST OF PARSED BLOCKS, IN ORDER OF APPEARANCE,
+# EASY TO CONVERT BACK TO STRING TO PUT INTO A NEW MD FILE.
 
-AT PAGE LEVEL, DO NOT STORE THE CONTENT OF THE PAGE, JUST THE
-FRONT MATTER. THE PAGE WILL BE RECONSTRUCTED FROM ITS BLOCKS.
+# AT PAGE LEVEL, DO NOT STORE THE CONTENT OF THE PAGE, JUST THE
+# FRONT MATTER. THE PAGE WILL BE RECONSTRUCTED FROM ITS BLOCKS.
 
 # --------------------------------------
 #
@@ -20,54 +20,34 @@ FRONT MATTER. THE PAGE WILL BE RECONSTRUCTED FROM ITS BLOCKS.
 #
 # --------------------------------------
 class Block():
+  """
+  A single Logseq Block.
 
-  # --------------------------------------
-  #
-  # Conversion to string for replicating in a new Markdown file.
-  #
-  # --------------------------------------
-  strBlock: str = None
-  """Conversion to string for replicating in a new Markdown file."""
+  Attributes
+  ----------
+  tags : List[str]
+    dd
 
-  # --------------------------------------
-  #
-  # Set of tags present in the block.
-  #
-  # --------------------------------------
-  tags: List[str] = None
-  """Set of tags present in the block."""
-
-  # --------------------------------------
-  #
-  # Highest priority found in the block, including
-  # child items.
-  #
-  # --------------------------------------
-  highestPriority = None
-  """Highest priority found in the block, including child items."""
-
-  # --------------------------------------
-  #
-  # Parent block, if any.
-  #
-  # --------------------------------------
-  parentBlock: any = None
-  """Parent block, if any."""
+  Methods
+  -------
+  colorspace(c='rgb')
+      Represent the photo in the given colorspace.
+  gamma(n=1.0)
+      Change the photo's gamma exposure.
+  """
 
   # --------------------------------------
   #
   # Constructor.
   #
   # --------------------------------------
-  def __init__(self, parentBlock: any=None):
+  def __init__(self, originalString: str=None):
     """Constructor.
 
-    Args:
-        parentBlock (Block, optional): Parent block, if any. Defaults to None.
     """
-    self.parentBlock = parentBlock
-    self.tags = []
-    self.strBlock = "- "
+    self.tags: List[str] = []
+    self.originalString: str = originalString
+    self.highestPriority: str = None
 
   # --------------------------------------
   #

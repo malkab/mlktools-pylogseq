@@ -61,7 +61,7 @@ class TestMarkdownParser:
         CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
         :END:"""
 
-      parsed = mark.parse(markdown)
+      mark.parse(markdown)
 
     assert e.value.message == "CLOCK error: undefined error parsing CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33"
 
@@ -76,7 +76,7 @@ class TestMarkdownParser:
         CLOCK: [2022-11-25.3 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
         :END:"""
 
-      parsed = mark.parse(markdown)
+      mark.parse(markdown)
 
     assert e.value.message == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
 
@@ -91,7 +91,7 @@ class TestMarkdownParser:
         CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25.6 Fri 09:09:45] =>  00:12:33
         :END:"""
 
-      parsed = mark.parse(markdown)
+      mark.parse(markdown)
 
     assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
 
@@ -106,7 +106,7 @@ class TestMarkdownParser:
         CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
         :END:"""
 
-      parsed = mark.parse(markdown)
+      mark.parse(markdown)
 
     assert e.value.message == "CLOCK error: clocking in different days 2022-11-25 <> 2022-11-26"
 
@@ -122,6 +122,6 @@ class TestMarkdownParser:
         CLOCK: [2022-11-26 Fri 09:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
         :END:"""
 
-      parsed = mark.parse(markdown)
+      mark.parse(markdown)
 
     assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 Fri 09:57:12 > 2022-11-26 Sat 09:09:45"
