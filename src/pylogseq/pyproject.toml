@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pghelpers"
+name = "pylogseq"
 version = "0.0.1"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Juan Pedro Pérez", email="jp.perez.alcantara@gmail.com" },
 ]
-description = "A small example package"
+description = "A set of commands and a library to interact with a set of Logseq graphs"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -17,8 +17,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyyaml",
-  "psycopg"
+  "marko",
+  "click"
 ]
 
 [project.urls]

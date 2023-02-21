@@ -2,7 +2,7 @@
 
 # -----------------------------------------------------------------
 #
-# Builds the package.
+# Build script.
 #
 # -----------------------------------------------------------------
-python -m build
+pyinstaller --onefile --clean mlkgraphclock.py

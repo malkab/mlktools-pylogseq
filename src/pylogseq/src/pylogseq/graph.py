@@ -1,24 +1,20 @@
-# --------------------------------------
-#
-# Graph class.
-#
-# --------------------------------------
+"""Represents a Logseq Graph.
+"""
+
 class Graph():
-  """
-  Docstring
+    """Represents a Logseq Graph.
 
-  Attributes
-  ----------
-  exposure : float
-      Exposure in seconds.
+    Attributes:
+        likes_spam:
+            A boolean indicating if we like SPAM or not.
+        eggs:
+            An integer count of the eggs we have laid.
+    """
 
-  Methods
-  -------
-  colorspace(c='rgb')
-      Represent the photo in the given colorspace.
-  gamma(n=1.0)
-      Change the photo's gamma exposure.
-  """
+    def __init__(self, path: str):
+        """Constructor.
 
-  def __init__(self, arg):
-    pass
+        Args:
+            path (str): The path to the graph's folder.
+        """
+        self.path = path

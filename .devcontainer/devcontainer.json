@@ -8,7 +8,13 @@
     }
   },
 
+  "mounts": [
+    "type=bind,source=${localEnv:HOME}/.mlkctxt,target=/home/user{{ cookiecutter.docker_remote_user }}/.mlkctxt"
+  ],
+
   "remoteUser": "1000",
 
-  "postCreateCommand": "bash -c \"./pip_install.sh\""
+  "postCreateCommand": "bash -c \"./.devcontainer/post_install.sh\"",
+
+  "postStartCommand": "bash -c \"echo postStartCommand\""
 }

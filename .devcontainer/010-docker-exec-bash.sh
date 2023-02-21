@@ -5,28 +5,34 @@
 # Executes a bash session into the Dev Container.
 #
 # -----------------------------------------------------------------
+# Change the ID of the DEV container here. It will change from time to
+# time when it is deleted by rebuilds and such.
+DEV_CONTAINER_ID=relaxed_gauss
+
 # The folder of the repo, as seen inside the Dev Container
 # It can be checked in the console of VSC once the DC is fired
 REPODIR=/workspaces/mlktools-pylogseq
 
+# Default user
+USER=1000:1000
+
+# Help
 if [ "$1" = "-h" ] ; then
-  echo Usage: $0 [ container hash or name ] [ optional user U:G ]
+  echo The script needs to define hard coded the ID of the DEV container, which
+  echo is somewhat volatile.
+  echo
+  echo As an optional parameter, an user can be provided as a parameter as U:G.
   exit 0
 fi
 
-if [ -z "$1" ] ; then
-  echo Specify a container hash or name and an optional user, as in 0:0 \(defaults to 1000:1000\)
-  exit 2
+# Set user
+if [ ! -z "$1" ] ; then
+  USER=$1
 fi
 
-USER=1000:1000
-
-if [ ! -z "$2" ] ; then
-  USER=$2
-fi
-
+# Exec
 docker exec -ti \
   -u $USER \
   -w $REPODIR/src \
-  $1 \
+  $DEV_CONTAINER_ID \
   /bin/bash
