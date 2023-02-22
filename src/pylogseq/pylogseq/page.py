@@ -1,7 +1,8 @@
 from marko import Markdown
 from marko.block import ListItem
-from pylogseq.src.pylogseq.block import Block
+from .block import Block
 from typing import List
+from .parser import Parser
 
 # --------------------------------------
 #
@@ -52,7 +53,7 @@ class Page():
   # Parses the page's Markdown.
   #
   # --------------------------------------
-  def parseMarkdown(self, parser: Markdown, markdown: str) -> any:
+  def parseMarkdown(self) -> any:
     """Parses the page's Markdown.
 
     Args:
@@ -62,7 +63,9 @@ class Page():
     Returns:
         any: The parsed document.
     """
-    return parser.parse(markdown)
+    parser = Markdown(extensions=[Parser])
+
+    return parser.parse(self.content)
 
   # --------------------------------------
   #

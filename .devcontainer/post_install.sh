@@ -26,5 +26,6 @@ pip install -U \
   marko \
   click \
   pytest \
+  pytest-watch \
   pyinstaller \
   typer[all]

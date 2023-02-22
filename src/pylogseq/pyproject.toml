@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "pylogseq"
 version = "0.0.1"
 authors = [
-  { name="Juan Pedro Pérez", email="jp.perez.alcantara@gmail.com" },
+  { name="Juan Pedro Pérez", email="jp.perez.alcantara@gmail.com" }
 ]
 description = "A set of commands and a library to interact with a set of Logseq graphs"
 readme = "README.md"

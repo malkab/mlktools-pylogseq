@@ -4,9 +4,6 @@
 #
 # --------------------------------------
 
-
-
-
 class ErrorClock(Exception):
 
   message: str = None
