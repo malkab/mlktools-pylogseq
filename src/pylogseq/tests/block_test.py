@@ -43,9 +43,3 @@ class TestBlock:
         assert block.hash == None
         assert block.tags == []
         assert block.highest_priority == None
-
-        p = Parser()
-
-        b = p.parse(block.content)
-
-        print("D: ") #, block.process())

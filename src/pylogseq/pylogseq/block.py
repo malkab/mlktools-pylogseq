@@ -50,6 +50,8 @@ class Block():
 
         p = Parser()
 
+        self.process(p.parse(self.content))
+
 
     def _sanitize_content(self, content):
         current_length = len(content) + 1
@@ -79,71 +81,101 @@ class Block():
 
             rank (int, optional): Ranking of this block. Controls indentation of children blocks. Defaults to 0.
         """
-        # A growing list of Markdown parsed items to process
-        items: list[Any] = item.children
-
-        # While there are items to process...
-        while len(items)>0:
-
-        # Get the first item
-        i: any = items.pop(0)
-
         # Check the type's name
-        t: str = type(i).__name__
+        t: str = type(item).__name__
 
-        # Process each item based on its type, composing the string representation
-        if t in [ "LogseqDone", "LogseqLogBook", "LogseqLater" ]:
-            self.strBlock += i.target
+        # AQUÍ: Aquí identificamos qué tipo de objeto es y reaccionamos. Si tiene hijos
+        # en children, procesamos esos hijos recursivamente.
 
-        if t == "LogseqEnd":
-            self.strBlock += "\n%s" % i.target
+        # AQUI: Checkeamos si tiene el atributo children. Si lo tiene, procesamos lo de abajo
+        # Si no, entramos a ver qué tipo de
+        # print("D: ", t, hasattr(item,  'children'))
 
-        if t == "LogseqClock":
-            self.strBlock += "\nCLOCK: [%s %s %s]--[%s %s %s] =>  %s" % \
-            (i.target["startDate"], i.target["startDay"], i.target["startHour"],
-            i.target["endDate"], i.target["endDay"], i.target["endHour"],
-            i.target["calculatedElapsedTime"])
+        # try:
+        #     if type(item.children).__name__ == "str":
+        #         print ("D: str", item.children)
 
-        if t == "LogseqPriority":
-            self._setPriority(i.target)
+        #     else:
+        #         for child in item.children:
+        #             self.process(child, rank=rank+1)
 
-            if self.parentBlock:
-            self.parentBlock._setPriority(i.target)
+        # except Exception as e:
+        #     print("D: ", e)
 
-            self.strBlock += "[#%s]" % i.target
 
-        if t == "RawText":
-            self.strBlock += i.children
+        # # A growing list of Markdown parsed items to process
+        # try:
+        #     items: list[Any] = item.children
 
-        if t in "LogseqComposedTag":
-            self.strBlock += "#[[%s]]" % i.target[-1]
-            self.tags.extend(i.target)
+        #     # While there are items to process...
+        #     while len(items)>0:
 
-        if t in "LogseqTag":
-            self.strBlock += "#%s " % i.target[-1]
-            self.tags.extend(i.target)
 
-        if t in "LogseqSquareTag":
-            self.strBlock += "[[%s]]" % i.target[-1]
-            self.tags.extend(i.target)
 
-        if t == "LineBreak":
-            self.strBlock += "\n"
+                # # Get the first item
+                # i: any = items.pop(0)
 
-        if t == "ListItem":
-            u = Block(parentBlock=self)
-            u.process(i, rank=rank+1)
-            self.strBlock += "\n%s%s" % ("  "*(rank+1), u.strBlock)
+                # # Check the type's name
+                # t: str = type(i).__name__
 
-        try:
-            if t not in [ "RawText", "LogseqComposedTag", "LogseqTag",
-            "LogseqSquareTag", "FencedCode" ]:
-            items.extend(i.children)
-        except:
-            pass
+                # # Process each item based on its type, composing the string representation
+                # if t in [ "LogseqDone", "LogseqLogBook", "LogseqLater" ]:
+                #     self.strBlock += i.target
+
+                # if t == "LogseqEnd":
+                #     self.strBlock += "\n%s" % i.target
+
+                # if t == "LogseqClock":
+                #     self.strBlock += "\nCLOCK: [%s %s %s]--[%s %s %s] =>  %s" % \
+                #     (i.target["startDate"], i.target["startDay"], i.target["startHour"],
+                #     i.target["endDate"], i.target["endDay"], i.target["endHour"],
+                #     i.target["calculatedElapsedTime"])
+
+                # if t == "LogseqPriority":
+                #     self._setPriority(i.target)
+
+                #     if self.parentBlock:
+                #         self.parentBlock._setPriority(i.target)
+
+                #     self.strBlock += "[#%s]" % i.target
+
+                # if t == "RawText":
+                #     self.strBlock += i.children
+
+                # if t in "LogseqComposedTag":
+                #     self.strBlock += "#[[%s]]" % i.target[-1]
+                #     self.tags.extend(i.target)
+
+                # if t in "LogseqTag":
+                #     self.strBlock += "#%s " % i.target[-1]
+                #     self.tags.extend(i.target)
+
+                # if t in "LogseqSquareTag":
+                #     self.strBlock += "[[%s]]" % i.target[-1]
+                #     self.tags.extend(i.target)
+
+                # if t == "LineBreak":
+                #     self.strBlock += "\n"
+
+                # if t == "ListItem":
+                #     self.process(i, rank=rank+1)
+
+                # if t == "List":
+                #     for listItem in i.children:
+                #         self.process(listItem, rank=rank+1)
+
+                # try:
+                #     if t not in [ "RawText", "LogseqComposedTag", "LogseqTag",
+                #     "LogseqSquareTag", "FencedCode" ]:
+                #         items.extend(i.children)
+                # except:
+                #     pass
+
+        # except:
+        #     pass
 
         # Process unique tags
-        self.tags = list(set(self.tags))
+        # self.tags = list(set(self.tags))
 
     # # --------------------------------------
     # #
