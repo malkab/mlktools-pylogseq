@@ -1,3 +1,9 @@
+title:: Gestión/IT
+filters:: {"done" false}
+
+- DONE Something DONE aaa
+- LATER aaa
+- NOW BBB
 - #Workflow Gestión de proyectos con [[Logseq]]
   collapsed:: true
   - En [[Logseq]] usamos un único grafo para todo. Proyectos muy, muy, muy concretos y desacoplados pueden usar un grafo aparte para ellos sólos si se considera que su contenido va a polucionar absurdamente al grafo principal de trabajo. Por ejemplo, un proyecto de trabajo debe ir al grafo principal, puesto que aportará información técnica importante y valiosa. Pero una aventura rolera, por ejemplo, sólo molestará.
@@ -66,7 +72,7 @@
   - don't bring Pivotal Stories from one week to another. Close it with the Focus Points spent in the week that is closing and make a copy if necessary in the incoming week with its own Focus Point;
   - organize **Pivotal Work** in **Epics** for each activity, like the different **Freelancing stuff** and **Sunntics**;
   - do not add **Fun** or **Home** stuff to **Pivotal Work**. Leave it for the **mlk-docs/task** lists.
-    
+
     Each time a Focus is over, do the following:
     - in Phys, mark the overall category of the activity done (MANagement, SUNntics, US, IOT, EOI, etc.);
     - in Pivotal Work, review active tasks: mark everything done as completed, but the sum of them must be 1 Focus Point. Set small ones to 0 points if necessary. If the Focus was expended in a long story, just put it in WIP mode and note the Focus Point spent in brackets in its name, like "Desarrollo SunnSaaS [4]";
@@ -75,78 +81,78 @@
 - **Organizing Music MP3** #worflow #audio
   collapsed:: true
   - Protocol for music storage and organization in MP3.
-    
+
     Use **EasyTag** in Linux.
-    
+
     Use **VLC** in Mac, Linux, and Windows for playing.
-    
+
     All files must be in MP3 format. Convert as needed.
-    
+
     Organize albums in folders that starts with the letter of the artist. Then, a folder with the artist name. And at least, a folder for the album with the structure [year]-[artist]-[name]:
-    
+
     ```
     a
-    
+
       acdc
-    
+
         1976-acdc-dirty_deeds_done_dirt_cheap
-    
+
           1976-acdc-dirty_deeds_done_dirt_cheap-00.mp3
-    
+
           1976-acdc-dirty_deeds_done_dirt_cheap-01.mp3
-    
+
           1976-acdc-dirty_deeds_done_dirt_cheap-02.mp3
-    
+
         1976-acdc-high_voltage-international_edition
-    
+
       alex_north
-    
+
         1968-alex_north-2001_a_space_odyssey
-    
+
     b
-    
+
       basil_poledouris
-    
+
         1982-basil_poledouris-conan_the_barbarian
-    
+
         1997-basil_poledouris-starship_troopers
-    
+
     ```
-    
+
     Not available data, or lone tracks, go to folders like this:
-    
+
     ```
-    
+
     0000-jewel-varios
-    
+
     ```
-    
+
     Unknown information is to be left blank. Unknown albums are labeled as unknown in folder and file names:
-    
+
     ```
-    
+
     0000-scissor_sisters-unknown
-    
+
       000-scissor_sisters-unknown.mp3
-    
+
     ```
-    
+
     As such, completely unknown files will go to:
-    
+
     ```
-    
+
     u
-    
+
       unknown
-    
+
         0000-unknown-unknown
-    
+
           000-unknown-unknown.mp3
-    
+
     ```
-    
+
     The file name of the items from iVoox must include always the date of the item as uploaded to iVoox.
-    
+
     Enter tag details:
     - **song title:** name of the episode (for example, "Valdemar | Parte 01");
     - **artist:** the people doing the radio theater (for example, "Historias (RNE)");
@@ -156,7 +162,7 @@
     - **track;**
     - **genre:** Radio Theater for radio theater;
     - **total number of tracks.**
-      
+
       Finally, give the files a square (300x300 minimum) picture. Leave the cover picture in the folder with the name **00-cover.png**.
 - **FNMT Certificate** #Workflow
   collapsed:: true
@@ -247,7 +253,7 @@
   - don't bring Pivotal Stories from one week to another. Close it with the Focus Points spent in the week that is closing and make a copy if necessary in the incoming week with its own Focus Point;
   - organize **Pivotal Work** in **Epics** for each activity, like the different **Freelancing stuff** and **Sunntics**;
   - do not add **Fun** or **Home** stuff to **Pivotal Work**. Leave it for the **mlk-docs/task** lists.
-    
+
     Each time a Focus is over, do the following:
     - in Phys, mark the overall category of the activity done (MANagement, SUNntics, US, IOT, EOI, etc.);
     - in Pivotal Work, review active tasks: mark everything done as completed, but the sum of them must be 1 Focus Point. Set small ones to 0 points if necessary. If the Focus was expended in a long story, just put it in WIP mode and note the Focus Point spent in brackets in its name, like "Desarrollo SunnSaaS [4]";
@@ -256,78 +262,78 @@
 - **Organizing Music MP3** #worflow #audio
   collapsed:: true
   - Protocol for music storage and organization in MP3.
-    
+
     Use **EasyTag** in Linux.
-    
+
     Use **VLC** in Mac, Linux, and Windows for playing.
-    
+
     All files must be in MP3 format. Convert as needed.
-    
+
     Organize albums in folders that starts with the letter of the artist. Then, a folder with the artist name. And at least, a folder for the album with the structure [year]-[artist]-[name]:
-    
+
     ```
     a
-    
+
       acdc
-    
+
         1976-acdc-dirty_deeds_done_dirt_cheap
-    
+
           1976-acdc-dirty_deeds_done_dirt_cheap-00.mp3
-    
+
           1976-acdc-dirty_deeds_done_dirt_cheap-01.mp3
-    
+
           1976-acdc-dirty_deeds_done_dirt_cheap-02.mp3
-    
+
         1976-acdc-high_voltage-international_edition
-    
+
       alex_north
-    
+
         1968-alex_north-2001_a_space_odyssey
-    
+
     b
-    
+
       basil_poledouris
-    
+
         1982-basil_poledouris-conan_the_barbarian
-    
+
         1997-basil_poledouris-starship_troopers
-    
+
     ```
-    
+
     Not available data, or lone tracks, go to folders like this:
-    
+
     ```
-    
+
     0000-jewel-varios
-    
+
     ```
-    
+
     Unknown information is to be left blank. Unknown albums are labeled as unknown in folder and file names:
-    
+
     ```
-    
+
     0000-scissor_sisters-unknown
-    
+
       000-scissor_sisters-unknown.mp3
-    
+
     ```
-    
+
     As such, completely unknown files will go to:
-    
+
     ```
-    
+
     u
-    
+
       unknown
-    
+
         0000-unknown-unknown
-    
+
           000-unknown-unknown.mp3
-    
+
     ```
-    
+
     The file name of the items from iVoox must include always the date of the item as uploaded to iVoox.
-    
+
     Enter tag details:
     - **song title:** name of the episode (for example, "Valdemar | Parte 01");
     - **artist:** the people doing the radio theater (for example, "Historias (RNE)");
@@ -337,7 +343,7 @@
     - **track;**
     - **genre:** Radio Theater for radio theater;
     - **total number of tracks.**
-      
+
       Finally, give the files a square (300x300 minimum) picture. Leave the cover picture in the folder with the name **00-cover.png**.
 - **FNMT Certificate** #Workflow
   collapsed:: true

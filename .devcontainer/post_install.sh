@@ -24,7 +24,6 @@ python -m pip install --upgrade build
 
 pip install -U \
   marko \
-  click \
   pytest \
   pytest-watch \
   pyinstaller \

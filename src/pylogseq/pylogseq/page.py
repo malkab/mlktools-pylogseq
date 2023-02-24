@@ -48,11 +48,7 @@ class Page():
     self.content: str = ""
     self.blocks: List[Block] = []
 
-  # --------------------------------------
-  #
-  # Parses the page's Markdown.
-  #
-  # --------------------------------------
+
   def parseMarkdown(self) -> any:
     """Parses the page's Markdown.
 
@@ -63,51 +59,69 @@ class Page():
     Returns:
         any: The parsed document.
     """
-    parser = Markdown(extensions=[Parser])
+    blocks: list[str] = self.content.split("\n- ")
 
-    return parser.parse(self.content)
+    b = []
+    for block in blocks:
+      if not block.startswith("title::") or block.startswith("filters::"):
+        block = block.strip('\n').strip(' ')
+        b.append(f"- {block}")
 
-  # --------------------------------------
-  #
-  # Get and process blocks from a parsed Markdown.
-  #
-  # --------------------------------------
-  def getBlocks(self, parsedMark: any) -> any:
-    """Get and process blocks from a parsed Markdown.
+    for block in b:
+      # print("D: 000", block)
 
-    Args:
-        parsedMark (any): The parsed Markdown objects.
+      b = Block(block)
 
-    Returns:
-        List[Block]: A list of parsed Block objects.
-    """
-    items: List[any] = [parsedMark]
-    blocks: List[ListItem] = []
-    out: List[Block] = []
+      print("D: 888", b.now, b.done, b.later)
 
-    # Get ListItems (Blocks)
-    while len(items)>0:
 
-      i: any = items.pop(0)
+    # parser = Markdown(extensions=[Parser])
 
-      t: str = type(i).__name__
+    # return parser.parse(self.content)
 
-      if t == "ListItem":
-        blocks.append(i)
 
-      try:
-        if t not in [ "RawText", "ListItem" ]:
-          items.extend(i.children)
-      except:
-        pass
 
-    # Process Blocks
-    for b in blocks:
-      x = Block()
-      x.process(b)
-      self.blocks.append(x)
+  # # --------------------------------------
+  # #
+  # # Get and process blocks from a parsed Markdown.
+  # #
+  # # --------------------------------------
+  # def getBlocks(self, parsedMark: any) -> any:
+  #   """Get and process blocks from a parsed Markdown.
 
-    return self
+  #   Args:
+  #       parsedMark (any): The parsed Markdown objects.
+
+  #   Returns:
+  #       List[Block]: A list of parsed Block objects.
+  #   """
+  #   items: List[any] = [parsedMark]
+  #   blocks: List[ListItem] = []
+  #   out: List[Block] = []
+
+  #   # Get ListItems (Blocks)
+  #   while len(items)>0:
+
+  #     i: any = items.pop(0)
+
+  #     t: str = type(i).__name__
+
+  #     if t == "ListItem":
+  #       blocks.append(i)
+
+  #     try:
+  #       if t not in [ "RawText", "ListItem" ]:
+  #         items.extend(i.children)
+  #     except:
+  #       pass
+
+  #   # Process Blocks
+  #   for b in blocks:
+  #     x = Block()
+  #     x.process(b)
+  #     self.blocks.append(x)
+
+  #   return self
 
   # --------------------------------------
   #

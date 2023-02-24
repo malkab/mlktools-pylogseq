@@ -14,7 +14,7 @@ class LogseqDone(inline.InlineElement):
   # The pattern to match.
   #
   # --------------------------------------
-  pattern: str = r'(DONE)'
+  pattern: str = r'^(DONE)'
   """The pattern to match."""
 
   # --------------------------------------

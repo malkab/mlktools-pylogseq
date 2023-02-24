@@ -14,7 +14,7 @@ class LogseqLater(inline.InlineElement):
   # The pattern to match.
   #
   # --------------------------------------
-  pattern: str = r'(LATER)'
+  pattern: str = r'^(LATER)'
   """The pattern to match."""
 
   # --------------------------------------
