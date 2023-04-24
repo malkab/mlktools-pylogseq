@@ -4,6 +4,26 @@ filters:: {"done" false}
 - DONE Something DONE aaa
 - LATER aaa
 - NOW BBB
+  :LOGBOOK:
+  CLOCK: [2022-09-05 Wed 09:00:00]--[2022-09-05 Wed 10:00:00] =>  01:00:00
+  CLOCK: [2022-09-06 Tue 11:45:00]--[2022-09-06 Tue 12:00:00] =>  00:15:00
+  CLOCK: [2022-09-06 Tue 12:00:00]--[2022-09-06 Tue 12:15:00] =>  00:15:00
+  CLOCK: [2022-09-07 Wed 09:15:00]--[2022-09-07 Wed 09:45:00] =>  00:30:00
+  CLOCK: [2022-09-07 Wed 12:30:00]--[2022-09-07 Wed 13:00:00] =>  00:30:00
+  CLOCK: [2022-09-08 Wed 09:00:00]--[2022-09-08 Wed 09:30:00] =>  00:30:00
+  CLOCK: [2022-09-08 Wed 11:00:00]--[2022-09-08 Wed 11:30:00] =>  00:30:00
+  CLOCK: [2022-09-09 Wed 09:15:00]--[2022-09-09 Wed 10:30:00] =>  01:15:00
+  CLOCK: [2022-09-12 Wed 09:30:00]--[2022-09-12 Wed 10:30:00] =>  01:00:00
+  CLOCK: [2022-09-12 Wed 10:45:00]--[2022-09-12 Wed 11:00:00] =>  00:15:00
+  CLOCK: [2022-09-13 Wed 09:30:00]--[2022-09-13 Wed 10:30:00] =>  01:00:00
+  CLOCK: [2022-09-14 Wed 09:30:00]--[2022-09-14 Wed 10:15:00] =>  00:45:00
+  CLOCK: [2023-03-23 Thu 12:23:37]--[2023-03-23 Thu 12:32:36] =>  00:08:59
+  CLOCK: [2023-03-23 Thu 15:59:52]--[2023-03-23 Thu 16:06:57] =>  00:07:05
+  CLOCK: [2023-03-24 Fri 09:33:10]--[2023-03-24 Fri 10:42:16] =>  01:09:06
+  CLOCK: [2023-03-24 Fri 14:29:33]--[2023-03-24 Fri 14:30:06] =>  00:00:33
+  CLOCK: [2023-03-27 Mon 10:02:54]--[2023-03-27 Mon 10:36:08] =>  00:33:14
+  CLOCK: [2023-03-27 Mon 20:20:42]--[2023-03-28 Mon 19:25:57] =>  00:05:15
+  :END:
 - #Workflow Gestión de proyectos con [[Logseq]]
   collapsed:: true
   - En [[Logseq]] usamos un único grafo para todo. Proyectos muy, muy, muy concretos y desacoplados pueden usar un grafo aparte para ellos sólos si se considera que su contenido va a polucionar absurdamente al grafo principal de trabajo. Por ejemplo, un proyecto de trabajo debe ir al grafo principal, puesto que aportará información técnica importante y valiosa. Pero una aventura rolera, por ejemplo, sólo molestará.

@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------
 # Change the ID of the DEV container here. It will change from time to
 # time when it is deleted by rebuilds and such.
-DEV_CONTAINER_ID=relaxed_gauss
+DEV_CONTAINER_ID=pylogseq-dev-container
 
 # The folder of the repo, as seen inside the Dev Container
 # It can be checked in the console of VSC once the DC is fired
@@ -18,10 +18,8 @@ USER=1000:1000
 
 # Help
 if [ "$1" = "-h" ] ; then
-  echo The script needs to define hard coded the ID of the DEV container, which
-  echo is somewhat volatile.
-  echo
   echo As an optional parameter, an user can be provided as a parameter as U:G.
+  echo Default user is 1000:1000.
   exit 0
 fi
 

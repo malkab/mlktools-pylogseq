@@ -117,13 +117,13 @@ class TestParser:
         assert b.target == "LATER"
 
 
-    #@pytest.mark.skip
+    # @pytest.mark.only
     def test_logbook(self):
         """Detects the LOGBOOK keyword.
         """
         markdown = """- LATER Something
         :LOGBOOK:
-        CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
+        CLOCK: [2022-11-25 Fri 23:54:59]--[2022-11-26 Sat 00:05:01] =>  00:12:33
         :END:"""
 
         parsed = parser.parse(markdown)
@@ -299,21 +299,6 @@ class TestParser:
             parser.parse(markdown)
 
         assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
-
-
-    def test_error_clock_different_days(self):
-        """Error in clocking in different days.
-        """
-        with pytest.raises(ErrorClock) as e:
-
-            markdown = """- DONE #[[Gestión/Gestión general]] Something
-                :LOGBOOK:
-                CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
-                :END:"""
-
-            parser.parse(markdown)
-
-        assert e.value.message == "CLOCK error: clocking in different days 2022-11-25 <> 2022-11-26"
 
 
     def test_error_clock_start_bigger(self):

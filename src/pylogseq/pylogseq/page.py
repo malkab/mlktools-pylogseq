@@ -32,117 +32,63 @@ class Page():
   #
   # --------------------------------------
   def __init__(self):
-    """
-    Docstring
+        """
+        Docstring
 
-    Parameters
-    ----------
-    var : type
-        Doc
+        Parameters
+        ----------
+        var : type
+            Doc
 
-    Returns
-    -------
-    type
-        Doc
-    """
-    self.content: str = ""
-    self.blocks: List[Block] = []
-
-
-  def parseMarkdown(self) -> any:
-    """Parses the page's Markdown.
-
-    Args:
-        parser (Markdown): The parser.
-        markdown (str): The Markdown string to parse.
-
-    Returns:
-        any: The parsed document.
-    """
-    blocks: list[str] = self.content.split("\n- ")
-
-    b = []
-    for block in blocks:
-      if not block.startswith("title::") or block.startswith("filters::"):
-        block = block.strip('\n').strip(' ')
-        b.append(f"- {block}")
-
-    for block in b:
-      # print("D: 000", block)
-
-      b = Block(block)
-
-      print("D: 888", b.now, b.done, b.later)
+        Returns
+        -------
+        type
+            Doc
+        """
+        self.content: str = ""
+        self.file_name: str = ""
+        self.blocks: List[Block] = []
 
 
-    # parser = Markdown(extensions=[Parser])
+  def parse_markdown(self) -> any:
+        """Parses the page's Markdown.
 
-    # return parser.parse(self.content)
+        Args:
+            parser (Markdown): The parser.
+            markdown (str): The Markdown string to parse.
 
+        Returns:
+            any: The parsed document.
+        """
+        blocks: list[str] = self.content.split("\n- ")
 
-
-  # # --------------------------------------
-  # #
-  # # Get and process blocks from a parsed Markdown.
-  # #
-  # # --------------------------------------
-  # def getBlocks(self, parsedMark: any) -> any:
-  #   """Get and process blocks from a parsed Markdown.
-
-  #   Args:
-  #       parsedMark (any): The parsed Markdown objects.
-
-  #   Returns:
-  #       List[Block]: A list of parsed Block objects.
-  #   """
-  #   items: List[any] = [parsedMark]
-  #   blocks: List[ListItem] = []
-  #   out: List[Block] = []
-
-  #   # Get ListItems (Blocks)
-  #   while len(items)>0:
-
-  #     i: any = items.pop(0)
-
-  #     t: str = type(i).__name__
-
-  #     if t == "ListItem":
-  #       blocks.append(i)
-
-  #     try:
-  #       if t not in [ "RawText", "ListItem" ]:
-  #         items.extend(i.children)
-  #     except:
-  #       pass
-
-  #   # Process Blocks
-  #   for b in blocks:
-  #     x = Block()
-  #     x.process(b)
-  #     self.blocks.append(x)
-
-  #   return self
+        # Process blocks
+        for block in blocks:
+            if not block.startswith("title::") or block.startswith("filters::"):
+                block = block.strip('\n').strip(' ')
+                self.blocks.append(Block(f"- {block}"))
 
   # --------------------------------------
   #
   # Read the page file.
   #
   # --------------------------------------
-  def readPageFile(self, path: str) -> any:
-    """
-    Docstring
+  def read_page_file(self, path: str) -> any:
+        """
+        Docstring
 
-    Parameters
-    ----------
-    var : type
-        Doc
+        Parameters
+        ----------
+        var : type
+            Doc
 
-    Returns
-    -------
-    type
-        Page
-    """
-    # Read the page file
-    with open(path, "r") as f:
-      self.content = f.read()
-      return self
+        Returns
+        -------
+        type
+            Page
+        """
+        # Read the page file
+        with open(path, "r") as f:
+            self.content = f.read()
+            self.file_name = path
+            return self

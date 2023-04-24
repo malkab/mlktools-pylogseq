@@ -2,9 +2,19 @@
   "image": "malkab/python:3.11-bullseye",
   "name": "pylogseq-dev-container",
 
+  "runArgs": [
+    "--network=host",
+    "--name=pylogseq-dev-container"
+  ],
+
   "customizations": {
     "vscode": {
-      "extensions": [ "ms-python.python" ]
+      "extensions": [
+        "ms-python.python",
+        "GitHub.copilot",
+        "njpwerner.autodocstring",
+        "redhat.vscode-yaml"
+      ]
     }
   },
 

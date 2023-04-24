@@ -6,7 +6,17 @@ import marko
 from typing import Any
 import hashlib
 from .parser import Parser
-import pylogseq
+# import pylogseq
+from .mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
+from .mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
+from .mdlogseq.elements_parsers.logseqclockclass import LogseqClock
+from .mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
+from .mdlogseq.elements_parsers.logseqnowclass import LogseqNow
+from .mdlogseq.elements_parsers import LogseqTag
+from .mdlogseq.elements_parsers import LogseqComposedTag
+from .mdlogseq.elements_parsers import LogseqSquareTag
+from .mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
+from .mdlogseq.elements_parsers.logseqendclass import LogseqEnd
 
 
 class Block():
@@ -64,6 +74,9 @@ class Block():
         self.logbook: list[Any] = []
         self.excluded_words = excluded_words
 
+        # Get the first line (main block) as title
+        self.title: str = content.split("\n")[0].strip("- ").strip()
+
         # Parse the content
         p = Parser()
         self.process(p.parse(self.content))
@@ -102,7 +115,7 @@ class Block():
             for child in item.children:
                 self.process(child)
 
-        elif isinstance(item, pylogseq.mdlogseq.elements_parsers.logseqdoneclass.LogseqDone):
+        elif isinstance(item, LogseqDone):
 
             self.done = True
 
@@ -110,34 +123,34 @@ class Block():
 
             self.words.extend(self._process_words(item.children, self.excluded_words))
 
-        elif isinstance(item, pylogseq.mdlogseq.elements_parsers.LogseqPriority):
+        elif isinstance(item, LogseqPriority):
 
             self.priorities.append(item.target)
 
-        elif isinstance(item, pylogseq.mdlogseq.elements_parsers.logseqclockclass.LogseqClock):
+        elif isinstance(item, LogseqClock):
 
-            self.logbook.append(item.target)
+            self.logbook.extend(item.target)
 
-        elif isinstance(item, pylogseq.mdlogseq.elements_parsers.logseqlaterclass.LogseqLater):
+        elif isinstance(item, LogseqLater):
 
             self.later = True
 
-        elif isinstance(item, pylogseq.mdlogseq.elements_parsers.logseqnowclass.LogseqNow):
+        elif isinstance(item, LogseqNow):
 
             self.now = True
 
         elif \
-            isinstance(item, pylogseq.mdlogseq.elements_parsers.LogseqTag) or \
-            isinstance(item, pylogseq.mdlogseq.elements_parsers.LogseqComposedTag) or \
-            isinstance(item, pylogseq.mdlogseq.elements_parsers.LogseqSquareTag):
+            isinstance(item, LogseqTag) or \
+            isinstance(item, LogseqComposedTag) or \
+            isinstance(item, LogseqSquareTag):
 
             self.tags.extend(item.target)
 
         elif \
             isinstance(item, marko.inline.LineBreak) or \
             isinstance(item, marko.block.BlankLine) or \
-            isinstance(item, pylogseq.mdlogseq.elements_parsers.logseqlogbookclass.LogseqLogBook) or \
-            isinstance(item, pylogseq.mdlogseq.elements_parsers.logseqendclass.LogseqEnd):
+            isinstance(item, LogseqLogBook) or \
+            isinstance(item, LogseqEnd):
 
             pass
 
@@ -151,8 +164,6 @@ class Block():
                 children = item.children
             else:
                 children = None
-
-            raise Exception(f"Unknown item while processing Block: type {type(item)}, target {target}, children {children}")
 
 
     def _process_words(self, text: str, excluded_words: list[str] = []) -> list[str]:
