@@ -1,7 +1,0 @@
-- **Logseq** es el principal repositorio de toda la información. Información sobre tareas, proyectos, etc. va aquí. Eventualmente se pueden añadir algunas fotos y demás, pero no saturarlo. Se apoya en otras herramientas y sistemas.
-- **Git and GitHub** are the main project code repositories. **euler** has a **git_datascience_lfs** for the big data for projects.
-- **Dropbox** is the main data bucket for everyday. Don't overload it, try to have a complete download in a big machine and a complete backup if possible.
-- **Dropbox/mlk-docs-knowledge-base** holds general notes for management and projects.
-- **Google Drive** is not used at a personal level.
-- **OneDrive** is used for storing Office files and stuff.
-- #procesar

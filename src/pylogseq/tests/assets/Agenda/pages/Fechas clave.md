@@ -1,2 +1,0 @@
-- #procesar
-- Las fechas clave de verdad tienen que estar en **000-Gestión**, aquí puede haber algunas, pero no es su sitio de verdad

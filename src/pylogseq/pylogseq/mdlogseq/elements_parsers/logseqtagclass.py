@@ -5,7 +5,7 @@ from re import Match
 class LogseqTag(inline.InlineElement):
   """Parser element for Logseq simple #A tag."""
 
-  pattern = r'#([A-Za-z0-9/]+)'
+  pattern = r'#([^\s]+)'
   """The pattern to match."""
 
   parse_children = True

@@ -8,6 +8,8 @@ from .logseqpriorityclass import LogseqPriority
 from .logseqsquaretagclass import LogseqSquareTag
 from .logseqtagclass import LogseqTag
 from .logseqnowclass import LogseqNow
+from .logseqscheduledclass import LogseqScheduled
+from .logseqdeadlineclass import LogseqDeadline
 
 __all__ = [
     "LogseqClock",
@@ -19,5 +21,7 @@ __all__ = [
     "LogseqPriority",
     "LogseqSquareTag",
     "LogseqTag",
-    "LogseqNow"
+    "LogseqNow",
+    "LogseqScheduled",
+    "LogseqDeadline"
 ]

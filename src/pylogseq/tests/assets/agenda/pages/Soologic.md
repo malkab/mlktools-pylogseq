@@ -1,0 +1,5 @@
+- Personas
+  - [[Antonio Cabrera]], Soologic.
+  - [[Matías]], ingeniero Soologic.
+  - [[Andrés Romero]], RqR.
+  - [[Daniel Romero]], RqR.

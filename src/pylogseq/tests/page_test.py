@@ -14,10 +14,10 @@ class TestPage:
         p = Page()
 
         # Read a page
-        p.read_page_file("tests/assets/Agenda/pages/Gestión.md")
+        p.read_page_file("tests/assets/agenda/pages/Gestión general.md")
 
         # Check the content
         # assert p.content == "- #procesar\n- Las fechas clave de verdad tienen que estar en **000-Gestión**, aquí puede haber algunas, pero no es su sitio de verdad\n"
 
         # Check the blocks
-        p.parse_markdown()
+        p.parse()

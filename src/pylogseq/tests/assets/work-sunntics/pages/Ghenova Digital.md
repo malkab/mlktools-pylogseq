@@ -1,0 +1,5 @@
+- [[Ghenova Digital]], la antigua [[Soologic]], es una empresa con la que hemos colaborado en el proyecto [[BlueSolar]].
+- # Personas
+  - [[Antonio Cabrera]]: responsable técnico, no sabemos su título
+  - [[Sandra Pinon Rodríguez]]: ingeniera de automatización
+  - [[Enrique Cárdenas Topf]]: ingeniero de automatización

@@ -3,10 +3,9 @@ Logseq page and parses it into Markdown, analyzing everything.
 """
 
 import marko
+import datetime
 from typing import Any
-import hashlib
 from .parser import Parser
-# import pylogseq
 from .mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
 from .mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
 from .mdlogseq.elements_parsers.logseqclockclass import LogseqClock
@@ -17,7 +16,8 @@ from .mdlogseq.elements_parsers import LogseqComposedTag
 from .mdlogseq.elements_parsers import LogseqSquareTag
 from .mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
 from .mdlogseq.elements_parsers.logseqendclass import LogseqEnd
-
+from .mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
+from .mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
 
 class Block():
     """A class to represent a top level block.
@@ -51,7 +51,7 @@ class Block():
     """
 
 
-    def __init__(self, content: str, excluded_words: list[str]=[]):
+    def __init__(self, content: str):
         """Constructor.
 
         Args:
@@ -62,36 +62,60 @@ class Block():
                 List of words to filter in the list of unique words. Defaults to
                 [].
         """
+        from .page import Page
+
         self.tags: list[str] = []
         self.content: str = content.strip("\n").strip()
-        self.content_hash: str = hashlib.sha256(content.encode()).hexdigest()
         self.highest_priority: str = None
         self.done: bool = False
         self.later: bool = False
         self.now: bool = False
-        self.words: list[str] = []
         self.priorities: list[str] = []
         self.logbook: list[Any] = []
-        self.excluded_words = excluded_words
+        self.page: Page = None
+        self.allocated_time: int = None
+        self.scheduled: any = None
+        self.deadline: any = None
+        self.elapsed_time: datetime.timedelta = None
+        self.time_left: datetime.timedelta = None
 
         # Get the first line (main block) as title
         self.title: str = content.split("\n")[0].strip("- ").strip()
 
         # Parse the content
         p = Parser()
-        self.process(p.parse(self.content))
+        self.parse(p.parse(self.content))
 
         # Postprocess data
         self.priorities = sorted(list(set(self.priorities)))
         self.tags = sorted(list(set(self.tags)))
 
+        # Check for highest priority
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-        self.words = sorted(list(set(self.words)))
+        # Check if there is an allocated time tag T
+        if "T" in self.tags:
+
+            time_tag = list(filter(lambda x: x.startswith("T/"), self.tags))[0]
+
+            try:
+                time_tag = int(time_tag.strip("T/"))
+                self.allocated_time = datetime.timedelta(hours=time_tag)
+
+                # Check if there is are clocked time
+                if self.elapsed_time is not None:
+                    self.time_left = self.allocated_time - self.elapsed_time
+            except:
+                raise Exception("Invalid allocated time tag: " + time_tag)
 
 
-    def process(self, item: Any) -> None:
+    # ----------------------------------
+    #
+    # Parse the block content.
+    #
+    # ----------------------------------
+    def parse(self, item: Any) -> None:
         """Process the block from a ListItem (a Logseq block) found in the
         parsing of the Markdown of a Logseq page.
 
@@ -113,30 +137,30 @@ class Block():
             isinstance(item, marko.inline.StrongEmphasis): \
 
             for child in item.children:
-                self.process(child)
+                self.parse(child)
 
         elif isinstance(item, LogseqDone):
-
             self.done = True
 
         elif isinstance(item, marko.inline.RawText):
-
-            self.words.extend(self._process_words(item.children, self.excluded_words))
+            pass
 
         elif isinstance(item, LogseqPriority):
-
             self.priorities.append(item.target)
 
         elif isinstance(item, LogseqClock):
+            for clock in item.target:
+                if self.elapsed_time is None:
+                    self.elapsed_time = clock.elapsed_time
+                else:
+                    self.elapsed_time += clock.elapsed_time
 
             self.logbook.extend(item.target)
 
         elif isinstance(item, LogseqLater):
-
             self.later = True
 
         elif isinstance(item, LogseqNow):
-
             self.now = True
 
         elif \
@@ -146,6 +170,14 @@ class Block():
 
             self.tags.extend(item.target)
 
+        elif isinstance(item, LogseqScheduled):
+
+            self.scheduled = item.target
+
+        elif isinstance(item, LogseqDeadline):
+
+            self.deadline = item.target
+
         elif \
             isinstance(item, marko.inline.LineBreak) or \
             isinstance(item, marko.block.BlankLine) or \
@@ -154,41 +186,15 @@ class Block():
 
             pass
 
-        else:
-            if hasattr(item, "target"):
-                target = item.target
-            else:
-                target = None
+    # ----------------------------------
+    #
+    # Expand this block making copies of it for each logbook entry.
+    #
+    # ----------------------------------
+    def get_logbook_copies(self) -> list[tuple[any, any]]:
+        tuples = []
 
-            if hasattr(item, "children"):
-                children = item.children
-            else:
-                children = None
+        for logbook_entry in self.logbook:
+            tuples.append((logbook_entry, self,))
 
-
-    def _process_words(self, text: str, excluded_words: list[str] = []) -> list[str]:
-        """Process text, sanitizes it, and returns a list of unique words, with
-        optional exclusion.
-
-        Args:
-            text (str):
-                The text to process.
-            excluded_words (list[str], optional):
-                A list of excluded words. Defaults to [].
-
-        Returns:
-            list[str]:
-                The list of unique words found.
-        """
-        t: list[str] = text.split(" ")
-
-        t = map(lambda x: x \
-            .lower() \
-            .replace("(", "") \
-            .replace(")", "") \
-            .lstrip(".") \
-            .rstrip(".") \
-            .lstrip(",") \
-            .rstrip(","), t)
-
-        return filter(lambda x: x != "" and x not in excluded_words, t)
+        return tuples

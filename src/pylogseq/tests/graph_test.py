@@ -5,12 +5,10 @@ from pylogseq.page import Page
 class TestGraph:
 
     def test_graph(self):
-        graph = Graph("tests/assets/Agenda")
+        graph = Graph("tests/assets/agenda")
 
-        assert graph.path == "tests/assets/Agenda"
+        assert graph.path == "tests/assets/agenda"
 
-        graph.get_md_pages()
+        graph.get_pages()
 
-        graph.read_pages()
-
-        print("D: uuu", graph.pages)
+        graph.parse()

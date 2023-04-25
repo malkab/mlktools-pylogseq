@@ -1,9 +1,9 @@
 from pylogseq.mdlogseq.exceptions.errorclock import ErrorClock
-from pylogseq.mdlogseq.logseqparse import LogseqParse
 from pylogseq.parser import Parser
 import pylogseq.mdlogseq.elements_parsers as le
 import marko
 import pytest
+import datetime
 
 parser = Parser()
 
@@ -256,19 +256,17 @@ class TestParser:
         assert l2.children[6].target == [ "T", "T/B" ]
 
 
-    def test_error_clock_undefined(self):
-        """Clock parsing error, undefined.
+    def test_error_clock_malformed(self):
+        """Clock parsing malformed, returning empty clock set.
         """
-        with pytest.raises(ErrorClock) as e:
+        markdown = """- DONE #[[Gestión/Gestión general]] Something
+        :LOGBOOK:
+        CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
+        :END:"""
 
-            markdown = """- DONE #[[Gestión/Gestión general]] Something
-            :LOGBOOK:
-            CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
-            :END:"""
+        parsed = parser.parse(markdown)
 
-            parser.parse(markdown)
-
-            assert e.value.message == "CLOCK error: undefined error parsing CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33"
+        assert parsed.children[0].children[0].children[0].children[6].target == []
 
 
     def test_error_clock_starting_timestamp(self):
@@ -313,4 +311,18 @@ class TestParser:
 
             parser.parse(markdown)
 
-        assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 Fri 09:57:12 > 2022-11-26 Sat 09:09:45"
+        assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 09:57:12 > 2022-11-26 09:09:45"
+
+
+    def test_scheduled_deadline(self):
+        """Tests the parsing of an scheduled and deadline section.
+        """
+        markdown = """- Board Meeting
+  SCHEDULED: <2023-08-02 Wed>
+  DEADLINE: <2023-08-06 Wed 10:00>"""
+
+        parsed = parser.parse(markdown)
+
+        assert parsed.children[0].children[0].children[0].children[1].target == datetime.datetime(2023, 8, 2, 0, 0, 0)
+
+        assert parsed.children[0].children[0].children[0].children[2].target == datetime.datetime(2023, 8, 6, 10, 0, 0)

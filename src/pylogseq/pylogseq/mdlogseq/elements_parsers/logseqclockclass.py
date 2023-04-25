@@ -1,6 +1,13 @@
+import sys
+import os
+
+# Add the parent directory of the current file to the system path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from marko import inline
 from datetime import datetime
 from ..exceptions.errorclock import ErrorClock
+from clock import Clock
 import re
 
 # --------------------------------------
@@ -61,10 +68,8 @@ class LogseqClock(inline.InlineElement):
 
         m = re.match(pattern, str)
 
-        if m == None:
-            # Generic error
-            raise ErrorClock(("CLOCK error: undefined error parsing %s" % str).strip("\n"))
-        else:
+        # Process
+        if m != None:
             # Unparseable start time
             try:
                 start = datetime.strptime("%s %s" %
@@ -84,66 +89,27 @@ class LogseqClock(inline.InlineElement):
             # Check different days clocking
             if end<start:
                 raise ErrorClock("CLOCK error: start time bigger than end time %s > %s" % (
-                    "%s %s %s" % (m.group(2), m.group(3), m.group(4)),
-                    "%s %s %s" % (m.group(5), m.group(6), m.group(7))
-                    ))
+                    start, end))
             else:
-                out: list[dict] = []
+                out: list[Clock] = []
 
                 # Check if the 24h line has been crossed. If so, return
                 # two time stamps, one for each day.
                 if m.group(5) > m.group(2):
-                    endFirstDay = datetime.strptime("%s %s" %
+                    end_first_day = datetime.strptime("%s %s" %
                             (m.group(2), "23:59:59"), '%Y-%m-%d %H:%M:%S')
 
-                    startSecondDay = datetime.strptime("%s %s" %
+                    start_second_day = datetime.strptime("%s %s" %
                             (m.group(5), "00:00:01"), '%Y-%m-%d %H:%M:%S')
 
-                    out.append({
-                        "startDate": m.group(2),
-                        "startDay": m.group(3),
-                        "startHour": m.group(4),
-                        "start": start,
-
-                        "endDate": m.group(2),
-                        "endDay": m.group(3),
-                        "endHour": "23:59:59",
-                        "end": endFirstDay,
-
-                        "elapsedTime": None,
-                        "calculatedElapsedTime": endFirstDay - start
-                    })
-
-                    out.append({
-                        "startDate": m.group(5),
-                        "startDay": m.group(6),
-                        "startHour": "00:00:01",
-                        "start": startSecondDay,
-
-                        "endDate": m.group(5),
-                        "endDay": m.group(6),
-                        "endHour": m.group(7),
-                        "end": end,
-
-                        "elapsedTime": None,
-                        "calculatedElapsedTime": end - startSecondDay
-                    })
+                    out.append(Clock(start, end_first_day))
+                    out.append(Clock(start_second_day, end))
 
                 else:
                     # Everything ok, report parsed result
-                    out.append({
-                        "startDate": m.group(2),
-                        "startDay": m.group(3),
-                        "startHour": m.group(4),
-                        "start": start,
-
-                        "endDate": m.group(5),
-                        "endDay": m.group(6),
-                        "endHour": m.group(7),
-                        "end": end,
-
-                        "elapsedTime": m.group(8),
-                        "calculatedElapsedTime": end - start
-                    })
+                    out.append(Clock(start, end))
 
                 self.target = out
+
+        else:
+            self.target = []

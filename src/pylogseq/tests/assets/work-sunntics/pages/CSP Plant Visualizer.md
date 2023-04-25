@@ -1,0 +1,4 @@
+- Es el visualizador de planta accesible en [https://beta.viz.sunntics.com/](https://beta.viz.sunntics.com/).
+- Está hecho en [[React]] y su repositorio es [[G/sunnsaas/airo_experiments]].
+- Existen campos de prueba en [[D/scientific/050-campos_test_viz]].
+- [[Redstone]], Sudáfrica, está en 28.300°S, 23.350°E. La torre la solemos poner exactamente en 28.2980023ºS, 23.3656072ºE.

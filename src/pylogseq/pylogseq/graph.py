@@ -1,6 +1,7 @@
 import os
 import fnmatch
 from .page import Page
+from .block import Block
 
 """Represents a Logseq Graph.
 """
@@ -21,16 +22,17 @@ class Graph():
         Args:
             path (str): The path to the graph's folder.
         """
-        self.path = path
+        self.path = path.rstrip("/")
         self.pages_file_name = []
         self.pages = []
+        self.title = os.path.split(self.path)[-1]
 
     # ----------------------------------
     #
     # Get all .md files in graph.
     #
     # ----------------------------------
-    def get_md_pages(self):
+    def get_pages(self):
         """Get all .md files in graph folder tree.
 
         Returns:
@@ -44,19 +46,40 @@ class Graph():
             page_file_n = fnmatch.filter(filenames, "*.md")
 
             for fn in page_file_n:
-                self.pages_file_name.append(os.path.join(dirpath, fn))
+                # Filter all stuff at logseq/bak and at logseq/.recycle
+                if "logseq/bak" not in dirpath and "logseq/.recycle" not in dirpath:
+                    self.pages_file_name.append(os.path.join(dirpath, fn))
 
     # ----------------------------------
     #
     # Read all pages in graph.
     #
     # ----------------------------------
-    def read_pages(self):
+    def parse(self) -> None:
         """Read all pages in graph.
         """
         for p in self.pages_file_name:
             page = Page()
             page.read_page_file(p)
-            page.parse_markdown()
+            page.parse()
+            page.graph = self
             self.pages.append(page)
             yield page
+
+    # ----------------------------------
+    #
+    # Get all blocks in graph.
+    #
+    # ----------------------------------
+    def get_all_blocks(self) -> list[Block]:
+        """Get all blocks in graph.
+
+        Returns:
+            list[Block]: A list of all blocks in graph.
+        """
+        blocks = []
+
+        for page in self.pages:
+            blocks.extend(page.blocks)
+
+        return blocks

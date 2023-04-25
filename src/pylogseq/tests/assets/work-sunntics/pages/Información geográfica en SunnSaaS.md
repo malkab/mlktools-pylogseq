@@ -1,0 +1,3 @@
+- Algunas notas random #procesar
+- Uploading geographic data to SunnSaaS can be a tricky process. To start with, representing positional data on the surface of Earth is a complicated process due to different local coordinate systems. Due to the inherent complications of dealing with worldwide coordinate systems, of which there are several thousands, geographic data uploaded to SunnSaaS must be provided EXCLUSIVELY in GPS latitude / longitude coordinates, based on the WGS84 spheroid default to this positional system. No local cartesian coordinate systems (like the UTM system) are allowed.
+-

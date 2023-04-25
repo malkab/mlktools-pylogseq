@@ -1,0 +1,17 @@
+- # Renovar certificados HTTPS
+  collapsed:: true
+  - Se hacen a nivel de proxy general de máquina, de host. En el caso actual, uno para el frontend y otro para el backend.
+  - Ver **[[L/toolsresearch]]/Certificados Let's Encrypt** y seguir las instrucciones ahí. Se actúa desde **devops**, no desde los repositorios específicos de **SunnSaaS**. Ahí hay un directorio llamado **nginx_proxies_certbot** donde está centralizado el proceso. Activar en esos directorios el **mlkctxt default**, hacer **rsync** y **ssh** al directorio **apps/nginx_proxy_certbot** y continuar las instrucciones en [[L/toolsresearch]].
+  - Pasos:
+    - Ir a **D/devops** al directorio de la máquina correspondiente.
+    - Habilitar el perfil **mlkctxt** **default**, **rsync** y **ssh**.
+    - Apagar el proxy [[NGINX]] con **920**.
+    - Apagar las aplicaciones que están detrás del proxy, asegurarse de que todo está apagado con **docker service ls**.
+    - Arrancar los **fake servers** con **010**.
+    - Arrancar el proxy [[NGINX]] con HTTP con **020** y comprobar acceso HTTP a los fake servers. Para ello, revisar la configuración **assets/nginx_proxy_confs/010** para ver los subdominios utilizados.
+    - Renovar ejectando **030**.
+    - Apagar el proxy con **920**.
+    - Arrancar el proxy HTTPS con **040** y comprobar acceso HTTPS a los fake servers.
+    - Apagar los fake servers con **910** y el proxy con **920**, comprobar que todo está apagado.
+    - Volver a levantar los [[Docker]] stacks reales, comprobar con **docker service ls**.
+    - Volver a levantar el proxy HTTPS [[NGINX]] con **040** y volver a comprobar los servicios y el acceso remoto por HTTPS.

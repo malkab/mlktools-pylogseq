@@ -1,0 +1,138 @@
+query-table:: false
+#+BEGIN_QUERY
+{:title [:h1 "Vencidos"]
+:query [
+  :find (pull ?b [*])
+  :in $ ?start ?next
+  :where
+  (or
+    [?b :block/deadline ?d]
+  )
+  (not (task ?b #{"DONE"}))
+  [(> ?d ?start)]
+  [(< ?d ?next)]
+]
+:inputs [:900d-before :today]
+:collapsed? false
+:breadcrumb-show? true}
+#+END_QUERY
+
+- query-table:: false
+  #+BEGIN_QUERY
+  {:title [:h1 "1 semana"]
+  :query [
+    :find (pull ?b [*])
+    :in $ ?start ?next
+    :where
+      (or
+          [?b :block/deadline ?d]
+        )
+        (not [?p :block/name "tarea repetitiva"]
+        [?b :block/refs ?p])
+      [(> ?d ?start)]
+      [(< ?d ?next)]
+  ]
+  :inputs [:today :9d-after]
+  :collapsed? false
+  :breadcrumb-show? true}
+  #+END_QUERY
+- query-table:: true
+  #+BEGIN_QUERY
+  {:title [:h1 "2 semanas"]
+      :query [
+        :find (pull ?b [*])
+        :in $ ?start ?next
+        :where
+          (or
+            [?b :block/deadline ?d]
+          )
+          (not [?p :block/name "tarea repetitiva"]
+          [?b :block/refs ?p])
+          [(> ?d ?start)]
+          [(< ?d ?next)]
+      ]
+      :inputs [:8d-after :15d-after]
+      :collapsed? false
+      :breadcrumb-show? true
+    }
+    #+END_QUERY
+- query-table:: true
+  #+BEGIN_QUERY
+  {:title [:h1 "Próximo mes"]
+      :query [
+        :find (pull ?b [*])
+        :in $ ?start ?next
+        :where
+          (or
+            [?b :block/deadline ?d]
+          )
+          (not [?p :block/name "tarea repetitiva"]
+          [?b :block/refs ?p])
+          [(> ?d ?start)]
+          [(< ?d ?next)]
+      ]
+      :inputs [:14d-after :31d-after]
+      :collapsed? false
+      :breadcrumb-show? true
+    }
+    #+END_QUERY
+- query-table:: true
+  #+BEGIN_QUERY
+  {:title [:h1 "2 próximos meses"]
+      :query [
+        :find (pull ?b [*])
+        :in $ ?start ?next
+        :where
+          (or
+            [?b :block/deadline ?d]
+          )
+          (not [?p :block/name "tarea repetitiva"]
+          [?b :block/refs ?p])
+          [(> ?d ?start)]
+          [(< ?d ?next)]
+      ]
+      :inputs [:30d-after :62d-after]
+      :collapsed? false
+      :breadcrumb-show? true
+    }
+    #+END_QUERY
+- query-table:: true
+  #+BEGIN_QUERY
+  {:title [:h1 "6 próximos meses"]
+      :query [
+        :find (pull ?b [*])
+        :in $ ?start ?next
+        :where
+          (or
+            [?b :block/deadline ?d]
+          )
+          (not [?p :block/name "tarea repetitiva"]
+          [?b :block/refs ?p])
+          [(> ?d ?start)]
+          [(< ?d ?next)]
+      ]
+      :inputs [:61d-after :180d-after]
+      :collapsed? false
+      :breadcrumb-show? true
+    }
+    #+END_QUERY
+- query-table:: true
+  #+BEGIN_QUERY
+  {:title [:h1 "Año próximo"]
+      :query [
+        :find (pull ?b [*])
+        :in $ ?start ?next
+        :where
+          (or
+            [?b :block/deadline ?d]
+          )
+          (not [?p :block/name "tarea repetitiva"]
+          [?b :block/refs ?p])
+          [(> ?d ?start)]
+          [(< ?d ?next)]
+      ]
+      :inputs [:179d-after :365d-after]
+      :collapsed? false
+      :breadcrumb-show? true
+    }
+    #+END_QUERY

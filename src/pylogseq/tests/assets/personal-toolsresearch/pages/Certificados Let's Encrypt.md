@@ -1,0 +1,20 @@
+- #Web #HTTPS #[[Lets Encrypt]]
+- La configuración de un proxy [[NGINX]] con certificados para múltiples aplicaciones en una máquina tiene configuraciones muy específicas, por lo que hay que guardarlas individualizadas para cada uno de los hosts.
+- Tenemos una boilerplate en [[G/boilerplates/boilerplates]] en **devops/nginx_proxies_certbot** que aborda este tema.
+- # Despliegue de certificados
+  collapsed:: true
+  - Ver el **README.md** del boilerplate.
+- ## Renovar certificados de sistemas en marcha
+  - Este es un procedimiento de referencia. Puede ser especificado para cada host con instrucciones adicionales. Esto debe servir como plantilla.
+  - Ir a **D/devops** al directorio de la máquina correspondiente.
+  - Habilitar el perfil **mlkctxt** **default**, **rsync** y **ssh**.
+  - Apagar el proxy [[NGINX]] con **920**.
+  - Apagar las aplicaciones que están detrás del proxy, asegurarse de que todo está apagado con **docker service ls**.
+  - Arrancar los **fake servers** con **010**.
+  - Arrancar el proxy [[NGINX]] con HTTP con **020** y comprobar acceso HTTP a los fake servers.
+  - Renovar ejectando **030**.
+  - Apagar el proxy con **920**.
+  - Arrancar el proxy HTTPS con **040** y comprobar acceso HTTPS a los fake servers.
+  - Apagar los fake servers con **910** y el proxy con **920**, comprobar que todo está apagado.
+  - Volver a levantar los [[Docker]] stacks reales, comprobar con **docker service ls**.
+  - Volver a levantar el proxy HTTPS [[NGINX]] con **040** y volver a comprobar los servicios y el acceso remoto por HTTPS.
