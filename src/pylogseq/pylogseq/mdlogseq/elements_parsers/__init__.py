@@ -10,6 +10,7 @@ from .logseqtagclass import LogseqTag
 from .logseqnowclass import LogseqNow
 from .logseqscheduledclass import LogseqScheduled
 from .logseqdeadlineclass import LogseqDeadline
+from .logseqpagetitleclass import LogseqPageTitle
 
 __all__ = [
     "LogseqClock",
@@ -23,5 +24,6 @@ __all__ = [
     "LogseqTag",
     "LogseqNow",
     "LogseqScheduled",
-    "LogseqDeadline"
+    "LogseqDeadline",
+    "LogseqPageTitle"
 ]

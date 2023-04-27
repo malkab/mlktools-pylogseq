@@ -1,1 +1,0 @@
-- #Referencia #NGINX #Web Hay en [[G/boilerplates/boilerplates]], en **docker-deployments**, un ejemplo sencillo de configuración Docker de [[NGINX]] con [[CORS]] (esperemos)

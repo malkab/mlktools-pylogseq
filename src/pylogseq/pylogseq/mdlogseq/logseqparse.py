@@ -10,10 +10,11 @@ from .elements_parsers.logseqpriorityclass import LogseqPriority
 from .elements_parsers.logseqnowclass import LogseqNow
 from .elements_parsers.logseqscheduledclass import LogseqScheduled
 from .elements_parsers.logseqdeadlineclass import LogseqDeadline
+from .elements_parsers.logseqpagetitleclass import LogseqPageTitle
 
 
 class LogseqParse:
 
     elements = [ LogseqDone, LogseqLater, LogseqDeadline, LogseqScheduled,
         LogseqClock, LogseqLogBook, LogseqEnd, LogseqComposedTag, LogseqTag,
-        LogseqSquareTag, LogseqPriority, LogseqNow ]
+        LogseqSquareTag, LogseqPriority, LogseqNow, LogseqPageTitle ]

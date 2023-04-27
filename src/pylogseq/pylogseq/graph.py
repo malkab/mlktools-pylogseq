@@ -1,13 +1,17 @@
 import os
 import fnmatch
+import hashlib
 from .page import Page
-from .block import Block
+from typing import Any
+from .common import sanitize_path
 
 """Represents a Logseq Graph.
 """
 
 class Graph():
     """Represents a Logseq Graph.
+
+    TODO DOCUMENTATION
 
     Attributes:
         likes_spam:
@@ -16,23 +20,51 @@ class Graph():
             An integer count of the eggs we have laid.
     """
 
-    def __init__(self, path: str):
+    # ----------------------------------
+    #
+    # Constructor.
+    #
+    # ----------------------------------
+    def __init__(self, path: str, title: str = None):
         """Constructor.
+
+        TODO
 
         Args:
             path (str): The path to the graph's folder.
         """
-        self.path = path.rstrip("/")
-        self.pages_file_name = []
-        self.pages = []
-        self.title = os.path.split(self.path)[-1]
+
+        self.path: str = sanitize_path(path)
+        """The path to the graph's folder.
+        """
+
+        # Generate hashed ID
+        hash = hashlib.sha256(self.path.encode())
+        self.id: str = hash.hexdigest() if path is not None else None
+        """The hashed ID. The path is taken into account to generate it.
+        """
+
+        self.title = os.path.split(self.path)[-1] if title is None else title
+        """The title of the graph. This is the name of the last folder in the
+        graph's path.
+        """
+
+        self.pages_file_name: list[str] = []
+        """List of pages file names belonging to this graph. Populated
+        by method get_pages().
+        """
+
+        self.pages: list[Page] = []
+        """List of parsed pages belonging to this graph. Populated by
+        method parse().
+        """
 
     # ----------------------------------
     #
     # Get all .md files in graph.
     #
     # ----------------------------------
-    def get_pages(self):
+    def get_pages(self) -> None:
         """Get all .md files in graph folder tree.
 
         Returns:
@@ -50,28 +82,30 @@ class Graph():
                 if "logseq/bak" not in dirpath and "logseq/.recycle" not in dirpath:
                     self.pages_file_name.append(os.path.join(dirpath, fn))
 
+
     # ----------------------------------
     #
     # Read all pages in graph.
     #
     # ----------------------------------
     def parse(self) -> None:
-        """Read all pages in graph.
+        """Parses all pages in graph.
         """
+
         for p in self.pages_file_name:
-            page = Page()
-            page.read_page_file(p)
+            page = Page(path=p, graph=self)
+            page.read_page_file()
             page.parse()
-            page.graph = self
             self.pages.append(page)
             yield page
+
 
     # ----------------------------------
     #
     # Get all blocks in graph.
     #
     # ----------------------------------
-    def get_all_blocks(self) -> list[Block]:
+    def get_all_blocks(self) -> list[Any]:
         """Get all blocks in graph.
 
         Returns:

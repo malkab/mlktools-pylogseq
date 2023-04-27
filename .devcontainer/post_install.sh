@@ -27,4 +27,5 @@ pip install -U \
   pytest \
   pytest-watch \
   pyinstaller \
-  typer[all]
+  typer[all] \
+  pandas

@@ -1,3 +1,0 @@
-- [#A] ¿Seguimos insistiendo en esto?
-- Es un set de datos de la gente del sensor de tránsito de nubes para hacer cosas en el visualizador SSPARC.
-- [#A] Integrar estos datos en el visor SSPARC.

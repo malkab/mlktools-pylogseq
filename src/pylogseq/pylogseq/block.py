@@ -5,7 +5,10 @@ Logseq page and parses it into Markdown, analyzing everything.
 import marko
 import datetime
 from typing import Any
+import hashlib
+from common import sanitize_content
 from .parser import Parser
+from .forward_declarations import ClockBlock, Page
 from .mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
 from .mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
 from .mdlogseq.elements_parsers.logseqclockclass import LogseqClock
@@ -18,7 +21,13 @@ from .mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
 from .mdlogseq.elements_parsers.logseqendclass import LogseqEnd
 from .mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
 from .mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
+from .mdlogseq.elements_parsers.logseqpagetitleclass import LogseqPageTitle
 
+# ----------------------------------
+#
+# dd
+#
+# ----------------------------------
 class Block():
     """A class to represent a top level block.
 
@@ -50,8 +59,13 @@ class Block():
         Exception: _description_
     """
 
-
-    def __init__(self, content: str):
+    # ----------------------------------
+    #
+    # Constructor.
+    #
+    # ----------------------------------
+    def __init__(self, content: str=None, page: Page=None,
+                 order_in_page: int=None):
         """Constructor.
 
         Args:
@@ -64,27 +78,122 @@ class Block():
         """
         from .page import Page
 
-        self.tags: list[str] = []
-        self.content: str = content.strip("\n").strip()
-        self.highest_priority: str = None
-        self.done: bool = False
-        self.later: bool = False
-        self.now: bool = False
-        self.priorities: list[str] = []
-        self.logbook: list[Any] = []
-        self.page: Page = None
-        self.allocated_time: int = None
-        self.scheduled: any = None
-        self.deadline: any = None
-        self.elapsed_time: datetime.timedelta = None
-        self.time_left: datetime.timedelta = None
+        self.content: str = sanitize_content(content) if content else None
+        """Sanitized content of the block. Content for a block must start with '- '.
+        """
 
-        # Get the first line (main block) as title
-        self.title: str = content.split("\n")[0].strip("- ").strip()
+        self.page: Page = page
+        """The page this block belongs to.
+        """
+
+        self.order_in_page = order_in_page
+        """The order in the page this block is in.
+        """
+
+        self.tags: list[str] = []
+        """List of unique tags found in the block.
+        """
+
+        self.highest_priority: str = None
+        """The highest priority found in the block.
+        """
+
+        self.done: bool = False
+        """Flag to signal that the block is marked as done.
+        """
+
+        self.later: bool = False
+        """Flag to signal that the block is marked as later.
+        """
+
+        self.now: bool = False
+        """Flag to signal that the block is marked as now.
+        """
+
+        self.priorities: list[str] = []
+        """Unique priorities found in the block.
+        """
+
+        self.logbook: list[Any] = []
+        """List of LogBook entries found in the block.
+        """
+
+        self.allocated_time: int = None
+        """The allocated time for the block found in T tags.
+        """
+
+        self.scheduled: datetime.datetime = None
+        """The scheduled date for the block.
+        """
+
+        self.deadline: datetime.datetime = None
+        """The deadline date for the block.
+        """
+
+        self.elapsed_time: datetime.timedelta = None
+        """The elapsed time for the block as the sum of the logbook entries.
+        """
+
+        self.time_left: datetime.timedelta = None
+        """The time left for the block as the difference between the allocated
+        time and the sum of the elapsed times in logbook entries.
+        """
+
+        self.is_title_block = False
+        """Flag to signal that the block is a title block, so it is not added to
+        the page's blocks list.
+        """
+
+        self.title: str = content.split("\n")[0].strip("- ").strip() if content \
+            else None
+        """The title of the block, the first line of the content, without '-'.
+        """
+
+        self._id: str = self._update_id()
+        """The unique ID for the block. It is defined by the page's graph ID,
+        the page's ID, the placement of the block in the page, and its
+        content.
+        """
+
+
+    # ----------------------------------
+    #
+    # Property id. Read only.
+    #
+    # ----------------------------------
+    @property
+    def id(self) -> str:
+        """Returns the block's ID.
+
+        Returns:
+            str: The block ID.
+        """
+        return self._id
+
+
+    # ----------------------------------
+    #
+    # Parse the block content.
+    #
+    # ----------------------------------
+    def parse(self) -> None:
+        """Parses the block's content by initiating the recursive parsing of
+        anidated blocks.
+
+        Raises:
+            Exception: Raises an exception if the block's content is empty.
+            Exception: Raises an exception if the allocated time in T tags
+                cannot be processed.
+        """
+
+        if not self.content:
+            raise Exception("Block content is empty.")
 
         # Parse the content
         p = Parser()
-        self.parse(p.parse(self.content))
+
+        # Start the recursive processing of the parsed content
+        self._process(p.parse(self.content))
 
         # Postprocess data
         self.priorities = sorted(list(set(self.priorities)))
@@ -112,10 +221,10 @@ class Block():
 
     # ----------------------------------
     #
-    # Parse the block content.
+    # Recursive function to process the block's content.
     #
     # ----------------------------------
-    def parse(self, item: Any) -> None:
+    def _process(self, item: Any) -> None:
         """Process the block from a ListItem (a Logseq block) found in the
         parsing of the Markdown of a Logseq page.
 
@@ -178,6 +287,15 @@ class Block():
 
             self.deadline = item.target
 
+        elif isinstance(item, LogseqPageTitle):
+
+            # If a page title is found, change parent page's title, if any
+            if self.page:
+                self.page.title = item.target
+
+            # Flag the block as a title block
+            self.is_title_block = True
+
         elif \
             isinstance(item, marko.inline.LineBreak) or \
             isinstance(item, marko.block.BlankLine) or \
@@ -186,15 +304,70 @@ class Block():
 
             pass
 
+
     # ----------------------------------
     #
     # Expand this block making copies of it for each logbook entry.
     #
     # ----------------------------------
-    def get_logbook_copies(self) -> list[tuple[any, any]]:
+    def get_logbook_copies(self) -> list[ClockBlock]:
+
+        from .clockblock import ClockBlock
+
         tuples = []
 
         for logbook_entry in self.logbook:
-            tuples.append((logbook_entry, self,))
+            tuples.append(ClockBlock(logbook_entry, self))
 
         return tuples
+
+
+    # ----------------------------------
+    #
+    # __repr__ method.
+    #
+    # ----------------------------------
+    def __repr__(self) -> str:
+        """Print representation of the block.
+
+        Returns:
+            str: representation of the block.
+        """
+        graph_title = "No graph defined"
+        page_title = "No page defined"
+
+        if self.page:
+            page_title = self.page.title
+
+            if self.page.graph:
+                graph_title = self.page.graph.title
+
+        return f"Block({graph_title}, {page_title}, {self.title})"
+
+
+    # ----------------------------------
+    #
+    # Block comment
+    #
+    # ----------------------------------
+    def _update_id(self) -> str:
+        """Updates the block's ID. The ID is based on the parent graph and
+        page's ID, if available, the block's order in the page and the block's content.
+
+        Returns:
+            str: The new block's ID.
+        """
+        hash_id_graph = ""
+        hash_id_page = ""
+        hash_order = str(self.order_in_page) if self.order_in_page is not None else ""
+        hash_content = self.content if self.content else ""
+
+        if self.page:
+            hash_id_page = self.page.id
+
+            if self.page.graph:
+                hash_id_graph = self.page.graph.id
+
+        hash = hashlib.sha256(f"{hash_id_graph}{hash_id_page}{hash_order}{hash_content}".encode())
+
+        return hash.hexdigest()

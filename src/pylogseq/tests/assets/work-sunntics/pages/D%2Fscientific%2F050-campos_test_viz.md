@@ -1,2 +1,0 @@
-- Algunos campos para probar en el visualizador [[React]].
-- Las coordenadas de [[Redstone]] son 28.300ºS, 23.350ºE.

@@ -3,17 +3,18 @@
 
 import typer
 import os
-# from pylogseq import Graph, Page, Block, Page, PageParserError
+# from pylogseq import Graph, Page, Block, Page, PageParserError, ClockBlock
 from datetime import datetime, timedelta, date
 from rich.console import Console
 from rich.table import Table
 from enum import Enum
+import pandas as pd
 
 # For development
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from pylogseq.pylogseq import Graph, Page, Block, Page, PageParserError
+from pylogseq.pylogseq import Graph, Page, Block, Page, PageParserError, ClockBlock
 
 # Typer app
 app = typer.Typer()
@@ -72,7 +73,7 @@ def clock(
             except PageParserError as e:
                 print()
                 print("Error parsing block")
-                print("File: ", e.page.file_name)
+                print("File: ", e.page.title)
                 print("Error: ", e.original_exception)
                 print("Block:\n", e.block_content)
 
@@ -111,10 +112,6 @@ def clock(
     limitLow = datetime(t.year, t.month, t.day)
     limitHigh = datetime(t.year, t.month, t.day) + timedelta(days=1)
 
-    # --------------------------------
-    # Calculate total elapsed time
-    # --------------------------------
-
     # Filter all blocks with clock
     clock_blocks: list[Block] = list(filter(lambda b: len(b.logbook) > 0, all_blocks))
 
@@ -125,65 +122,105 @@ def clock(
         logbook_entries.extend(block.get_logbook_copies())
 
     # Filter blocks within the time limit
-    logbook_entries_filtered = list(filter(lambda b: b[0].start_date >= limitLow and b[0].end_date < limitHigh, logbook_entries))
+    logbook_entries_timelapse = list( \
+        filter(lambda b: b.clock.start_date >= limitLow and \
+               b.clock.end_date < limitHigh, logbook_entries))
 
     # Sort by start date
-    logbook_entries.sort(key=lambda b: b[0].start_date)
+    logbook_entries_timelapse.sort(key=lambda b: b.clock.start_date)
 
     # Check if there is an overlapping between logbook entries
-    for c in range(0, len(logbook_entries)-1):
-        if logbook_entries[c+1][0].start_date < logbook_entries[c][0].end_date:
-            print(f"WARNING: block '{logbook_entries[c+1][1].title}' in page '{logbook_entries[c+1][1].page.title}' of graph '{logbook_entries[c+1][1].page.graph.title}' has overlapping logbook entries with block '{logbook_entries[c][1].title}' in page '{logbook_entries[c][1].page.title}' of graph '{logbook_entries[c][1].page.graph.title}': {logbook_entries[c+1][0].start_date} < {logbook_entries[c][0].end_date}")
+    for c in range(0, len(logbook_entries_timelapse)-1):
+        if logbook_entries_timelapse[c+1].clock.start_date < logbook_entries_timelapse[c].clock.end_date:
+            print(f"WARNING: block '{logbook_entries_timelapse[c+1].block.title}' in page '{logbook_entries_timelapse[c+1].block.page.title}' of graph '{logbook_entries_timelapse[c+1].block.page.graph.title}' has overlapping logbook entries with block '{logbook_entries_timelapse[c].block.title}' in page '{logbook_entries_timelapse[c].block.page.title}' of graph '{logbook_entries_timelapse[c].block.page.graph.title}': {logbook_entries_timelapse[c+1].clock.start_date} < {logbook_entries_timelapse[c].clock.end_date}")
 
-    # Get total time in clocks
-    total_time = {}
-    for entry in logbook_entries_filtered:
-        if entry[1].page.graph.title not in total_time:
-            total_time[entry[1].page.graph.title] = entry[0].elapsed_time
-        else:
-            total_time[entry[1].page.graph.title] = \
-                total_time[entry[1].page.graph.title] + \
-                entry[0].elapsed_time
+    # Compose the Pandas dataframe data
+    dataframe_data = []
 
-    # --------------------------------
-    # Calculate total time allocated within the time limit
-    # --------------------------------
-    # Filter blocks with a SCHEDULED
-    scheduled_blocks: list[Block] = list(filter(lambda b: b.scheduled, all_blocks))
+    for entry in logbook_entries_timelapse:
+        dataframe_data.append({
+            "graph": entry.block.page.graph.title,
+            "page": entry.block.page.title,
+            "block": entry.block.title,
+            "start_date": entry.clock.start_date,
+            "end_date": entry.clock.end_date,
+            "elapsed_time": entry.clock.elapsed_time,
+            "allocated_time": entry.block.allocated_time,
+            "time_left": entry.block.time_left,
+            "tags": entry.block.tags
+        })
 
-    # Filter blocks within the time limit
-    scheduled_blocks_filtered = list(filter(lambda b: b.scheduled_date >= limitLow and b.scheduled_date < limitHigh, scheduled_blocks))
+    df = pd.DataFrame(dataframe_data)
 
-    # Get total time in clocks
-    total_time_allocated = {}
+    print("D: JUJU")
+    print(df)
 
-    for block in scheduled_blocks_filtered:
-        if block.page.graph.title not in total_time_allocated:
-            total_time_allocated[block.page.graph.title] = block.scheduled_time
-        else:
-            total_time_allocated[block.page.graph.title] = \
-                total_time_allocated[block.page.graph.title] + \
-                block.scheduled_time
+    print("\n\n")
 
-    # --------------------------------
-    # Final output
-    # --------------------------------
+    print(df.groupby("graph").agg({
+        "elapsed_time": ["sum"],
+        "allocated_time": ["sum"],
+        "time_left": ["sum"]
+    }))
+
     print()
 
-    table = Table(title="Time by graph")
+    # # --------------------------------
+    # # Calculate total elapsed time
+    # # --------------------------------
 
-    table.add_column("Graph")
-    # table.add_colum
-    table.add_column("Elapsed time", justify="right")
 
-    # Sort by time
-    total_time = dict(sorted(total_time.items(), key=lambda item: item[1], reverse=True))
 
-    for k,v in total_time.items():
-        table.add_row(k, str(v))
 
-    console = Console()
-    console.print(table)
+    # # Get total time in clocks
+    # total_time = {}
+    # for entry in logbook_entries_timelapse_filtered:
+    #     if entry.block.page.graph.title not in total_time:
+    #         total_time[entry.block.page.graph.title] = entry[0].elapsed_time
+    #     else:
+    #         total_time[entry.block.page.graph.title] = \
+    #             total_time[entry.block.page.graph.title] + \
+    #             entry[0].elapsed_time
+
+    # # --------------------------------
+    # # Calculate total time allocated within the time limit
+    # # --------------------------------
+    # # Filter blocks with a SCHEDULED
+    # scheduled_blocks: list[Block] = list(filter(lambda b: b.scheduled, all_blocks))
+
+    # # Filter blocks within the time limit
+    # scheduled_blocks_filtered = list(filter(lambda b: b.scheduled_date >= limitLow and b.scheduled_date < limitHigh, scheduled_blocks))
+
+    # # Get total time in clocks
+    # total_time_allocated = {}
+
+    # for block in scheduled_blocks_filtered:
+    #     if block.page.graph.title not in total_time_allocated:
+    #         total_time_allocated[block.page.graph.title] = block.scheduled_time
+    #     else:
+    #         total_time_allocated[block.page.graph.title] = \
+    #             total_time_allocated[block.page.graph.title] + \
+    #             block.scheduled_time
+
+    # # --------------------------------
+    # # Final output
+    # # --------------------------------
+    # print()
+
+    # table = Table(title="Time by graph")
+
+    # table.add_column("Graph")
+    # # table.add_colum
+    # table.add_column("Elapsed time", justify="right")
+
+    # # Sort by time
+    # total_time = dict(sorted(total_time.items(), key=lambda item: item.block, reverse=True))
+
+    # for k,v in total_time.items():
+    #     table.add_row(k, str(v))
+
+    # console = Console()
+    # console.print(table)
 
 
 # ----------------------------------

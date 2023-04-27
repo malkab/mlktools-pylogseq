@@ -1,7 +1,0 @@
-- # Personas
-  - [[Manolo Quero]] Manuel Quero
-  - [[Michiel Erkelens]] Michiel Erkelens
-- # Activos
-  - Repositorios Git (tanto en GitLab como en GitHub):
-    - [[G/sunntics/sunnsaas_help]]: contiene la documentación de SunnSaaS;
-    - [[G/sunnsaas/sunnsaas_api_tests]]: tests de la API escritos en Python.

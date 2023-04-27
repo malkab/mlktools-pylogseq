@@ -1,1 +1,0 @@
-- Este grafo es un cajón desastre donde intentamos centralizar la información más importante a la espera de tener un sistema PyLogseq o similar multi-grafo mejor.

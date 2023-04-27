@@ -1,2 +1,0 @@
-- **[[helios]]**
-  - Sunntics' box. Got a /home/git repo stash.

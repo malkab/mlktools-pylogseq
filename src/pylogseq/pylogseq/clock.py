@@ -19,3 +19,6 @@ class Clock:
         self.start_date: datetime.datetime = start_date
         self.end_date: datetime.datetime = end_date
         self.elapsed_time: datetime.timedelta = self.end_date - self.start_date
+
+    def __repr__(self):
+        return f"Clock({self.start_date}, {self.end_date})"

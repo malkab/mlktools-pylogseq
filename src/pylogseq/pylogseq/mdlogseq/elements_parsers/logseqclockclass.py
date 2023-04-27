@@ -100,7 +100,7 @@ class LogseqClock(inline.InlineElement):
                             (m.group(2), "23:59:59"), '%Y-%m-%d %H:%M:%S')
 
                     start_second_day = datetime.strptime("%s %s" %
-                            (m.group(5), "00:00:01"), '%Y-%m-%d %H:%M:%S')
+                            (m.group(5), "00:00:00"), '%Y-%m-%d %H:%M:%S')
 
                     out.append(Clock(start, end_first_day))
                     out.append(Clock(start_second_day, end))

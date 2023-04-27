@@ -1,1 +1,0 @@
-- Este repo está **DEPRECATED**. Se guarda por continuidad.

@@ -1,1 +1,0 @@
-- **Instalación en Ubuntu:** últimas instrucciones en [QGIS Installers](https://www.qgis.org/en/site/forusers/alldownloads.html#debian-ubuntu)

@@ -326,3 +326,20 @@ class TestParser:
         assert parsed.children[0].children[0].children[0].children[1].target == datetime.datetime(2023, 8, 2, 0, 0, 0)
 
         assert parsed.children[0].children[0].children[0].children[2].target == datetime.datetime(2023, 8, 6, 10, 0, 0)
+
+
+    # ----------------------------------
+    #
+    # Test the title:: whatever property.
+    #
+    # ----------------------------------
+    def test_page_title(self):
+        """Tests the parsing of a page title property title::.
+        """
+        markdown = """title:: A title
+- A block
+- Another block"""
+
+        parsed = parser.parse(markdown)
+
+        assert parsed.children[0].children[0].target == "A title"
