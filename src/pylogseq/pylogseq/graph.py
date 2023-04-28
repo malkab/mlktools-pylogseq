@@ -34,14 +34,13 @@ class Graph():
             path (str): The path to the graph's folder.
         """
 
-        self.path: str = sanitize_path(path)
+        self._path: str = sanitize_path(path)
         """The path to the graph's folder.
         """
 
-        # Generate hashed ID
         hash = hashlib.sha256(self.path.encode())
+        """The hashed ID. It depends on the path.
         self.id: str = hash.hexdigest() if path is not None else None
-        """The hashed ID. The path is taken into account to generate it.
         """
 
         self.title = os.path.split(self.path)[-1] if title is None else title
@@ -58,6 +57,9 @@ class Graph():
         """List of parsed pages belonging to this graph. Populated by
         method parse().
         """
+
+
+
 
     # ----------------------------------
     #
@@ -117,3 +119,31 @@ class Graph():
             blocks.extend(page.blocks)
 
         return blocks
+
+
+    # ----------------------------------
+    #
+    # Block comment
+    #
+    # ----------------------------------
+    def _update_id(self) -> str:
+        """Updates the block's ID. The ID is based on the parent graph and
+        page's ID, if available, the block's order in the page and the block's content.
+
+        Returns:
+            str: The new block's ID.
+        """
+        hash_id_graph = ""
+        hash_id_page = ""
+        hash_order = str(self.order_in_page) if self.order_in_page is not None else ""
+        hash_content = self.content if self.content else ""
+
+        if self.page:
+            hash_id_page = self.page.id
+
+            if self.page.graph:
+                hash_id_graph = self.page.graph.id
+
+        hash = hashlib.sha256(f"{hash_id_graph}{hash_id_page}{hash_order}{hash_content}".encode())
+
+        return hash.hexdigest()
