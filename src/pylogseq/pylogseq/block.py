@@ -82,7 +82,7 @@ class Block():
         """Sanitized content of the block. Content for a block must start with '- '.
         """
 
-        self.page: Page = page
+        self._page: Page = page
         """The page this block belongs to.
         """
 
@@ -169,6 +169,31 @@ class Block():
             str: The block ID.
         """
         return self._id
+
+
+    # ----------------------------------
+    #
+    # Property page.
+    #
+    # ----------------------------------
+    @property
+    def page(self) -> Page:
+        """Returns the page this block belongs to.
+
+        Returns:
+            Page: The page this block belongs to.
+        """
+        return self._page
+
+    @page.setter
+    def page(self, page: Page) -> None:
+        """Sets the page this block belongs to.
+
+        Args:
+            page (Page): The page this block belongs to.
+        """
+        self._page = page
+        self._id = self._update_id()
 
 
     # ----------------------------------

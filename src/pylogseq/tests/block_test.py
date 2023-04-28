@@ -1,4 +1,4 @@
-from pylogseq import Block, Page
+from pylogseq import Block, Page, Graph
 import datetime
 
 blockExample = """
@@ -137,6 +137,36 @@ class TestBlock:
         assert b.is_title_block is False
         assert b.title is None
         assert b.id == "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+
+
+    # ----------------------------------
+    #
+    # Test mutating ID.
+    #
+    # ----------------------------------
+    def test_mutating_id(self):
+
+        # Bare constructor
+        b = Block()
+
+        # Store the current ID
+        current_id = b.id
+
+        assert b.id == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+        # Add a page without a graph, ID should mutate
+        p = Page()
+        b.page = p
+
+        assert b.id != current_id
+
+        assert b.id == "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91"
+
+        # Add a graph to the page, ID should mutate
+        g = Graph()
+        p.graph = g
+        b.page = p
+
 
 
 
