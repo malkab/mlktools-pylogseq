@@ -21,7 +21,6 @@ from .mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
 from .mdlogseq.elements_parsers.logseqendclass import LogseqEnd
 from .mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
 from .mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
-from .mdlogseq.elements_parsers.logseqpagetitleclass import LogseqPageTitle
 
 # ----------------------------------
 #
@@ -137,11 +136,6 @@ class Block():
         self.time_left: datetime.timedelta = None
         """The time left for the block as the difference between the allocated
         time and the sum of the elapsed times in logbook entries.
-        """
-
-        self.is_title_block = False
-        """Flag to signal that the block is a title block, so it is not added to
-        the page's blocks list.
         """
 
         self.title: str = content.split("\n")[0].strip("- ").strip() if content \
@@ -311,15 +305,6 @@ class Block():
         elif isinstance(item, LogseqDeadline):
 
             self.deadline = item.target
-
-        elif isinstance(item, LogseqPageTitle):
-
-            # If a page title is found, change parent page's title, if any
-            if self.page:
-                self.page.title = item.target
-
-            # Flag the block as a title block
-            self.is_title_block = True
 
         elif \
             isinstance(item, marko.inline.LineBreak) or \

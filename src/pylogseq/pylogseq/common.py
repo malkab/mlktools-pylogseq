@@ -24,7 +24,7 @@ def sanitize_path(path: str) -> str:
     str
         The sanitized path.
     """
-    return os.path.abspath(os.path.normpath(path)) if path else None
+    return os.path.normpath(path) if path else None
 
 
 # --------------------------------------
