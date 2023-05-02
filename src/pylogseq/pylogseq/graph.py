@@ -49,19 +49,48 @@ class Graph():
         graph's path.
         """
 
-        self.pages_file_name: list[str] = []
-        """List of pages file names belonging to this graph. Populated
-        by method get_pages().
-        """
+        # self.pages_file_name: list[str] = []
+        # """List of pages file names belonging to this graph. Populated
+        # by method get_pages().
+        # """
 
         self.pages: list[Page] = []
         """List of parsed pages belonging to this graph. Populated by
         method parse().
         """
 
+
     # ----------------------------------
     #
-    # Get all .md files in graph.
+    # Page factory.
+    #
+    # ----------------------------------
+    def create_page(self, path: str=None, content: str=None, title: str=None):
+        """Create a Page object.
+
+        Args:
+            path (str, optional): The path of the page. Defaults to None.
+            content (str, optional): Content of the page. Defaults to None.
+            title (str, optional): Title of the page. Defaults to None.
+
+        Raises:
+            Exception: _description_
+
+        Returns:
+            _type_: _description_
+
+        Yields:
+            _type_: _description_
+        """
+        p = Page(path=path, content=content, title=title, graph=self)
+        self.pages.append(p)
+
+        return p
+
+
+    # ----------------------------------
+    #
+    # Get all .md files in graph, but do not parse them.
     #
     # ----------------------------------
     def get_pages(self) -> None:
@@ -80,7 +109,7 @@ class Graph():
             for fn in page_file_n:
                 # Filter all stuff at logseq/bak and at logseq/.recycle
                 if "logseq/bak" not in dirpath and "logseq/.recycle" not in dirpath:
-                    self.pages_file_name.append(os.path.join(dirpath, fn))
+                    self.create_page(path=os.path.join(dirpath, fn))
 
 
     # ----------------------------------
@@ -92,12 +121,10 @@ class Graph():
         """Parses all pages in graph.
         """
 
-        for p in self.pages_file_name:
-            page = Page(path=p, graph=self)
-            page.read_page_file()
-            page.parse()
-            self.pages.append(page)
-            yield page
+        for p in self.pages:
+            p.read_page_file()
+            p.parse()
+            yield p
 
 
     # ----------------------------------

@@ -76,6 +76,7 @@ class Page():
             self.id: str = hash.hexdigest() if hash else None
             """Generated hashed ID. Based on the path."""
 
+
     # ----------------------------------
     #
     # Parse the page's Markdown.
