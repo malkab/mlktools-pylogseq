@@ -1,5 +1,6 @@
 from pylogseq import Block, Page, Graph
 import datetime
+from pytest import raises
 
 blockExample = """
 
@@ -67,9 +68,10 @@ class TestBlock:
         assert b.deadline is None
         assert b.elapsed_time is None
         assert b.time_left is None
-        assert b.is_title_block is False
         assert b.title is None
-        assert b.id == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+        with raises(Exception, match="Can't compute ID for Block since content is None"):
+            b.id
 
         # Optional content
         b = Block(content="- A block")
@@ -89,9 +91,10 @@ class TestBlock:
         assert b.deadline is None
         assert b.elapsed_time is None
         assert b.time_left is None
-        assert b.is_title_block is False
         assert b.title == "A block"
-        assert b.id == "3a0da5506508afed4d93490ffc31a99dd291335412b595589698e154274f6949"
+
+        with raises(Exception, match="Can't compute ID for Block since order_in_page is None"):
+            b.id
 
         # Optional page
         p = Page()
@@ -112,9 +115,10 @@ class TestBlock:
         assert b.deadline is None
         assert b.elapsed_time is None
         assert b.time_left is None
-        assert b.is_title_block is False
         assert b.title is None
-        assert b.id == "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91"
+
+        with raises(Exception, match="Can't compute ID for Block since content is None"):
+            b.id
 
         # Optional order in page
         b = Block(order_in_page=0)
@@ -134,9 +138,12 @@ class TestBlock:
         assert b.deadline is None
         assert b.elapsed_time is None
         assert b.time_left is None
-        assert b.is_title_block is False
         assert b.title is None
-        assert b.id == "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+
+        with raises(Exception, match="Can't compute ID for Block since content is None"):
+            b.id
+
+        # Full constructor
 
 
     # ----------------------------------
@@ -147,55 +154,42 @@ class TestBlock:
     def test_mutating_id(self):
 
         # Bare constructor
-        b = Block()
+        g = Graph(path="a_graph")
+        p = Page(path="page/a_page.md", graph=g)
+        b = Block(content="- A block", order_in_page=0, page=p)
 
         # Store the current ID
         current_id = b.id
-
-        assert b.id == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        assert b.id == "30bd5a7dd28f64d3bbf8de9b6e9c03b5b8d8235a07a8080027128ac074ffdb65"
 
         # Add a page without a graph, ID should mutate
-        p = Page()
+        p.path = "page/another_page.md"
         b.page = p
 
         assert b.id != current_id
 
-        assert b.id == "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91"
-
-        # Add a graph to the page, ID should mutate
-        g = Graph()
-        p.graph = g
-        b.page = p
+        assert b.id == "4ec5cd50035d7a601785e442f59b802ce6bfcc5a648a54f41d3e67cb73a7a04d"
 
 
+    # ----------------------------------
+    #
+    # Check DEADLINE and SCHEDULED
+    #
+    # ----------------------------------
+    def test_scheduled_deadline(self):
+        """Scheduled and deadline test.
+        """
+        block = Block(content="""- A #T/10
+            SCHEDULED: <2021-01-01 Fri 10:00>
+            DEADLINE: <2021-01-02 Fri>
+            :LOGBOOK:
+            CLOCK: [2021-01-01 Wed 12:00:00]--[2021-01-01 Wed 12:10:00] =>  00:10:00
+            CLOCK: [2021-01-01 Wed 12:20:00]--[2021-01-01 Wed 12:30:00] =>  00:10:00
+            :END:""")
 
+        block.parse()
 
-    # TEST A PARSER WITH - AND WITHOUT -
-
-
-    #     assert block.content == blockExampleSanitized
-    #     assert block.priorities == [ "A", "C" ]
-    #     assert block.tags == [ 'A', 'A/B', 'A/B/C', 'A/B/D', 'Composed tags', 'T', 'T/10' ]
-    #     assert block.highest_priority == "A"
-    #     assert block.done == True
-
-    # # ----------------------------------
-    # #
-    # # Check DEADLINE and SCHEDULED
-    # #
-    # # ----------------------------------
-    # def test_scheduled_deadline(self):
-    #     """Scheduled and deadline test.
-    #     """
-    #     block = Block("""- A #T/10
-    #         SCHEDULED: <2021-01-01 Fri 10:00>
-    #         DEADLINE: <2021-01-02 Fri>
-    #         :LOGBOOK:
-    #         CLOCK: [2021-01-01 Wed 12:00:00]--[2021-01-01 Wed 12:10:00] =>  00:10:00
-    #         CLOCK: [2021-01-01 Wed 12:20:00]--[2021-01-01 Wed 12:30:00] =>  00:10:00
-    #         :END:""")
-
-    #     assert block.scheduled == datetime.datetime(2021, 1, 1, 10, 0)
-    #     assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
-    #     assert block.elapsed_time == datetime.timedelta(minutes=20)
-    #     assert block.time_left == datetime.timedelta(hours=9, minutes=40)
+        assert block.scheduled == datetime.datetime(2021, 1, 1, 10, 0)
+        assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
+        assert block.elapsed_time == datetime.timedelta(minutes=20)
+        assert block.time_left == datetime.timedelta(hours=9, minutes=40)

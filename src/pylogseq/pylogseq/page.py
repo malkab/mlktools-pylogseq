@@ -35,45 +35,45 @@ class Page():
     # --------------------------------------
     def __init__(self, path: str=None, content: str=None, title: str=None,
                  graph: Graph=None):
-            """
-            Docstring
+        """
+        Docstring
 
-            Parameters
-            ----------
-            var : type
-                Doc
+        Parameters
+        ----------
+        var : type
+            Doc
 
-            Returns
-            -------
-            type
-                Doc
-            """
-            from .block import Block
-            from .graph import Graph
+        Returns
+        -------
+        type
+            Doc
+        """
+        from .block import Block
+        from .graph import Graph
 
-            self.path: str = sanitize_path(path)
-            """The path to the page's file.
-            """
+        self.path: str = sanitize_path(path)
+        """The path to the page's file.
+        """
 
-            self.content: str = sanitize_content(content) if content else None
-            """The page's Markdown content.
-            """
+        self.content: str = sanitize_content(content) if content else None
+        """The page's Markdown content.
+        """
 
-            self.title: str = \
-                title if title else (os.path.split(self.path)[-1].strip(".md") if self.path else None)
-            """Page title: title if given in the constructor, the page file name
-            if path is given, None otherwise. This member can be overrided if
-            the page contains a title:: property block.
-            """
+        self.title: str = \
+            title if title else (os.path.split(self.path)[-1].strip(".md") if self.path else None)
+        """Page title: title if given in the constructor, the page file name
+        if path is given, None otherwise. This member can be overrided if
+        the page contains a title:: property block.
+        """
 
-            self.graph: Graph = graph
-            """The graph this page belongs to.
-            """
+        self.graph: Graph = graph
+        """The graph this page belongs to.
+        """
 
-            self.blocks: list[Block] = []
-            """List of parsed blocks belonging to this page. Populated by the
-            parse() method.
-            """
+        self.blocks: list[Block] = []
+        """List of parsed blocks belonging to this page. Populated by the
+        parse() method.
+        """
 
 
     # ----------------------------------
@@ -88,15 +88,14 @@ class Page():
         Child blocks will depend on this too.
         """
         if self.path is None:
-            raise Exception("Page has no path and/or page's graph has no ID, cannot generate ID.")
+             raise Exception("Can't compute ID for Page since path is None")
 
         try:
             hash = f"{self.graph.id}{self.path}"
             hash = hashlib.sha256(hash.encode())
             return hash.hexdigest()
         except:
-            raise Exception("Page has no path and/or page's graph has no ID, cannot generate ID.")
-
+            raise Exception(f"Can't compute ID for Page: check parent graph exists and that has a valid ID")
 
     # ----------------------------------
     #
@@ -106,10 +105,19 @@ class Page():
     # ----------------------------------
     @property
     def abs_path(self) -> str:
-        try:
-            return os.path.join(self.graph.path, self.path)
-        except:
-             raise Exception("Page has no path and/or page's graph has no path, cannot generate absolute path.")
+        # Raise exception if the graph's path or the graph itself is None
+        if self.graph is None:
+            raise Exception("Can't compute abs_path for Page since graph is None")
+
+        if self.graph.path is None:
+            raise Exception("Can't compute abs_path for Page since graph.path is None")
+
+        # Raise exception if path is None
+        if self.path is None:
+            raise Exception("Can't compute abs_path for Page since path is None")
+
+        return os.path.join(self.graph.path, self.path) \
+            if self.graph.path and self.path else None
 
 
     # ----------------------------------
@@ -118,51 +126,54 @@ class Page():
     #
     # ----------------------------------
     def parse(self) -> any:
-            """Parses the page's Markdown.
+        """Parses the page's Markdown.
 
-            Args:
-                parser (Markdown): The parser.
-                markdown (str): The Markdown string to parse.
+        Args:
+            parser (Markdown): The parser.
+            markdown (str): The Markdown string to parse.
 
-            Returns:
-                any: The parsed document.
-            """
-            from .pageparsererror import PageParserError
-            from .block import Block
+        Returns:
+            any: The parsed document.
+        """
+        from .pageparsererror import PageParserError
+        from .block import Block
 
-            blocks: list[str] = self.content.split("\n- ")
+        blocks: list[str] = self.content.split("\n- ")
 
-            # Check for the first block to be title:: or filter::
-            b0 = blocks[0]
+        # Check for the first block to be title:: or filter::
+        b0 = blocks[0]
 
-            if b0.startswith("title::") or b0.startswith("filter::"):
-                # Extract the block so it's not processed as a block
-                b0 = blocks.pop(0)
+        if b0.startswith("title::") or b0.startswith("filter::"):
+            # Extract the block so it's not processed as a block
+            b0 = blocks.pop(0)
 
-                # Regex the title
-                pattern = r'title::\s*(.+)\s*'
-                match = re.search(pattern, b0)
+            # Regex the title
+            pattern = r'title::\s*(.+)\s*'
+            match = re.search(pattern, b0)
 
-                # Set the title if there is one in the reg exp
-                if match.group(1):
-                    self.title = match.group(1).strip()
+            # Set the title if there is one in the reg exp
+            if match.group(1):
+                self.title = match.group(1).strip()
 
-            # Process blocks
-            for block in blocks:
-                block_clean = block.strip('\n').strip()
+        # Process blocks
+        for block in blocks:
+            block_clean = block.strip('\n').strip()
 
-                # Try to parse the block
-                try:
-                    b = Block(content=f"- {block_clean}", page=self)
-                except Exception as e:
-                    raise PageParserError(
-                        f"Error parsing block in page {self.path}: {e}",
-                        e, self, block_clean)
+            # Try to parse the block
+            try:
+                b = Block(content=f"- {block_clean}", page=self)
+                b.parse()
 
                 # Add the block to the page
                 b.page = self
                 b.order_in_page = len(self.blocks)
                 self.blocks.append(b)
+
+            except Exception as e:
+                raise PageParserError(
+                    f"Error parsing block in page {self.path}: {e}",
+                    e, self, block_clean)
+
 
     # --------------------------------------
     #
@@ -170,29 +181,35 @@ class Page():
     #
     # --------------------------------------
     def read_page_file(self) -> any:
-            """
-            Docstring
+        """
+        Docstring
 
-            Parameters
-            ----------
-            var : type
-                Doc
+        Parameters
+        ----------
+        var : type
+            Doc
 
-            Returns
-            -------
-            type
-                Page
-            """
-            # Raise exception if path is None
-            if self.path is None:
-                raise Exception("Page path is None.")
+        Returns
+        -------
+        type
+            Page
+        """
+        # Read the page file
+        with open(self.abs_path, "r") as f:
+            self.content = sanitize_content(f.read())
 
-            # Read the page file
-            with open(self.path, "r") as f:
-                self.content = sanitize_content(f.read())
-
-                return self
+            return self
 
 
+    # ----------------------------------
+    #
+    # __repr__
+    #
+    # ----------------------------------
     def __repr__(self) -> str:
+        """Representación __repr__.
+
+        Returns:
+            str: La representación del objeto para los print.
+        """
         return(f"Page(path={self.path}, title={self.title}, )")

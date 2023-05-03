@@ -5,12 +5,15 @@ from .page import Page
 from .block import Block
 from typing import Any
 from .common import sanitize_path
+from .forward_declarations import Graph
 
 """Represents a Logseq Graph.
 """
 
 class Graph():
     """Represents a Logseq Graph.
+
+    PATH puede ir en relativo o absoluto, dependiendo si comienza por / o no.
 
     TODO DOCUMENTATION
 
@@ -35,7 +38,7 @@ class Graph():
             path (str): The path to the graph's folder.
         """
 
-        self._path: str = os.path.abspath(sanitize_path(path)) if path else None
+        self.path: str = os.path.abspath(sanitize_path(path)) if path else None
         """The path to the graph's folder.
         """
 
@@ -58,30 +61,6 @@ class Graph():
 
     # ----------------------------------
     #
-    # Property path.
-    # Path to the graph's folder.
-    #
-    # TODO: The change of the path should trigger the change of the ID, that's
-    # easy. But it also should change the path of the pages, which should
-    # trigger the change of their ID. Cascading, all blocks in the pages will
-    # also change their ID since they are dependent of the parent page and
-    # graph's ID. This would allow to copy and move the graph entirely to
-    # another folder, and all the IDs would be updated accordingly, if we
-    # are able to fully reproduce the folder structure and the pages.
-    #
-    # ----------------------------------
-    @property
-    def path(self) -> str:
-        return self._path
-
-    @path.setter
-    def path(self, path: str) -> None:
-        self._path = path
-        self._id = self._update_id()
-
-
-    # ----------------------------------
-    #
     # Property id.
     # ID of the grap.
     #
@@ -92,7 +71,7 @@ class Graph():
         depend on this too.
         """
         if self.path is None:
-            raise Exception("Graph has no path, cannot generate ID.")
+            raise Exception("Can't compute ID for Graph since path is None")
 
         hash = hashlib.sha256(self.path.encode())
         return hash.hexdigest()
@@ -103,7 +82,7 @@ class Graph():
     # Page factory.
     #
     # ----------------------------------
-    def create_page(self, path: str=None, content: str=None, title: str=None):
+    def create_page(self, path: str=None, content: str=None, title: str=None) -> Page:
         """Create a Page object.
 
         Args:
@@ -128,10 +107,27 @@ class Graph():
 
     # ----------------------------------
     #
+    # Add page.
+    #
+    # ----------------------------------
+    def add_page(self, page: Page) -> Graph:
+        """Add a Page object to the graph.
+
+        Args:
+            page (Page): The page to add.
+        """
+        page.graph = self
+        self.pages.append(page)
+
+        return self
+
+
+    # ----------------------------------
+    #
     # Get all .md files in graph, but do not parse them.
     #
     # ----------------------------------
-    def get_pages(self) -> None:
+    def get_pages(self) -> list[Page]:
         """Get all .md files in graph folder tree.
 
         Returns:
@@ -147,19 +143,40 @@ class Graph():
             for fn in page_file_n:
                 # Filter all stuff at logseq/bak and at logseq/.recycle
                 if "logseq/bak" not in dirpath and "logseq/.recycle" not in dirpath:
-                    self.create_page(path=os.path.join(dirpath, fn))
+
+                    # Substract from the page path the path of the graph so the
+                    # page's path is relative to the graph
+                    gp = self.path.split("/")
+                    pp = os.path.join(dirpath, fn).split("/")
+                    common_prefix = 0
+
+                    min_len = min(len(gp), len(pp))
+
+                    for i in range(min_len):
+                        if gp[i] == pp[i]:
+                            common_prefix += 1
+                        else:
+                            break
+
+                    fp = "/".join(pp[common_prefix:])
+
+                    self.create_page(path=fp)
+
+        return self.pages
 
     # ----------------------------------
     #
     # Read all pages in graph in bulk.
     #
     # ----------------------------------
-    def parse(self) -> None:
+    def parse(self) -> Graph:
         """Parses all pages in graph in bulk.
         """
         for p in self.pages:
             p.read_page_file()
             p.parse()
+
+        return self
 
 
     # ----------------------------------
@@ -202,15 +219,8 @@ class Graph():
 
     # ----------------------------------
     #
-    # Update the ID. Will trigger the ID change in all child pages and blocks.
+    # __repr__
     #
     # ----------------------------------
-    def _update_id(self) -> str:
-        """Updates the block's ID. The ID is based on the graph's path. Will
-        trigger the update of the ID in all child pages and blocks.
-
-        Returns:
-            str: The new block's ID.
-        """
-        hash = hashlib.sha256(self.path.encode()) if self.path else None
-        return hash.hexdigest() if hash else None
+    def __repr__(self) -> str:
+        return f"Graph(path={self.path}, title={self.title})"

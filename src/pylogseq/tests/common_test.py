@@ -33,7 +33,7 @@ class TestCommon:
 
         # Check the sanitized path
         assert sanitized_paths == [
-            "/workspaces/mlktools-pylogseq/src/logseq",
-            "/workspaces/mlktools-pylogseq/src/a",
+            "../logseq",
+            "../a",
             "//a/b/c"
         ]

@@ -1,16 +1,25 @@
-**WARNING!** This Cookie should be used inside the **src** folder of a base **python** cookie. Do not use it standalone.
-
-This is an example on how to configure a Python PyPI package for publishing.
-
-The name of the parent folder must match the name of the package, as well as the main folder inside src. Inside that folder the package can be organized in submodules.
-
-
 # Access PyDoc Documentation
 
 Navigate to the package or **tests** folder and run **python -m pydoc -b**. Do this in the VSC terminal. A browser should open with the documentation.
 
 
 # Testing the Package
+
+To run tests:
+
+```shell
+# Run with watch at pytest.ini level, all tests
+pytest-watch
+
+# Run with warch certain tests
+pytest-watch tests/parser_test.py tests/block_test.py
+
+# A specific test (a test class method), capturing prints
+pytest -rP -vvv -k "test_ping or test_apiinfo"
+
+# A full module (a test class), capturing prints
+pytest -rP -vvv -k "TestClassWhatever"
+```
 
 To run tests, use **PyTest** and **PyTest-Watch** to watch/run.
 
@@ -24,26 +33,26 @@ with open("./tests/assets/Agenda/pages/A.md") as f:
     print("D: ", f.read())
 ```
 
-Organize all tests in folders at **tests/src**. Do not create another tests folder at package level.
+Organize all tests in folders at **tests**. Do not create another tests folder at package level.
 
 Test files must be named with the following structure: [a name]_test.py
 
-Run them with **pytest -rP** to capture the **print** outputs.
 
-Run a specific test:
+# Skipping Tests
 
-```shell
-# A specific test (a test class method)
-pytest -rP -k "test_ping or test_apiinfo"
+To skip a test, use the decorator:
 
-# A full module (a test class)
-pytest -rP -k "TestClassWhatever"
-```
+```python
+@pytest.mark.skip
+class TestA:
+    """_summary_
+    """
 
-**Pytest-Watch** can also be instructed to run only certain tests:
-
-```shell
-pytest-watch tests/parser_test.py tests/block_test.py
+    @pytest.mark.skip
+    def test_b(self):
+        """Another test.
+        """
+        assert 2 == 2
 ```
 
 

@@ -81,7 +81,7 @@ class Block():
         """Sanitized content of the block. Content for a block must start with '- '.
         """
 
-        self._page: Page = page
+        self.page: Page = page
         """The page this block belongs to.
         """
 
@@ -143,51 +143,30 @@ class Block():
         """The title of the block, the first line of the content, without '-'.
         """
 
-        self._id: str = self._update_id()
-        """The unique ID for the block. It is defined by the page's graph ID,
-        the page's ID, the placement of the block in the page, and its
-        content.
-        """
-
 
     # ----------------------------------
     #
-    # Property id. Read only.
+    # Property id.
+    # ID of the block.
     #
     # ----------------------------------
     @property
     def id(self) -> str:
-        """Returns the block's ID.
-
-        Returns:
-            str: The block ID.
+        """The hashed ID. It depends on the path of the parent page and the
+        content of the block.
         """
-        return self._id
+        if self.content is None:
+            raise Exception("Can't compute ID for Block since content is None")
 
+        if self.order_in_page is None:
+            raise Exception("Can't compute ID for Block since order_in_page is None")
 
-    # ----------------------------------
-    #
-    # Property page.
-    #
-    # ----------------------------------
-    @property
-    def page(self) -> Page:
-        """Returns the page this block belongs to.
-
-        Returns:
-            Page: The page this block belongs to.
-        """
-        return self._page
-
-    @page.setter
-    def page(self, page: Page) -> None:
-        """Sets the page this block belongs to.
-
-        Args:
-            page (Page): The page this block belongs to.
-        """
-        self._page = page
-        self._id = self._update_id()
+        try:
+            hash = f"{self.page.id}{self.content}{self.order_in_page}"
+            hash = hashlib.sha256(hash.encode())
+            return hash.hexdigest()
+        except(Exception) as e:
+            raise Exception(f"Can't compute ID for Block: check parent page exists and that has a valid ID")
 
 
     # ----------------------------------
@@ -265,7 +244,7 @@ class Block():
             isinstance(item, marko.inline.StrongEmphasis): \
 
             for child in item.children:
-                self.parse(child)
+                self._process(child)
 
         elif isinstance(item, LogseqDone):
             self.done = True
@@ -353,31 +332,3 @@ class Block():
                 graph_title = self.page.graph.title
 
         return f"Block({graph_title}, {page_title}, {self.title})"
-
-
-    # ----------------------------------
-    #
-    # Block comment
-    #
-    # ----------------------------------
-    def _update_id(self) -> str:
-        """Updates the block's ID. The ID is based on the parent graph and
-        page's ID, if available, the block's order in the page and the block's content.
-
-        Returns:
-            str: The new block's ID.
-        """
-        hash_id_graph = ""
-        hash_id_page = ""
-        hash_order = str(self.order_in_page) if self.order_in_page is not None else ""
-        hash_content = self.content if self.content else ""
-
-        if self.page:
-            hash_id_page = self.page.id
-
-            if self.page.graph:
-                hash_id_graph = self.page.graph.id
-
-        hash = hashlib.sha256(f"{hash_id_graph}{hash_id_page}{hash_order}{hash_content}".encode())
-
-        return hash.hexdigest()
