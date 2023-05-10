@@ -2,29 +2,31 @@
 Logseq page and parses it into Markdown, analyzing everything.
 """
 
+import re
 import marko
 import datetime
 from typing import Any
 import hashlib
-from common import sanitize_content
-from .parser import Parser
-from .forward_declarations import ClockBlock, Page
-from .mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
-from .mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
-from .mdlogseq.elements_parsers.logseqclockclass import LogseqClock
-from .mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
-from .mdlogseq.elements_parsers.logseqnowclass import LogseqNow
-from .mdlogseq.elements_parsers import LogseqTag
-from .mdlogseq.elements_parsers import LogseqComposedTag
-from .mdlogseq.elements_parsers import LogseqSquareTag
-from .mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
-from .mdlogseq.elements_parsers.logseqendclass import LogseqEnd
-from .mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
-from .mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
+from pylogseq.common import sanitize_content
+from pylogseq.parser import Parser
+from pylogseq.clock import Clock
+from pylogseq.forward_declarations import ClockBlock, Page
+from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
+from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
+from pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
+from pylogseq.mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
+from pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
+from pylogseq.mdlogseq.elements_parsers import LogseqTag
+from pylogseq.mdlogseq.elements_parsers import LogseqComposedTag
+from pylogseq.mdlogseq.elements_parsers import LogseqSquareTag
+from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
+from pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
+from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
+from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
 
 # ----------------------------------
 #
-# dd
+# Block class.
 #
 # ----------------------------------
 class Block():
@@ -171,6 +173,20 @@ class Block():
 
     # ----------------------------------
     #
+    # Property time_left_hours.
+    # Get the time_left as a value in hours.
+    #
+    # ----------------------------------
+    @property
+    def time_left_hours(self) -> float:
+        if self.time_left is not None:
+            return self.time_left.total_seconds() / 3600.0
+        else:
+            return None
+
+
+    # ----------------------------------
+    #
     # Parse the block content.
     #
     # ----------------------------------
@@ -207,12 +223,13 @@ class Block():
             time_tag = list(filter(lambda x: x.startswith("T/"), self.tags))[0]
 
             try:
-                time_tag = int(time_tag.strip("T/"))
+                time_tag = int(re.sub(r"\D", "", time_tag))
                 self.allocated_time = datetime.timedelta(hours=time_tag)
 
                 # Check if there is are clocked time
                 if self.elapsed_time is not None:
                     self.time_left = self.allocated_time - self.elapsed_time
+
             except:
                 raise Exception("Invalid allocated time tag: " + time_tag)
 
@@ -256,13 +273,17 @@ class Block():
             self.priorities.append(item.target)
 
         elif isinstance(item, LogseqClock):
-            for clock in item.target:
+            if item.target:
                 if self.elapsed_time is None:
-                    self.elapsed_time = clock.elapsed_time
+                    self.elapsed_time = item.target.elapsed
                 else:
-                    self.elapsed_time += clock.elapsed_time
+                    self.elapsed_time += item.target.elapsed
 
-            self.logbook.extend(item.target)
+                # Recalculate time left
+                if self.allocated_time is not None:
+                    self.time_left = self.allocated_time - self.elapsed_time
+
+                self.logbook.append(item.target)
 
         elif isinstance(item, LogseqLater):
             self.later = True
@@ -299,9 +320,9 @@ class Block():
     # Expand this block making copies of it for each logbook entry.
     #
     # ----------------------------------
-    def get_logbook_copies(self) -> list[ClockBlock]:
+    def get_clock_blocks(self) -> list[ClockBlock]:
 
-        from .clockblock import ClockBlock
+        from pylogseq.clockblock import ClockBlock
 
         tuples = []
 

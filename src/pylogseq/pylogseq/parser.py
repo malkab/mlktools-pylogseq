@@ -1,6 +1,6 @@
 from marko import Markdown
 from marko.block import Document
-from .mdlogseq.logseqparse import LogseqParse
+from pylogseq.mdlogseq.logseqparse import LogseqParse
 
 class Parser:
   """This is the parser class. It parses markdown that contains specific

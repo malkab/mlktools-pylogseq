@@ -28,4 +28,5 @@ pip install -U \
   pytest-watch \
   pyinstaller \
   typer[all] \
-  pandas
+  pandas \
+  jinja2

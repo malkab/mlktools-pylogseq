@@ -1,4 +1,5 @@
 from typing import Any, Protocol
+import datetime
 
 # ----------------------------------
 #
@@ -19,13 +20,14 @@ class Page(Protocol):
     graph: Graph
     title: str
 
-
-
 class Block(Protocol):
     id: str
     page: Any
 
+class Clock(Protocol):
+    start: datetime.datetime
+    end: datetime.datetime
 
 class ClockBlock(Protocol):
-    clock: Any
-    block: Any
+    clock: Clock
+    block: Block

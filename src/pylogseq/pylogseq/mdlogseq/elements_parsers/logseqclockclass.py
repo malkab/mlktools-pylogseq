@@ -1,13 +1,10 @@
 import sys
 import os
 
-# Add the parent directory of the current file to the system path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
 from marko import inline
 from datetime import datetime
-from ..exceptions.errorclock import ErrorClock
-from clock import Clock
+from pylogseq.mdlogseq.exceptions.errorclock import ErrorClock
+from pylogseq.clock import Clock
 import re
 
 # --------------------------------------
@@ -64,6 +61,7 @@ class LogseqClock(inline.InlineElement):
             ErrorClock: Raises in several scenarios.
         """
         str = match.group(1)
+
         pattern = r"(\s?CLOCK:)\s\[(.*)\s(.*)\s(.*)\]--\[(.*)\s(.*)\s(.*)\] =>  (.*)\n"
 
         m = re.match(pattern, str)
@@ -91,25 +89,7 @@ class LogseqClock(inline.InlineElement):
                 raise ErrorClock("CLOCK error: start time bigger than end time %s > %s" % (
                     start, end))
             else:
-                out: list[Clock] = []
-
-                # Check if the 24h line has been crossed. If so, return
-                # two time stamps, one for each day.
-                if m.group(5) > m.group(2):
-                    end_first_day = datetime.strptime("%s %s" %
-                            (m.group(2), "23:59:59"), '%Y-%m-%d %H:%M:%S')
-
-                    start_second_day = datetime.strptime("%s %s" %
-                            (m.group(5), "00:00:00"), '%Y-%m-%d %H:%M:%S')
-
-                    out.append(Clock(start, end_first_day))
-                    out.append(Clock(start_second_day, end))
-
-                else:
-                    # Everything ok, report parsed result
-                    out.append(Clock(start, end))
-
-                self.target = out
+                self.target = Clock(start, end)
 
         else:
-            self.target = []
+            self.target = None

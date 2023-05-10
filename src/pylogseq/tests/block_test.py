@@ -160,7 +160,7 @@ class TestBlock:
 
         # Store the current ID
         current_id = b.id
-        assert b.id == "30bd5a7dd28f64d3bbf8de9b6e9c03b5b8d8235a07a8080027128ac074ffdb65"
+        assert b.id == "dfb48890f4741b949d69dd7445b58fbcd5ac4862a9a87b84d93baf73b54ca717"
 
         # Add a page without a graph, ID should mutate
         p.path = "page/another_page.md"
@@ -168,7 +168,7 @@ class TestBlock:
 
         assert b.id != current_id
 
-        assert b.id == "4ec5cd50035d7a601785e442f59b802ce6bfcc5a648a54f41d3e67cb73a7a04d"
+        assert b.id == "2721929737c5a3d940f562c9972242613b24be20fbee2685b166a9bd25caa31b"
 
 
     # ----------------------------------
@@ -193,3 +193,51 @@ class TestBlock:
         assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
         assert block.elapsed_time == datetime.timedelta(minutes=20)
         assert block.time_left == datetime.timedelta(hours=9, minutes=40)
+
+
+    # ----------------------------------
+    #
+    # Check title.
+    #
+    # ----------------------------------
+    def test_title(self):
+
+        block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/10.
+            :LOGBOOK:
+            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:00:02
+            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:00:02
+            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:00:02
+            :END:""")
+
+        block.parse()
+
+        assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/10."
+        assert block.highest_priority == "A"
+        assert block.allocated_time == datetime.timedelta(hours=10)
+        assert block.elapsed_time == datetime.timedelta(minutes=50)
+        assert block.time_left == datetime.timedelta(hours=9, minutes=10)
+        assert round(block.time_left_hours, 3) == 9.167
+
+
+    # ----------------------------------
+    #
+    # Check time.
+    #
+    # ----------------------------------
+    def test_time(self):
+
+        block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/1.
+            :LOGBOOK:
+            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+            :END:""")
+
+        block.parse()
+
+        # assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/10."
+        # assert block.highest_priority == "A"
+        assert block.allocated_time == datetime.timedelta(hours=1)
+        assert block.elapsed_time == datetime.timedelta(minutes=50)
+        assert block.time_left == datetime.timedelta(minutes=10)
+        assert round(block.time_left_hours, 3) == 0.167

@@ -18,6 +18,12 @@
     }
   },
 
+  // Add ENVVARS to the container here:
+  // "SOMETHING": "A_VALUE"
+  // "containerEnv": {
+  //   "PYTHONPATH": "${PYTHONPATH};/workspaces/mlktools-pylogseq/src/pylogseq"
+  // },
+
   "mounts": [
     "type=bind,source=${localEnv:HOME}/.mlkctxt,target=/home/user{{ cookiecutter.docker_remote_user }}/.mlkctxt"
   ],

@@ -1,4 +1,6 @@
-from .block import Block
+from pylogseq.block import Block
+from pylogseq.clockblock import ClockBlock
+from pylogseq.clock import Clock
 
 # ----------------------------------
 #
@@ -30,6 +32,31 @@ class ArrayBlock:
 
         # Index for the iterable
         self._index = -1
+
+
+    # ----------------------------------
+    #
+    # Return the list of ClockBlock for all the blocks in this array.
+    #
+    # Optionally filtered by a Clock interval
+    #
+    # ----------------------------------
+    def get_clock_blocks(self, filter_interval: Clock=None) -> list[ClockBlock]:
+        """TODO
+
+        Returns:
+            list[ClockBlock]: TODO
+        """
+        out: list[ClockBlock] = []
+
+        for block in self._blocks:
+            out.extend(block.get_clock_blocks())
+
+        if filter_interval:
+            for clock_block in out:
+                clock_block.intersect(filter_interval)
+
+        return list(filter(lambda cb: cb.clock is not None, out))
 
 
     # ----------------------------------

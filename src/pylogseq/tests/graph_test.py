@@ -26,9 +26,9 @@ class TestGraph:
         g = Graph(path="tests/assets/pylogseq_test_graph")
 
         assert g.path == \
-            "/workspaces/mlktools-pylogseq/src/tests/assets/pylogseq_test_graph"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
         assert g.id == \
-            "5c9465e284e91f4f0bbce4238e6f3b86aaf689e08543b0d79aaeafc3bb5b01b2"
+            "45f7e878af560d4b64a418707c3fcdb6cb92aaabf22a74cd609e1b3fd2764bae"
         assert g.title == "pylogseq_test_graph"
         assert g.pages == []
 
@@ -47,9 +47,9 @@ class TestGraph:
         g = Graph(path="tests/assets/pylogseq_test_graph", title="test_graph")
 
         assert g.path == \
-            "/workspaces/mlktools-pylogseq/src/tests/assets/pylogseq_test_graph"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
         assert g.id == \
-            "5c9465e284e91f4f0bbce4238e6f3b86aaf689e08543b0d79aaeafc3bb5b01b2"
+            "45f7e878af560d4b64a418707c3fcdb6cb92aaabf22a74cd609e1b3fd2764bae"
         assert g.title == "test_graph"
         assert g.pages == []
 
@@ -97,10 +97,10 @@ class TestGraph:
         p1 = g.create_page(path="pages/test_page.md")
 
         assert p1.id == \
-            "ed9d26a61219c158e7b594e84293bd8944c46bb4a0a62e51337e645243185790"
+            "ab788eaff982779654d48f383244166045a6729b431a8c55cdf80a83e0490d79"
         assert p1.path == "pages/test_page.md"
         assert p1.abs_path == \
-            "/workspaces/mlktools-pylogseq/src/tests/assets/pylogseq_test_graph/pages/test_page.md"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/test_page.md"
         assert p1.content is None
         assert p1.title == "test_page"
         assert p1.graph == g
@@ -146,11 +146,11 @@ class TestGraph:
                            content="- # Test page", title="Test page")
 
         assert p4.id == \
-            "4c656219ac9b302421ebf5315384ded4497ae624c809ec9e41039bdec7a25448"
+            "24015266d14bff70b652b07b9ab346bfa15824d23ad0f894bb8046e7c7143564"
         assert p4.path == \
             "tests/assets/pylogseq_test_graph/pages/test_page.md"
         assert p4.abs_path == \
-            "/workspaces/mlktools-pylogseq/src/tests/assets/pylogseq_test_graph/tests/assets/pylogseq_test_graph/pages/test_page.md"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/tests/assets/pylogseq_test_graph/pages/test_page.md"
         assert p4.content == "- # Test page"
         assert p4.title == "Test page"
         assert p4.graph == g
@@ -185,7 +185,7 @@ class TestGraph:
     # ----------------------------------
     def test_get_pages(self):
 
-        g = Graph("pylogseq/tests/assets/pylogseq_test_graph")
+        g = Graph("tests/assets/pylogseq_test_graph")
 
         assert g.pages == []
 
@@ -214,7 +214,7 @@ class TestGraph:
     # ----------------------------------
     def test_parse_iter(self):
 
-        g = Graph("pylogseq/tests/assets/pylogseq_test_graph")
+        g = Graph("tests/assets/pylogseq_test_graph")
 
         assert g.pages == []
 
@@ -264,7 +264,7 @@ class TestGraph:
     # ----------------------------------
     def test_parse(self):
 
-        g = Graph("pylogseq/tests/assets/pylogseq_test_graph")
+        g = Graph("tests/assets/pylogseq_test_graph")
 
         assert g.pages == []
 
@@ -309,7 +309,7 @@ class TestGraph:
     # ----------------------------------
     def test_get_all_blocks(self):
 
-        g = Graph("pylogseq/tests/assets/pylogseq_test_graph")
+        g = Graph("tests/assets/pylogseq_test_graph")
 
         g.get_pages()
 
@@ -347,7 +347,7 @@ class TestGraph:
     # ----------------------------------
     def test_change_id(self):
 
-        g = Graph("pylogseq/tests/assets/pylogseq_test_graph")
+        g = Graph("tests/assets/pylogseq_test_graph")
 
         g.get_pages()
 

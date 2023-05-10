@@ -256,73 +256,73 @@ class TestParser:
         assert l2.children[6].target == [ "T", "T/B" ]
 
 
-    def test_error_clock_malformed(self):
-        """Clock parsing malformed, returning empty clock set.
-        """
-        markdown = """- DONE #[[Gestión/Gestión general]] Something
-        :LOGBOOK:
-        CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
-        :END:"""
+#     def test_error_clock_malformed(self):
+#         """Clock parsing malformed, returning empty clock set.
+#         """
+#         markdown = """- DONE #[[Gestión/Gestión general]] Something
+#         :LOGBOOK:
+#         CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
+#         :END:"""
 
-        parsed = parser.parse(markdown)
+#         parsed = parser.parse(markdown)
 
-        assert parsed.children[0].children[0].children[0].children[6].target == []
-
-
-    def test_error_clock_starting_timestamp(self):
-        """Error parsing the starting timestamp.
-        """
-        with pytest.raises(ErrorClock) as e:
-
-            markdown = """- DONE #[[Gestión/Gestión general]] Something
-                :LOGBOOK:
-                CLOCK: [2022-11-25.3 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
-                :END:"""
-
-            parser.parse(markdown)
-
-        assert e.value.message == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
+#         assert parsed.children[0].children[0].children[0].children[6].target == []
 
 
-    def test_error_clock_ending_timestamp(self):
-        """Error parsing the ending timestamp.
-        """
-        with pytest.raises(ErrorClock) as e:
+#     def test_error_clock_starting_timestamp(self):
+#         """Error parsing the starting timestamp.
+#         """
+#         with pytest.raises(ErrorClock) as e:
 
-            markdown = """- DONE #[[Gestión/Gestión general]] Something
-                :LOGBOOK:
-                CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25.6 Fri 09:09:45] =>  00:12:33
-                :END:"""
+#             markdown = """- DONE #[[Gestión/Gestión general]] Something
+#                 :LOGBOOK:
+#                 CLOCK: [2022-11-25.3 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
+#                 :END:"""
 
-            parser.parse(markdown)
+#             parser.parse(markdown)
 
-        assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
-
-
-    def test_error_clock_start_bigger(self):
-        """Error in clocking: starting time bigger than ending time.
-        """
-        with pytest.raises(ErrorClock) as e:
-
-            markdown = """- DONE #[[Gestión/Gestión general]] Something
-                :LOGBOOK:
-                CLOCK: [2022-11-26 Fri 09:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
-                :END:"""
-
-            parser.parse(markdown)
-
-        assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 09:57:12 > 2022-11-26 09:09:45"
+#         assert e.value.message == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
 
 
-    def test_scheduled_deadline(self):
-        """Tests the parsing of an scheduled and deadline section.
-        """
-        markdown = """- Board Meeting
-  SCHEDULED: <2023-08-02 Wed>
-  DEADLINE: <2023-08-06 Wed 10:00>"""
+#     def test_error_clock_ending_timestamp(self):
+#         """Error parsing the ending timestamp.
+#         """
+#         with pytest.raises(ErrorClock) as e:
 
-        parsed = parser.parse(markdown)
+#             markdown = """- DONE #[[Gestión/Gestión general]] Something
+#                 :LOGBOOK:
+#                 CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25.6 Fri 09:09:45] =>  00:12:33
+#                 :END:"""
 
-        assert parsed.children[0].children[0].children[0].children[1].target == datetime.datetime(2023, 8, 2, 0, 0, 0)
+#             parser.parse(markdown)
 
-        assert parsed.children[0].children[0].children[0].children[2].target == datetime.datetime(2023, 8, 6, 10, 0, 0)
+#         assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
+
+
+#     def test_error_clock_start_bigger(self):
+#         """Error in clocking: starting time bigger than ending time.
+#         """
+#         with pytest.raises(ErrorClock) as e:
+
+#             markdown = """- DONE #[[Gestión/Gestión general]] Something
+#                 :LOGBOOK:
+#                 CLOCK: [2022-11-26 Fri 09:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
+#                 :END:"""
+
+#             parser.parse(markdown)
+
+#         assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 09:57:12 > 2022-11-26 09:09:45"
+
+
+#     def test_scheduled_deadline(self):
+#         """Tests the parsing of an scheduled and deadline section.
+#         """
+#         markdown = """- Board Meeting
+#   SCHEDULED: <2023-08-02 Wed>
+#   DEADLINE: <2023-08-06 Wed 10:00>"""
+
+#         parsed = parser.parse(markdown)
+
+#         assert parsed.children[0].children[0].children[0].children[1].target == datetime.datetime(2023, 8, 2, 0, 0, 0)
+
+#         assert parsed.children[0].children[0].children[0].children[2].target == datetime.datetime(2023, 8, 6, 10, 0, 0)

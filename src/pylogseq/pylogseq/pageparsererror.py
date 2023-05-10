@@ -1,4 +1,4 @@
-from .page import Page
+from pylogseq.page import Page
 
 class PageParserError(Exception):
 

@@ -1,6 +1,6 @@
 import hashlib
-from .forward_declarations import Graph
-from .common import sanitize_path, sanitize_content
+from pylogseq.forward_declarations import Graph
+from pylogseq.common import sanitize_path, sanitize_content
 from enum import Enum
 import os
 import re
@@ -212,4 +212,4 @@ class Page():
         Returns:
             str: La representación del objeto para los print.
         """
-        return(f"Page(path={self.path}, title={self.title}, )")
+        return(f"Page(path={self.path}, title={self.title})")

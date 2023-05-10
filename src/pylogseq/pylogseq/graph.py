@@ -1,11 +1,11 @@
 import os
 import fnmatch
 import hashlib
-from .page import Page
-from .block import Block
+from pylogseq.page import Page
+from pylogseq.block import Block
 from typing import Any
-from .common import sanitize_path
-from .forward_declarations import Graph
+from pylogseq.common import sanitize_path
+from pylogseq.forward_declarations import Graph
 
 """Represents a Logseq Graph.
 """

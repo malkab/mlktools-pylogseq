@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime as dt
+from datetime import timedelta as td
 
 # ----------------------------------
 #
@@ -15,17 +16,60 @@ class Clock:
         exception: description
     """
 
-    def __init__(self, start_time: datetime.datetime, end_time: datetime.datetime):
+    def __init__(self, start: dt, end: dt):
         """Constructor.
 
         Args:
-            start_time (datetime.datetime): Start date.
+            start (datetime.datetime): Start date.
 
-            end_time (datetime.datetime): End date.
+            end (datetime.datetime): End date.
         """
-        self.start_time: datetime.datetime = start_time
-        self.end_time: datetime.datetime = end_time
-        self.elapsed_time: datetime.timedelta = self.end_time - self.start_time
+        self._start: dt = start
+        self._end: dt = end
+        self._elapsed: td = self._end - self._start
+
+
+    # ----------------------------------
+    #
+    # Property start.
+    # Start date.
+    #
+    # ----------------------------------
+    @property
+    def start(self) -> dt:
+        return self._start
+
+    @start.setter
+    def page(self, start: dt) -> None:
+        self._start = start
+        self._elapsed = self._end - self._start
+
+
+    # ----------------------------------
+    #
+    # Property end.
+    # End date.
+    #
+    # ----------------------------------
+    @property
+    def end(self) -> dt:
+        return self._end
+
+    @start.setter
+    def page(self, end: dt) -> None:
+        self._end = end
+        self._elapsed = self._end - self._start
+
+
+    # ----------------------------------
+    #
+    # Property elapsed.
+    # Elapsed time.
+    #
+    # ----------------------------------
+    @property
+    def elapsed(self) -> td:
+        return self._elapsed
 
 
     # ----------------------------------
@@ -34,10 +78,10 @@ class Clock:
     #
     # ----------------------------------
     def __repr__(self):
-        return f"Clock({self.start_time}, {self.end_time})"
+        return f"Clock({self.start}, {self.end})"
 
     def __eq__(self, other) -> bool:
-        if isinstance(other, Clock):
-            return self.start_time == other.start_time and self.end_time == other.end_time
-
-        return NotImplemented
+        return type(self.start) == type(other.start) and \
+                type(self.end) == type(other.end) and \
+                self.start == other.start and \
+                self.end == other.end

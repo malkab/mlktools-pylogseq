@@ -108,9 +108,9 @@ class TestPage:
 
         assert p.path == "tests/assets/pylogseq_test_graph/pages/test_page.md"
         assert p.abs_path == \
-            "/workspaces/mlktools-pylogseq/src/tests/assets/pylogseq_test_graph/tests/assets/pylogseq_test_graph/pages/test_page.md"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/tests/assets/pylogseq_test_graph/pages/test_page.md"
         assert p.id == \
-            "4c656219ac9b302421ebf5315384ded4497ae624c809ec9e41039bdec7a25448"
+            "24015266d14bff70b652b07b9ab346bfa15824d23ad0f894bb8046e7c7143564"
         assert p.content == "- Block"
         assert p.title == "Page title"
         assert isinstance(p.graph, Graph)
@@ -123,7 +123,7 @@ class TestPage:
     #
     # ----------------------------------
     def test_parse(self):
-        g = Graph("pylogseq/tests/assets/pylogseq_test_graph")
+        g = Graph("tests/assets/pylogseq_test_graph")
 
         # A Page object
         p = g.create_page(path="pages/a_page_with_a_title.md")

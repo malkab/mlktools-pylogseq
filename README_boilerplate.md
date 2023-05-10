@@ -15,6 +15,17 @@ This is the boilerplate to create Python standalone programs, like CLI utilities
 Go to the package folder in **src** and run **010**. Built packages go to **dist**.
 
 
+# Installing Wheel Packages
+
+If a package is developed as a library that is used by a program, to build and publish a Python program that uses the package it must be installed as a Wheel package:
+
+```shell
+pip install --force-reinstall whatever.whl
+```
+
+The Python program must use the package from the global repository, not directly from code as it is done when developing.
+
+
 # Publishing Workflow
 
 Steps:

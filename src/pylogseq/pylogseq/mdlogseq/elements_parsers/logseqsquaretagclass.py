@@ -1,5 +1,5 @@
 from marko import inline
-from .processmultitags import processMultiTags
+from pylogseq.mdlogseq.elements_parsers.processmultitags import processMultiTags
 
 class LogseqSquareTag(inline.InlineElement):
 
