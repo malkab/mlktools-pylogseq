@@ -1,22 +1,29 @@
 # Boilerplate for Python Programs
 
-This is the boilerplate to create Python standalone programs, like CLI utilities.
+This is the boilerplate to create Python standalone programs, like CLI utilities, and to create packages. It's a multipurpose boilerplate. It can even mix the creation of a package with the creation of several programs that use it directly.
 
 
-# Management of Virtualenv
+# VSCode Dev Containers
 
-Just:
+**VSCode Dev Containers** are very handy to debug. Run inside **Dev Containers** to run a recurrent Docker container that persist installed packages and other stuff. Use the **exec** script to attach to the Dev Container to use external terminals. Use the integrated environment in VSCode to debug. Use the **python_run** script to run an independent, volatile container. External infrastructure like databases and the like are to be defined in independent Docker Composes whose network the Dev Container attach to. Check the **graph/Toolsresearch/Dev Containers** for more details.
+
+**Virtualenv** use becomes deprecated.
+
+
+# Building Packages
+
+Go to the package folder in **src** and run **010**. Built packages go to **dist**.
+
+
+# Installing Wheel Packages
+
+If a package is developed as a library that is used by a program, to build and publish a Python program that uses the package it must be installed as a Wheel package:
 
 ```shell
-# Activate
-. virtualenv/bin/activate
-
-# List packages
-pip list
-
-# Deactivate
-deactivate
+pip install --force-reinstall whatever.whl
 ```
+
+The Python program must use the package from the global repository, not directly from code as it is done when developing.
 
 
 # Publishing Workflow
@@ -39,18 +46,4 @@ git push --all origin
 git push --tags
 git fetch -av --prune
 git branch -av
-```
-
-
-# DVC Operations
-
-Most used DVC operations:
-
-```shell
-dvc status
-dvc add data
-dvc move old_file_name new_file_name
-dvc commit
-dvc push
-dvc pull
 ```
