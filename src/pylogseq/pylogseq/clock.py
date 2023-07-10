@@ -1,5 +1,8 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
+from pylogseq.forward_declarations import Clock
+
+# TODO: DOCUMENT
 
 # ----------------------------------
 #
@@ -70,6 +73,30 @@ class Clock:
     @property
     def elapsed(self) -> td:
         return self._elapsed
+
+
+    # ----------------------------------
+    #
+    # Modify the clock member with the intersection with another Clock object.
+    #
+    # ----------------------------------
+    def intersect(self, clock: Clock) -> Clock:
+        """TODO
+
+        Args:
+            clock (Clock): _description_
+        """
+        start1, end1 = self.start, self.end
+        start2, end2 = clock.start, clock.end
+
+        # Find the intersection
+        start_intersect = max(start1, start2)
+        end_intersect = min(end1, end2)
+
+        if start_intersect < end_intersect:
+            return Clock(start_intersect, end_intersect)
+        else:
+            return None
 
 
     # ----------------------------------

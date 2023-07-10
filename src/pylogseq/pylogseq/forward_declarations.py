@@ -1,6 +1,10 @@
 from typing import Any, Protocol
 import datetime
 
+# TODO: DOCUMENT
+# TODO: ELIMINAR DE AQUÍ TODAS AQUELLAS DECLARACIONES QUE NO SEAN NECESARIAS
+# TODO: VER DÓNDE SE ESTÁN USANDO
+
 # ----------------------------------
 #
 # Forward declarations.

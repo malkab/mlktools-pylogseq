@@ -4,6 +4,8 @@
 #
 # --------------------------------------
 
+# TODO: DOCUMENT
+
 class ErrorClock(Exception):
 
   message: str = None

@@ -2,6 +2,8 @@ from marko import Markdown
 from marko.block import Document
 from pylogseq.mdlogseq.logseqparse import LogseqParse
 
+# TODO: DOCUMENT
+
 class Parser:
   """This is the parser class. It parses markdown that contains specific
   Logseq syntax and returns a tree of parsed objects.

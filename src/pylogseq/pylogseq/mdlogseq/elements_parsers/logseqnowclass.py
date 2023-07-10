@@ -1,6 +1,8 @@
 from marko import inline
 from re import Match
 
+# TODO: DOCUMENT
+
 class LogseqNow(inline.InlineElement):
   """Parser element for Logseq NOW mark."""
 

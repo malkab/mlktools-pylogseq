@@ -1,6 +1,6 @@
-from pylogseq import Block, Page, Graph
+from pylogseq import Block, Clock
 import datetime
-from pytest import raises
+import pytest
 
 blockExample = """
 
@@ -39,6 +39,7 @@ blockExampleSanitized = """- DONE [#C] #A/B/C [[A/B/D]] #[[Composed tags]] Block
         de EL PAÍS trabajó en medios como Público, El Mundo, La Voz de Galicia o la
         Agencia Efe."""
 
+#@pytest.mark.skip
 class TestBlock:
 
     # ----------------------------------
@@ -54,8 +55,6 @@ class TestBlock:
         b = Block()
 
         assert b.content is None
-        assert b.page is None
-        assert b.order_in_page is None
         assert b.tags == []
         assert b.highest_priority is None
         assert b.done is False
@@ -66,19 +65,12 @@ class TestBlock:
         assert b.allocated_time is None
         assert b.scheduled is None
         assert b.deadline is None
-        assert b.elapsed_time is None
-        assert b.time_left is None
         assert b.title is None
-
-        with raises(Exception, match="Can't compute ID for Block since content is None"):
-            b.id
 
         # Optional content
         b = Block(content="- A block")
 
         assert b.content == "- A block"
-        assert b.page is None
-        assert b.order_in_page is None
         assert b.tags == []
         assert b.highest_priority is None
         assert b.done is False
@@ -89,87 +81,7 @@ class TestBlock:
         assert b.allocated_time is None
         assert b.scheduled is None
         assert b.deadline is None
-        assert b.elapsed_time is None
-        assert b.time_left is None
         assert b.title == "A block"
-
-        with raises(Exception, match="Can't compute ID for Block since order_in_page is None"):
-            b.id
-
-        # Optional page
-        p = Page()
-        b = Block(page=p)
-
-        assert b.content is None
-        assert isinstance(b.page, Page)
-        assert b.order_in_page is None
-        assert b.tags == []
-        assert b.highest_priority is None
-        assert b.done is False
-        assert b.later is False
-        assert b.now is False
-        assert b.priorities == []
-        assert b.logbook == []
-        assert b.allocated_time is None
-        assert b.scheduled is None
-        assert b.deadline is None
-        assert b.elapsed_time is None
-        assert b.time_left is None
-        assert b.title is None
-
-        with raises(Exception, match="Can't compute ID for Block since content is None"):
-            b.id
-
-        # Optional order in page
-        b = Block(order_in_page=0)
-
-        assert b.content is None
-        assert b.page is None
-        assert b.order_in_page == 0
-        assert b.tags == []
-        assert b.highest_priority is None
-        assert b.done is False
-        assert b.later is False
-        assert b.now is False
-        assert b.priorities == []
-        assert b.logbook == []
-        assert b.allocated_time is None
-        assert b.scheduled is None
-        assert b.deadline is None
-        assert b.elapsed_time is None
-        assert b.time_left is None
-        assert b.title is None
-
-        with raises(Exception, match="Can't compute ID for Block since content is None"):
-            b.id
-
-        # Full constructor
-
-
-    # ----------------------------------
-    #
-    # Test mutating ID.
-    #
-    # ----------------------------------
-    def test_mutating_id(self):
-
-        # Bare constructor
-        g = Graph(path="a_graph")
-        p = Page(path="page/a_page.md", graph=g)
-        b = Block(content="- A block", order_in_page=0, page=p)
-
-        # Store the current ID
-        current_id = b.id
-        assert b.id == "dfb48890f4741b949d69dd7445b58fbcd5ac4862a9a87b84d93baf73b54ca717"
-
-        # Add a page without a graph, ID should mutate
-        p.path = "page/another_page.md"
-        b.page = p
-
-        assert b.id != current_id
-
-        assert b.id == "2721929737c5a3d940f562c9972242613b24be20fbee2685b166a9bd25caa31b"
-
 
     # ----------------------------------
     #
@@ -191,8 +103,6 @@ class TestBlock:
 
         assert block.scheduled == datetime.datetime(2021, 1, 1, 10, 0)
         assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
-        assert block.elapsed_time == datetime.timedelta(minutes=20)
-        assert block.time_left == datetime.timedelta(hours=9, minutes=40)
 
 
     # ----------------------------------
@@ -214,9 +124,6 @@ class TestBlock:
         assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/10."
         assert block.highest_priority == "A"
         assert block.allocated_time == datetime.timedelta(hours=10)
-        assert block.elapsed_time == datetime.timedelta(minutes=50)
-        assert block.time_left == datetime.timedelta(hours=9, minutes=10)
-        assert round(block.time_left_hours, 3) == 9.167
 
 
     # ----------------------------------
@@ -226,18 +133,61 @@ class TestBlock:
     # ----------------------------------
     def test_time(self):
 
-        block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/1.
+        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
-            :END:""")
+            :END:
+            - [#B] aaa""")
 
         block.parse()
 
-        # assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/10."
-        # assert block.highest_priority == "A"
-        assert block.allocated_time == datetime.timedelta(hours=1)
-        assert block.elapsed_time == datetime.timedelta(minutes=50)
-        assert block.time_left == datetime.timedelta(minutes=10)
-        assert round(block.time_left_hours, 3) == 0.167
+        assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1"
+        assert block.tags == [ "S", "S/1", "T", "T/2" ]
+        assert block.done is False
+        assert block.later is False
+        assert block.now is False
+        assert block.priorities == [ "A", "B" ]
+        assert block.highest_priority == "A"
+        assert block.allocated_time == datetime.timedelta(hours=2)
+        assert block.current_time == datetime.timedelta(hours=1)
+
+
+    # ----------------------------------
+    #
+    # Check clock intersections.
+    #
+    # ----------------------------------
+    def test_clock_intersection(self):
+
+        clock: Clock = Clock(datetime.datetime(2023,5,10,11,25), datetime.datetime(2023,5,10,13,15))
+
+        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1
+            :LOGBOOK:
+            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+            :END:
+            - [#B] aaa""")
+
+        block.parse()
+
+        assert block.intersect_clock(clock) == [
+            Clock(datetime.datetime(2023, 5, 10, 11, 25), datetime.datetime(2023, 5, 10, 11, 30)),
+            Clock(datetime.datetime(2023, 5, 10, 13, 0), datetime.datetime(2023, 5, 10, 13, 15))
+        ]
+
+        clock: Clock = Clock(datetime.datetime(2023, 2, 10, 11, 25), datetime.datetime(2023, 2, 10, 13, 15))
+
+        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1
+            :LOGBOOK:
+            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+            :END:
+            - [#B] aaa""")
+
+        block.parse()
+
+        assert block.intersect_clock(clock) == []

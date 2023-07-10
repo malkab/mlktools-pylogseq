@@ -1,6 +1,8 @@
 from marko import inline
 from pylogseq.mdlogseq.elements_parsers.processmultitags import processMultiTags
 
+# TODO: DOCUMENT
+
 class LogseqSquareTag(inline.InlineElement):
 
   pattern = r"\[\[(\b.+?\b)\]\]"

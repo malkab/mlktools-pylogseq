@@ -1,9 +1,9 @@
-import hashlib
-from pylogseq.forward_declarations import Graph
-from pylogseq.common import sanitize_path, sanitize_content
-from enum import Enum
+from pylogseq.block import Block
+from pylogseq.pageparsererror import PageParserError
 import os
 import re
+
+# TODO: DOCUMENT
 
 
 # --------------------------------------
@@ -12,50 +12,28 @@ import re
 #
 # --------------------------------------
 class Page():
-    """
-    Docstring
-
-    Attributes
-    ----------
-    exposure : float
-        Exposure in seconds.
-
-    Methods
-    -------
-    colorspace(c='rgb')
-        Represent the photo in the given colorspace.
-    gamma(n=1.0)
-        Change the photo's gamma exposure.
-    """
 
     # --------------------------------------
     #
     # Constructor.
     #
     # --------------------------------------
-    def __init__(self, path: str=None, content: str=None, title: str=None,
-                 graph: Graph=None):
+    def __init__(self, path: str=None, content: str=None, title: str=None):
+        """Contructor.
+
+        Args:
+            path (str, optional): Path, absolute or relative. Defaults to None.
+            content (str, optional): Content. Defaults to None.
+            title (str, optional): Title. Defaults to None.
         """
-        Docstring
 
-        Parameters
-        ----------
-        var : type
-            Doc
 
-        Returns
-        -------
-        type
-            Doc
-        """
-        from .block import Block
-        from .graph import Graph
-
-        self.path: str = sanitize_path(path)
+        self.path: str = os.path.abspath(
+            os.path.normpath(path)) if path else None
         """The path to the page's file.
         """
 
-        self.content: str = sanitize_content(content) if content else None
+        self.content: str = content.strip("\n").strip() if content else None
         """The page's Markdown content.
         """
 
@@ -65,59 +43,6 @@ class Page():
         if path is given, None otherwise. This member can be overrided if
         the page contains a title:: property block.
         """
-
-        self.graph: Graph = graph
-        """The graph this page belongs to.
-        """
-
-        self.blocks: list[Block] = []
-        """List of parsed blocks belonging to this page. Populated by the
-        parse() method.
-        """
-
-
-    # ----------------------------------
-    #
-    # Property id.
-    # ID of the grap.
-    #
-    # ----------------------------------
-    @property
-    def id(self) -> str:
-        """The hashed ID. It depends on the path and the ID of the parent graph.
-        Child blocks will depend on this too.
-        """
-        if self.path is None:
-             raise Exception("Can't compute ID for Page since path is None")
-
-        try:
-            hash = f"{self.graph.id}{self.path}"
-            hash = hashlib.sha256(hash.encode())
-            return hash.hexdigest()
-        except:
-            raise Exception(f"Can't compute ID for Page: check parent graph exists and that has a valid ID")
-
-    # ----------------------------------
-    #
-    # Property abs_path.
-    # Absolute path of the page, including the path of the graph.
-    #
-    # ----------------------------------
-    @property
-    def abs_path(self) -> str:
-        # Raise exception if the graph's path or the graph itself is None
-        if self.graph is None:
-            raise Exception("Can't compute abs_path for Page since graph is None")
-
-        if self.graph.path is None:
-            raise Exception("Can't compute abs_path for Page since graph.path is None")
-
-        # Raise exception if path is None
-        if self.path is None:
-            raise Exception("Can't compute abs_path for Page since path is None")
-
-        return os.path.join(self.graph.path, self.path) \
-            if self.graph.path and self.path else None
 
 
     # ----------------------------------
@@ -135,10 +60,10 @@ class Page():
         Returns:
             any: The parsed document.
         """
-        from .pageparsererror import PageParserError
-        from .block import Block
 
         blocks: list[str] = self.content.split("\n- ")
+
+        out: list[Block] = []
 
         # Check for the first block to be title:: or filter::
         b0 = blocks[0]
@@ -161,18 +86,16 @@ class Page():
 
             # Try to parse the block
             try:
-                b = Block(content=f"- {block_clean}", page=self)
+                b = Block(content=f"- {block_clean}")
                 b.parse()
-
-                # Add the block to the page
-                b.page = self
-                b.order_in_page = len(self.blocks)
-                self.blocks.append(b)
+                out.append(b)
 
             except Exception as e:
                 raise PageParserError(
                     f"Error parsing block in page {self.path}: {e}",
                     e, self, block_clean)
+
+        return out
 
 
     # --------------------------------------
@@ -194,9 +117,10 @@ class Page():
         type
             Page
         """
+
         # Read the page file
-        with open(self.abs_path, "r") as f:
-            self.content = sanitize_content(f.read())
+        with open(self.path, "r") as f:
+            self.content = (f.read()).strip("\n").strip()
 
             return self
 

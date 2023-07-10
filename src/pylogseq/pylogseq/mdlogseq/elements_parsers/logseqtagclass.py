@@ -2,6 +2,8 @@ from marko import inline
 from pylogseq.mdlogseq.elements_parsers.processmultitags import processMultiTags
 from re import Match
 
+# TODO: DOCUMENT
+
 class LogseqTag(inline.InlineElement):
   """Parser element for Logseq simple #A tag."""
 

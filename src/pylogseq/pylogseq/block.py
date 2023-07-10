@@ -1,16 +1,17 @@
 """This class takes a top block (the ones starting by "- " in text read from a
 Logseq page and parses it into Markdown, analyzing everything.
+
+Child blocks are not parsed separately, they are part of the parent block.
+
+TODO: THIS CLASS HAS BEEN DOCUMENTED.
 """
 
 import re
 import marko
 import datetime
 from typing import Any
-import hashlib
-from pylogseq.common import sanitize_content
 from pylogseq.parser import Parser
 from pylogseq.clock import Clock
-from pylogseq.forward_declarations import ClockBlock, Page
 from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
 from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
 from pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
@@ -30,15 +31,15 @@ from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadlin
 #
 # ----------------------------------
 class Block():
-    """A class to represent a top level block.
+    """A class to represent a top level block in a page. Subblocks are processed
+    as part of this block but not parsed on separate ones. We are only
+    interested in top level ones.
 
     Attributes:
-        tags (list[str]):
-            List of unique tags found in the block.
         content (str):
             Sanitized content of the block, in plain str, suitable for moving.
-        content_hash (str):
-            The hash of the sanitized content.
+        tags (list[str]):
+            List of unique tags found in the block.
         highest_priority (str):
             The highest priority found in the block.
         done (bool):
@@ -47,17 +48,28 @@ class Block():
             Is the block marked as later?
         now (bool):
             Is the block marked as now?
-        words (list[str]):
-            List of unique words found in the block (subject to exclusion).
         priorities (list[str]):
             Unique priorities found in the block.
-        logbook (list[Any]):
-            List of LogBook entries found in the block.
-        excluded_words (list[str]):
-            The list of excluded words for finding unquiue words.
+        logbook (list[Clock]):
+            List of LogBook entries found in the block, as Clock objects.
+        allocated_time (int):
+            Time allocated in the SCRUM Backlog, in the T tag.
+        current_time (int):
+            Time allocated in the SCRUM Current, in the S tag.
+        scheduled (datetime.datetime):
+            A scheduled date for the block, in the SCHEDULED tag.
+        deadline (datetime.datetime):
+            A deadline date for the block, in the DEADLINE tag.
+        title (str):
+            The title of the block, the first line of the content.
 
     Raises:
-        Exception: _description_
+        Exception:
+            If the block content is empty.
+        Exception:
+            If the allocated time is invalid.
+        Exception:
+            If the current time is invalid.
     """
 
     # ----------------------------------
@@ -65,30 +77,17 @@ class Block():
     # Constructor.
     #
     # ----------------------------------
-    def __init__(self, content: str=None, page: Page=None,
-                 order_in_page: int=None):
+    def __init__(self, content: str=None):
         """Constructor.
 
         Args:
             content (str):
                 The block's content in a plain str. This will be parsed by the
                 Markdown parser.
-            excluded_words (list[str], optional):
-                List of words to filter in the list of unique words. Defaults to
-                [].
         """
-        from .page import Page
 
-        self.content: str = sanitize_content(content) if content else None
+        self.content: str = content.strip("\n").strip() if content else None
         """Sanitized content of the block. Content for a block must start with '- '.
-        """
-
-        self.page: Page = page
-        """The page this block belongs to.
-        """
-
-        self.order_in_page = order_in_page
-        """The order in the page this block is in.
         """
 
         self.tags: list[str] = []
@@ -123,6 +122,10 @@ class Block():
         """The allocated time for the block found in T tags.
         """
 
+        self.current_time: int = None
+        """The time in S tags.
+        """
+
         self.scheduled: datetime.datetime = None
         """The scheduled date for the block.
         """
@@ -131,58 +134,10 @@ class Block():
         """The deadline date for the block.
         """
 
-        self.elapsed_time: datetime.timedelta = None
-        """The elapsed time for the block as the sum of the logbook entries.
-        """
-
-        self.time_left: datetime.timedelta = None
-        """The time left for the block as the difference between the allocated
-        time and the sum of the elapsed times in logbook entries.
-        """
-
         self.title: str = content.split("\n")[0].strip("- ").strip() if content \
             else None
         """The title of the block, the first line of the content, without '-'.
         """
-
-
-    # ----------------------------------
-    #
-    # Property id.
-    # ID of the block.
-    #
-    # ----------------------------------
-    @property
-    def id(self) -> str:
-        """The hashed ID. It depends on the path of the parent page and the
-        content of the block.
-        """
-        if self.content is None:
-            raise Exception("Can't compute ID for Block since content is None")
-
-        if self.order_in_page is None:
-            raise Exception("Can't compute ID for Block since order_in_page is None")
-
-        try:
-            hash = f"{self.page.id}{self.content}{self.order_in_page}"
-            hash = hashlib.sha256(hash.encode())
-            return hash.hexdigest()
-        except(Exception) as e:
-            raise Exception(f"Can't compute ID for Block: check parent page exists and that has a valid ID")
-
-
-    # ----------------------------------
-    #
-    # Property time_left_hours.
-    # Get the time_left as a value in hours.
-    #
-    # ----------------------------------
-    @property
-    def time_left_hours(self) -> float:
-        if self.time_left is not None:
-            return self.time_left.total_seconds() / 3600.0
-        else:
-            return None
 
 
     # ----------------------------------
@@ -195,9 +150,14 @@ class Block():
         anidated blocks.
 
         Raises:
-            Exception: Raises an exception if the block's content is empty.
-            Exception: Raises an exception if the allocated time in T tags
-                cannot be processed.
+            Exception:
+                Raises an exception if the block's content is empty.
+            Exception:
+                Raises an exception if the allocated time in T tags cannot be
+                processed.
+            Exception:
+                Raises an exception if the current time in S tags cannot be
+                processed.
         """
 
         if not self.content:
@@ -226,12 +186,20 @@ class Block():
                 time_tag = int(re.sub(r"\D", "", time_tag))
                 self.allocated_time = datetime.timedelta(hours=time_tag)
 
-                # Check if there is are clocked time
-                if self.elapsed_time is not None:
-                    self.time_left = self.allocated_time - self.elapsed_time
-
             except:
                 raise Exception("Invalid allocated time tag: " + time_tag)
+
+        # Check if there is an allocated SCRUM current time tag S
+        if "S" in self.tags:
+
+            time_tag = list(filter(lambda x: x.startswith("S/"), self.tags))[0]
+
+            try:
+                time_tag = int(re.sub(r"\D", "", time_tag))
+                self.current_time = datetime.timedelta(hours=time_tag)
+
+            except:
+                raise Exception("Invalid current time tag: " + time_tag)
 
 
     # ----------------------------------
@@ -246,10 +214,6 @@ class Block():
         Args:
             item (Any):
                 A Markdown parsed object.
-
-        Raises:
-            Exception:
-                Raises an exception if a type of block item is unprocessable.
         """
         if \
             isinstance(item, marko.block.Document) or \
@@ -274,15 +238,6 @@ class Block():
 
         elif isinstance(item, LogseqClock):
             if item.target:
-                if self.elapsed_time is None:
-                    self.elapsed_time = item.target.elapsed
-                else:
-                    self.elapsed_time += item.target.elapsed
-
-                # Recalculate time left
-                if self.allocated_time is not None:
-                    self.time_left = self.allocated_time - self.elapsed_time
-
                 self.logbook.append(item.target)
 
         elif isinstance(item, LogseqLater):
@@ -317,19 +272,28 @@ class Block():
 
     # ----------------------------------
     #
-    # Expand this block making copies of it for each logbook entry.
+    # Clock block intersections.
     #
     # ----------------------------------
-    def get_clock_blocks(self) -> list[ClockBlock]:
+    def intersect_clock(self, clock: Clock) -> list[Clock]:
+        """Returns a list of Clock objects that are the intersections of the
+        clocks in this block with the given clock interval.
 
-        from pylogseq.clockblock import ClockBlock
+        Args:
+            clock (Clock):
+                The Clock interval to compute intersections with.
 
-        tuples = []
+        Returns:
+            list[Clock]:
+                The list of intersections of Clock objects in the block
+                with the given clock interval.
+        """
 
-        for logbook_entry in self.logbook:
-            tuples.append(ClockBlock(logbook_entry, self))
+        # Clock intersection
+        clocks: list[Clock] = [ c.intersect(clock) for c in self.logbook ]
 
-        return tuples
+        # Purge Nones
+        return [ c for c in clocks if c is not None ]
 
 
     # ----------------------------------
