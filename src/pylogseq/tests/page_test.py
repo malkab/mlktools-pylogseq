@@ -4,6 +4,8 @@ from pylogseq.graph import Graph
 from pylogseq.parser import Parser
 import pytest
 
+import os
+
 
 # @pytest.mark.skip
 class TestPage:
@@ -26,10 +28,10 @@ class TestPage:
         assert p.title is None
 
         # Optional path
-        p = Page(path="pages/test_page.md")
+        p = Page(path="tests/assets/pylogseq_test_graph/pages/test_page.md")
 
         assert p.path == \
-            "/workspaces/mlktools-pylogseq/src/pylogseq/pages/test_page.md"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/test_page.md"
 
         assert p.content is None
         assert p.title == "test_page"

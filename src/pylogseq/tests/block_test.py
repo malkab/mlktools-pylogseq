@@ -52,7 +52,7 @@ class TestBlock:
         """
 
         # Bare constructor
-        b = Block()
+        b: Block = Block()
 
         assert b.content is None
         assert b.tags == []
@@ -61,11 +61,13 @@ class TestBlock:
         assert b.later is False
         assert b.now is False
         assert b.priorities == []
-        assert b.logbook == []
+        assert b.clocks == []
         assert b.allocated_time is None
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title is None
+        assert b.total_elapsed_time == datetime.timedelta(0)
+        assert b.remaining_time == None
 
         # Optional content
         b = Block(content="- A block")
@@ -77,11 +79,13 @@ class TestBlock:
         assert b.later is False
         assert b.now is False
         assert b.priorities == []
-        assert b.logbook == []
+        assert b.clocks == []
         assert b.allocated_time is None
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title == "A block"
+        assert b.total_elapsed_time == datetime.timedelta(0)
+        assert b.remaining_time == None
 
     # ----------------------------------
     #
@@ -103,6 +107,8 @@ class TestBlock:
 
         assert block.scheduled == datetime.datetime(2021, 1, 1, 10, 0)
         assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
+        assert block.total_elapsed_time == datetime.timedelta(seconds=1200)
+        assert block.remaining_time == datetime.timedelta(seconds=34800)
 
 
     # ----------------------------------
@@ -124,6 +130,8 @@ class TestBlock:
         assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/10."
         assert block.highest_priority == "A"
         assert block.allocated_time == datetime.timedelta(hours=10)
+        assert block.total_elapsed_time == datetime.timedelta(seconds=3000)
+        assert block.remaining_time == datetime.timedelta(seconds=33000)
 
 
     # ----------------------------------
@@ -152,6 +160,8 @@ class TestBlock:
         assert block.highest_priority == "A"
         assert block.allocated_time == datetime.timedelta(hours=2)
         assert block.current_time == datetime.timedelta(hours=1)
+        assert block.total_elapsed_time == datetime.timedelta(seconds=3000)
+        assert block.remaining_time == datetime.timedelta(seconds=4200)
 
 
     # ----------------------------------

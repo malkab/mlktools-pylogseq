@@ -1,9 +1,26 @@
+# Building the Wheel Package
+
+Run the **010** script to build the package and install it with PIP. This will make it available to any companion CLI program, for example.
+
+The Wheel package **.whl** will be stored at **dist** folder.
+
+
 # Access PyDoc Documentation
 
-Navigate to the package or **tests** folder and run **python -m pydoc -b**. Do this in the VSC terminal. A browser should open with the documentation.
+Navigate to the package folder and run **python3 -m pydoc -b**. Do this in the VSC terminal. A browser should open with the documentation.
 
 
 # Testing the Package
+
+**NOTICE:** run always the package folder, right above the **tests** and the package folder, and configure paths to assets accordingly. If not, the watching will not affect the source files.
+
+Tests access the package assets directly this way:
+
+```python
+from package import Something
+
+# TESTS HERE
+```
 
 To run tests:
 
@@ -48,7 +65,6 @@ class TestA:
     """_summary_
     """
 
-    @pytest.mark.skip
     def test_b(self):
         """Another test.
         """

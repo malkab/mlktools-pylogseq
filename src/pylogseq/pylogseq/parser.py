@@ -17,8 +17,8 @@ class Parser:
 
     Returns:
         marko.block.Document:
-          This type has several critical members, being the most important one
-          children, where the parsed tree is stored.
+            This type has several critical members, being the most important one
+            children, where the parsed tree is stored.
     """
     parser = Markdown(extensions=[LogseqParse])
 

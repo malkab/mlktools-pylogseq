@@ -72,6 +72,7 @@ class Block():
             If the current time is invalid.
     """
 
+
     # ----------------------------------
     #
     # Constructor.
@@ -114,15 +115,15 @@ class Block():
         """Unique priorities found in the block.
         """
 
-        self.logbook: list[Any] = []
-        """List of LogBook entries found in the block.
+        self.clocks: list[Clock] = []
+        """List of LogBook entries found in the block, as Clock objects.
         """
 
-        self.allocated_time: int = None
+        self.allocated_time: datetime.timedelta = None
         """The allocated time for the block found in T tags.
         """
 
-        self.current_time: int = None
+        self.current_time: datetime.timedelta = None
         """The time in S tags.
         """
 
@@ -138,6 +139,48 @@ class Block():
             else None
         """The title of the block, the first line of the content, without '-'.
         """
+
+
+    # ----------------------------------
+    #
+    # Total elapsed time property.
+    #
+    # ----------------------------------
+    @property
+    def total_elapsed_time(self) -> datetime.timedelta:
+        """Total elapsed time in the clock blocks.
+
+        Returns:
+            datetime.timedelta:
+                Total elapsed time in the clock blocks.
+        """
+        total: datetime.timedelta = datetime.timedelta(0)
+
+        for clock in self.clocks:
+            total += clock.elapsed
+
+        return total
+
+
+    # ----------------------------------
+    #
+    # Remaining time in block, if any, T - elapsed time.
+    #
+    # ----------------------------------
+    @property
+    def remaining_time(self) -> datetime.timedelta:
+        """Returns the remaining time in the block, given the block has
+        allocated time as T tag. Can be negative. If there is no allocated time
+        in the block, returns None.
+
+        Returns:
+            datetime.timedelta:
+                Remaining time in the block.
+        """
+        if self.allocated_time:
+            return self.allocated_time - self.total_elapsed_time
+        else:
+            return None
 
 
     # ----------------------------------
@@ -238,7 +281,7 @@ class Block():
 
         elif isinstance(item, LogseqClock):
             if item.target:
-                self.logbook.append(item.target)
+                self.clocks.append(item.target)
 
         elif isinstance(item, LogseqLater):
             self.later = True
@@ -286,11 +329,12 @@ class Block():
         Returns:
             list[Clock]:
                 The list of intersections of Clock objects in the block
-                with the given clock interval.
+                with the given clock interval. Returns an empty list if no
+                collisions at all.
         """
 
         # Clock intersection
-        clocks: list[Clock] = [ c.intersect(clock) for c in self.logbook ]
+        clocks: list[Clock] = [ c.intersect(clock) for c in self.clocks ]
 
         # Purge Nones
         return [ c for c in clocks if c is not None ]

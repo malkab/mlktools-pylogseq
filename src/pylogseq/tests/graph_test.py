@@ -18,17 +18,11 @@ class TestGraph:
 
         assert g.path is None
 
-        # Optional path
-        g = Graph(path="tests/assets/pylogseq_test_graph")
-
-        assert g.path == \
-            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
-
         # Full, relative path
-        g = Graph(path="tests/assets/pylogseq_test_graph")
+        g = Graph(path="tests/assets/pylogseq_test_graph/pages/test_page.md")
 
         assert g.path == \
-            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
+            "/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/test_page.md"
 
         # Full, full path
         g = Graph(
@@ -47,7 +41,7 @@ class TestGraph:
     #@pytest.mark.skip
     def test_get_pages(self):
 
-        g = Graph("tests/assets/pylogseq_test_graph")
+        g = Graph("/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph")
 
         pages = g.get_pages()
 

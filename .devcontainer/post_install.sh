@@ -7,10 +7,10 @@
 #
 # -----------------------------------------------------------------
 # APT installs
-# sudo apt-get update
+sudo apt-get update
 
-# sudo apt-get install -y \
-#   something
+sudo apt-get install -y \
+    git
 
 # sudo apt-get -y upgrade
 
@@ -23,10 +23,11 @@ python -m pip install --upgrade pip
 python -m pip install --upgrade build
 
 pip install -U \
-  marko \
+  marko==2.* \
   pytest \
   pytest-watch \
   pyinstaller \
   typer[all] \
   pandas \
-  jinja2
+  jinja2 \
+  arrow==1.*
