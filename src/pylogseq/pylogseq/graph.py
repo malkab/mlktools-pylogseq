@@ -68,4 +68,4 @@ class Graph():
     #
     # ----------------------------------
     def __repr__(self) -> str:
-        return f"Graph(path={self.path}, title={self.title})"
+        return f"Graph(path={self.path})"

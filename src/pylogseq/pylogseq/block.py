@@ -307,13 +307,5 @@ class Block():
         Returns:
             str: representation of the block.
         """
-        graph_title = "No graph defined"
-        page_title = "No page defined"
 
-        if self.page:
-            page_title = self.page.title
-
-            if self.page.graph:
-                graph_title = self.page.graph.title
-
-        return f"Block({graph_title}, {page_title}, {self.title})"
+        return f"Block({self.title})"
