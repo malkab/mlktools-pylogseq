@@ -8,7 +8,7 @@ blockExample = """
 
 
 
-- DONE [#C] #A/B/C [[A/B/D]] #[[Composed tags]] Blocks title #T/10
+- DONE [#C] #A/B/C [[A/B/D]] #[[Composed tags]] Blocks title
   collapsed:: true
   :LOGBOOK:
   CLOCK: [2023-01-11 Wed 12:39:45]--[2023-01-11 Wed 12:39:49] =>  00:00:04
@@ -26,7 +26,7 @@ blockExample = """
 
 """
 
-blockExampleSanitized = """- DONE [#C] #A/B/C [[A/B/D]] #[[Composed tags]] Blocks title #T/10
+blockExampleSanitized = """- DONE [#C] #A/B/C [[A/B/D]] #[[Composed tags]] Blocks title
     collapsed:: true
     :LOGBOOK:
     CLOCK: [2023-01-11 Wed 12:39:45]--[2023-01-11 Wed 12:39:49] =>  00:00:04
@@ -62,12 +62,12 @@ class TestBlock:
         assert b.now is False
         assert b.priorities == []
         assert b.clocks == []
-        assert b.allocated_time is None
+        assert b.scrum_project is None
+        assert b.scrum_backlog_time is None
+        assert b.scrum_current_time is None
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title is None
-        assert b.total_elapsed_time == datetime.timedelta(0)
-        assert b.remaining_time == None
 
         # Optional content
         b = Block(content="- A block")
@@ -80,12 +80,12 @@ class TestBlock:
         assert b.now is False
         assert b.priorities == []
         assert b.clocks == []
-        assert b.allocated_time is None
+        assert b.scrum_project is None
+        assert b.scrum_backlog_time is None
+        assert b.scrum_current_time is None
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title == "A block"
-        assert b.total_elapsed_time == datetime.timedelta(0)
-        assert b.remaining_time == None
 
     # ----------------------------------
     #
@@ -95,20 +95,15 @@ class TestBlock:
     def test_scheduled_deadline(self):
         """Scheduled and deadline test.
         """
-        block = Block(content="""- A #T/10
+        block = Block(content="""- A
             SCHEDULED: <2021-01-01 Fri 10:00>
             DEADLINE: <2021-01-02 Fri>
-            :LOGBOOK:
-            CLOCK: [2021-01-01 Wed 12:00:00]--[2021-01-01 Wed 12:10:00] =>  00:10:00
-            CLOCK: [2021-01-01 Wed 12:20:00]--[2021-01-01 Wed 12:30:00] =>  00:10:00
-            :END:""")
+            """)
 
         block.parse()
 
         assert block.scheduled == datetime.datetime(2021, 1, 1, 10, 0)
         assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
-        assert block.total_elapsed_time == datetime.timedelta(seconds=1200)
-        assert block.remaining_time == datetime.timedelta(seconds=34800)
 
 
     # ----------------------------------
@@ -118,50 +113,105 @@ class TestBlock:
     # ----------------------------------
     def test_title(self):
 
-        block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/10.
-            :LOGBOOK:
-            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:00:02
-            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:00:02
-            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:00:02
-            :END:""")
+        block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2**""")
 
         block.parse()
 
-        assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/10."
+        assert block.title == "[#A] A block at page **test_2_page** in graph **test_2**"
         assert block.highest_priority == "A"
-        assert block.allocated_time == datetime.timedelta(hours=10)
-        assert block.total_elapsed_time == datetime.timedelta(seconds=3000)
-        assert block.remaining_time == datetime.timedelta(seconds=33000)
+        assert block.scrum_project == None
+        assert block.scrum_backlog_time == None
 
 
     # ----------------------------------
     #
-    # Check time.
+    # Check SCRUM tag.
     #
     # ----------------------------------
-    def test_time(self):
+    def test_scrum(self):
 
-        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1
-            :LOGBOOK:
-            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
-            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
-            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
-            :END:
-            - [#B] aaa""")
+        # Full
+        block: Block = \
+            Block(content="""- A block at page **test_2_page** in graph **test_2** #SC/Test/2 #S/1""")
 
         block.parse()
 
-        assert block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1"
-        assert block.tags == [ "S", "S/1", "T", "T/2" ]
+        assert block.title == "A block at page **test_2_page** in graph **test_2** #SC/Test/2 #S/1"
+        assert block.tags == ['S', 'S/1', 'SC', 'SC/Test', 'SC/Test/2']
         assert block.done is False
         assert block.later is False
         assert block.now is False
-        assert block.priorities == [ "A", "B" ]
-        assert block.highest_priority == "A"
-        assert block.allocated_time == datetime.timedelta(hours=2)
-        assert block.current_time == datetime.timedelta(hours=1)
-        assert block.total_elapsed_time == datetime.timedelta(seconds=3000)
-        assert block.remaining_time == datetime.timedelta(seconds=4200)
+        assert block.priorities == [ ]
+        assert block.highest_priority is None
+        assert block.scrum_project == "Test"
+        assert block.scrum_backlog_time == datetime.timedelta(hours=2)
+        assert block.scrum_current_time == datetime.timedelta(hours=1)
+
+        # No current time assigned
+        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2** #SC/Test/2""")
+
+        block.parse()
+
+        assert block.title == "A block at page **test_2_page** in graph **test_2** #SC/Test/2"
+        assert block.tags == ['SC', 'SC/Test', 'SC/Test/2']
+        assert block.done is False
+        assert block.later is False
+        assert block.now is False
+        assert block.priorities == [ ]
+        assert block.highest_priority is None
+        assert block.scrum_project == "Test"
+        assert block.scrum_backlog_time == datetime.timedelta(hours=2)
+        assert block.scrum_current_time is None
+
+        # Done SCRUM
+        block: Block = Block(content="""- DONE A block at page **test_2_page** in graph **test_2** #SC/Test""")
+
+        block.parse()
+
+        assert block.title == "DONE A block at page **test_2_page** in graph **test_2** #SC/Test"
+        assert block.tags == ['SC', 'SC/Test']
+        assert block.done is True
+        assert block.later is False
+        assert block.now is False
+        assert block.priorities == [ ]
+        assert block.highest_priority is None
+        assert block.scrum_project == "Test"
+        assert block.scrum_backlog_time is None
+        assert block.scrum_current_time is None
+
+        # Current sprint time assigned without SC tag
+        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2** #S/1""")
+
+        with pytest.raises(Exception, match="SCRUM S current time tag found without a project."):
+            block.parse()
+
+        # Malformed SC tag
+        block: Block = Block(
+            content="- [#A] A block at page **test_2_page** in graph **test_2** #SC")
+
+        with pytest.raises(Exception, match="Invalid SC SCRUM tag: SC"):
+            block.parse()
+
+        # SC tag without Backlog or Current time and not DONE
+        block: Block = Block(
+            content="- A block at page **test_2_page** in graph **test_2** #SC/Test")
+
+        with pytest.raises(Exception, match="SCRUM SC tag found without Backlog time in a not DONE block."):
+            block.parse()
+
+        # DONE with Backlog time
+        block: Block = Block(
+            content="- DONE A block at page **test_2_page** in graph **test_2** #SC/Test/2")
+
+        with pytest.raises(Exception, match="SCRUM with Backlog or Current time found in a DONE block."):
+            block.parse()
+
+        # DONE with Current time
+        block: Block = Block(
+            content="- DONE A block at page **test_2_page** in graph **test_2** #SC/Test/2 #S/2")
+
+        with pytest.raises(Exception, match="SCRUM with Backlog or Current time found in a DONE block."):
+            block.parse()
 
 
     # ----------------------------------
@@ -173,13 +223,13 @@ class TestBlock:
 
         clock: Clock = Clock(datetime.datetime(2023,5,10,11,25), datetime.datetime(2023,5,10,13,15))
 
-        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1
+        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2**
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
             :END:
-            - [#B] aaa""")
+            """)
 
         block.parse()
 
@@ -190,13 +240,13 @@ class TestBlock:
 
         clock: Clock = Clock(datetime.datetime(2023, 2, 10, 11, 25), datetime.datetime(2023, 2, 10, 13, 15))
 
-        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2** #T/2 #S/1
+        block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2**
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
             :END:
-            - [#B] aaa""")
+            """)
 
         block.parse()
 

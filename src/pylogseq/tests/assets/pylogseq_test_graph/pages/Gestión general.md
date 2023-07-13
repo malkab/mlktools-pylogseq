@@ -1,8 +1,19 @@
-- El propósito de esta página es simplemente guardar una tarea **Gestión general** para todo el grafo. Esta tarea debe estar siempre en estado **LATER**.
-- LATER Gestión general #[[Gestión general]] #[[Another/tag]] #T/1
-  SCHEDULED: <2023-04-25 Tue>
-  DEADLINE: <2023-04-25 Tue>
+- SCRUM test
+- Current #SC/Test/2 #S/2
   :LOGBOOK:
-  CLOCK: [2023-04-27 Mon 23:00:00]--[2023-04-28 Mon 01:00:00] =>  00:09:30
-  CLOCK: [2023-04-27 Mon 20:00:00]--[2023-04-27 Mon 21:00:00] =>  00:09:30
+  CLOCK: [2023-07-12 Mon 10:00:00]--[2023-07-12 Mon 11:00:00] =>  01:00:00
+  :END:
+- Backlog #SC/Test/1
+  :LOGBOOK:
+  CLOCK: [2023-07-07 Mon 10:00:00]--[2023-07-07 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2023-07-12 Mon 10:00:00]--[2023-07-12 Mon 11:00:00] =>  01:00:00
+  :END:
+- DONE Done #SC/Test
+  :LOGBOOK:
+  CLOCK: [2023-07-07 Mon 10:00:00]--[2023-07-07 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2023-07-10 Mon 10:00:00]--[2023-07-10 Mon 11:00:00] =>  01:00:00
+  :END:
+- Another
+  :LOGBOOK:
+  CLOCK: [2023-07-07 Mon 12:00:00]--[2023-07-07 Mon 13:00:00] =>  01:00:00
   :END:

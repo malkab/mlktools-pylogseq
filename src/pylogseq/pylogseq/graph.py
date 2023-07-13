@@ -64,6 +64,33 @@ class Graph():
 
     # ----------------------------------
     #
+    # Read all pages in graph with an iterator.
+    #
+    # ----------------------------------
+    def parse_iter(self) -> None:
+        """Parses all pages in the graph with an iterator. This must be used in
+        a loop, very useful to check progress in the parsing process, for
+        example:
+
+        ```Python
+        for p, b in graph.parse_iter():
+            print(f"Page {p.title} parsed.")
+            print(f"Number of blocks: {len(b)}"
+        ```
+
+        Yields:
+            Page, list[Block]:
+                Returns the Page that has been parsed and the list of Block
+                that where processed.
+        """
+        for p in self.get_pages():
+            p.read_page_file()
+            blocks = p.parse()
+            yield p, blocks
+
+
+    # ----------------------------------
+    #
     # __repr__
     #
     # ----------------------------------

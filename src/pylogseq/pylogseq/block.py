@@ -3,7 +3,8 @@ Logseq page and parses it into Markdown, analyzing everything.
 
 Child blocks are not parsed separately, they are part of the parent block.
 
-TODO: THIS CLASS HAS BEEN DOCUMENTED.
+TODO: THIS CLASS NEEDS A REVIEW IN DOC AFTER DROPPING THE S AND T OLD TAGS
+FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 """
 
 import re
@@ -35,6 +36,14 @@ class Block():
     as part of this block but not parsed on separate ones. We are only
     interested in top level ones.
 
+    How SCRUM Works
+
+    A block can be given special tags to be used in SCRUM:
+
+    - SC/project/X:         SCRUM Backlog time X for project.
+    - SC/project/X + S/X:   SCRUM Sprint time X for project.
+    - SC/project + DONE:    SCRUM DONE task for project.
+
     Attributes:
         content (str):
             Sanitized content of the block, in plain str, suitable for moving.
@@ -50,12 +59,14 @@ class Block():
             Is the block marked as now?
         priorities (list[str]):
             Unique priorities found in the block.
-        logbook (list[Clock]):
+        clocks (list[Clock]):
             List of LogBook entries found in the block, as Clock objects.
-        allocated_time (int):
-            Time allocated in the SCRUM Backlog, in the T tag.
-        current_time (int):
-            Time allocated in the SCRUM Current, in the S tag.
+        scrum_project (str):
+            The SCRUM project SC tags.
+        scrum_backlog_time (int):
+            The SCRUM Backlog time in SC/Project/X tag.
+        scrum_current_time (int):
+            The SCRUM sprint time in S/X time tags.
         scheduled (datetime.datetime):
             A scheduled date for the block, in the SCHEDULED tag.
         deadline (datetime.datetime):
@@ -67,9 +78,7 @@ class Block():
         Exception:
             If the block content is empty.
         Exception:
-            If the allocated time is invalid.
-        Exception:
-            If the current time is invalid.
+            If the SCRUM tag is invalid.
     """
 
 
@@ -119,12 +128,19 @@ class Block():
         """List of LogBook entries found in the block, as Clock objects.
         """
 
-        self.allocated_time: datetime.timedelta = None
-        """The allocated time for the block found in T tags.
+        self.scrum_project: str = None
+        """The tag that identifies the SCRUM project, if any. It is the second
+        item in a SCRUM S/Project/allocated/sprint tag. Must be present.
         """
 
-        self.current_time: datetime.timedelta = None
-        """The time in S tags.
+        self.scrum_backlog_time: datetime.timedelta = None
+        """The allocated time for the block found in SCRUM tags. It is the third
+        item in a SCRUM S/Project/allocated/sprint tag. Must be present.
+        """
+
+        self.scrum_current_time: datetime.timedelta = None
+        """The sprint time for the block found in SCRUM tags. It is the fourth
+        item in a SCRUM S/Project/allocated/sprint tag. Can be absent.
         """
 
         self.scheduled: datetime.datetime = None
@@ -143,48 +159,6 @@ class Block():
 
     # ----------------------------------
     #
-    # Total elapsed time property.
-    #
-    # ----------------------------------
-    @property
-    def total_elapsed_time(self) -> datetime.timedelta:
-        """Total elapsed time in the clock blocks.
-
-        Returns:
-            datetime.timedelta:
-                Total elapsed time in the clock blocks.
-        """
-        total: datetime.timedelta = datetime.timedelta(0)
-
-        for clock in self.clocks:
-            total += clock.elapsed
-
-        return total
-
-
-    # ----------------------------------
-    #
-    # Remaining time in block, if any, T - elapsed time.
-    #
-    # ----------------------------------
-    @property
-    def remaining_time(self) -> datetime.timedelta:
-        """Returns the remaining time in the block, given the block has
-        allocated time as T tag. Can be negative. If there is no allocated time
-        in the block, returns None.
-
-        Returns:
-            datetime.timedelta:
-                Remaining time in the block.
-        """
-        if self.allocated_time:
-            return self.allocated_time - self.total_elapsed_time
-        else:
-            return None
-
-
-    # ----------------------------------
-    #
     # Parse the block content.
     #
     # ----------------------------------
@@ -196,11 +170,8 @@ class Block():
             Exception:
                 Raises an exception if the block's content is empty.
             Exception:
-                Raises an exception if the allocated time in T tags cannot be
-                processed.
-            Exception:
-                Raises an exception if the current time in S tags cannot be
-                processed.
+                Raises an exception if the SCRUM S tag does not adhere to the
+                S/Project/allocated/sprint format.
         """
 
         if not self.content:
@@ -220,30 +191,74 @@ class Block():
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-        # Check if there is an allocated time tag T
-        if "T" in self.tags:
+        # Check for SC SCRUM TAGS
+        if "SC" in self.tags:
 
-            time_tag = list(filter(lambda x: x.startswith("T/"), self.tags))[0]
-
+            # Try to parse the SCRUM tag
             try:
-                time_tag = int(re.sub(r"\D", "", time_tag))
-                self.allocated_time = datetime.timedelta(hours=time_tag)
+                time_tag = list(filter(lambda x: x.startswith("SC/"), self.tags))
 
-            except:
-                raise Exception("Invalid allocated time tag: " + time_tag)
+                # A default value for tag to make the exception work at except
+                tag = "SC"
 
-        # Check if there is an allocated SCRUM current time tag S
+                # Get the longest tag, which is the most specific
+                tag = sorted(time_tag, key=len)[-1]
+
+                # Use a regex to get the elements S/Project/allocated/sprint
+                # and split them
+                t = re.sub(r"SC/", "", tag)
+                t = t.split("/")
+
+                # Get components. The last one is optional.
+                self.scrum_project = t[0]
+
+                # Check if there is a backlog time
+                self.scrum_backlog_time = datetime.timedelta(hours=int(t[1])) \
+                    if len(t) == 2 else None
+
+            except Exception as e:
+
+                raise Exception("Invalid SC SCRUM tag: " + tag)
+
+        # Check if there is a SCRUM tag S for current time
         if "S" in self.tags:
 
-            time_tag = list(filter(lambda x: x.startswith("S/"), self.tags))[0]
-
+            # Try to parse the SCRUM tag
             try:
-                time_tag = int(re.sub(r"\D", "", time_tag))
-                self.current_time = datetime.timedelta(hours=time_tag)
+                time_tag = list(filter(lambda x: x.startswith("S/"), self.tags))
+
+                # Get the longest tag, which is the most specific
+                tag = sorted(time_tag, key=len)[-1]
+
+                # Use a regex to get the elements S/Project/allocated/sprint
+                # and split them
+                t = re.sub(r"S/", "", tag)
+
+                t = t.split("/")
+
+                # Get components. The last one is optional.
+                self.scrum_current_time = datetime.timedelta(hours=int(t[0]))
 
             except:
-                raise Exception("Invalid current time tag: " + time_tag)
+                raise Exception("Invalid S SCRUM tag: " + tag)
 
+            # Raise exception if a S tag is found without a project
+            if self.scrum_project is None:
+                raise Exception("SCRUM S current time tag found without a project.")
+
+        # Raise exception if SC tag is found without Backlog or current time in
+        # a not DONE block
+        if self.scrum_project is not None and \
+            self.scrum_backlog_time is None and \
+            self.scrum_current_time is None and \
+            not self.done:
+            raise Exception("SCRUM SC tag found without Backlog time in a not DONE block.")
+
+        # Raise exception if there is Backlog or Current time while DONE
+        if (self.scrum_backlog_time is not None or \
+            self.scrum_current_time is not None) and \
+            self.done:
+            raise Exception("SCRUM with Backlog or Current time found in a DONE block.")
 
     # ----------------------------------
     #
