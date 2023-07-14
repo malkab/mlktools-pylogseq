@@ -132,85 +132,80 @@ class TestBlock:
 
         # Full
         block: Block = \
-            Block(content="""- A block at page **test_2_page** in graph **test_2** #SC/Test/2 #S/1""")
+            Block(content="""- SCRUM TEST #P/Client/Project #SCB/2 #SCC/1""")
 
         block.parse()
 
-        assert block.title == "A block at page **test_2_page** in graph **test_2** #SC/Test/2 #S/1"
-        assert block.tags == ['S', 'S/1', 'SC', 'SC/Test', 'SC/Test/2']
+        assert block.title == "SCRUM TEST #P/Client/Project #SCB/2 #SCC/1"
+        assert block.tags == ['P', 'P/Client', 'P/Client/Project', 'SCB', 'SCB/2', 'SCC', 'SCC/1']
         assert block.done is False
         assert block.later is False
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Test"
+        assert block.scrum_project == "Client/Project"
         assert block.scrum_backlog_time == datetime.timedelta(hours=2)
         assert block.scrum_current_time == datetime.timedelta(hours=1)
 
         # No current time assigned
-        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2** #SC/Test/2""")
+        block: Block = Block(content="""- SCRUM TEST #P/Client/Project #SCB/2""")
 
         block.parse()
 
-        assert block.title == "A block at page **test_2_page** in graph **test_2** #SC/Test/2"
-        assert block.tags == ['SC', 'SC/Test', 'SC/Test/2']
+        assert block.title == "SCRUM TEST #P/Client/Project #SCB/2"
+        assert block.tags == ['P', 'P/Client', 'P/Client/Project', 'SCB', 'SCB/2']
         assert block.done is False
         assert block.later is False
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Test"
+        assert block.scrum_project == "Client/Project"
         assert block.scrum_backlog_time == datetime.timedelta(hours=2)
         assert block.scrum_current_time is None
 
         # Done SCRUM
-        block: Block = Block(content="""- DONE A block at page **test_2_page** in graph **test_2** #SC/Test""")
+        block: Block = Block(content="""- DONE SCRUM TEST #P/Client/Project""")
 
         block.parse()
 
-        assert block.title == "DONE A block at page **test_2_page** in graph **test_2** #SC/Test"
-        assert block.tags == ['SC', 'SC/Test']
+        assert block.title == "DONE SCRUM TEST #P/Client/Project"
+        assert block.tags == ['P', 'P/Client', 'P/Client/Project']
         assert block.done is True
         assert block.later is False
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Test"
+        assert block.scrum_project == "Client/Project"
         assert block.scrum_backlog_time is None
         assert block.scrum_current_time is None
 
-        # Current sprint time assigned without SC tag
-        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2** #S/1""")
+        # Incorrect project tag
+        block: Block = Block(content="""- SCRUM TEST #P""")
 
-        with pytest.raises(Exception, match="SCRUM S current time tag found without a project."):
+        with pytest.raises(Exception, match="Invalid Project tag: SCRUM TEST #P"):
             block.parse()
 
-        # Malformed SC tag
-        block: Block = Block(
-            content="- [#A] A block at page **test_2_page** in graph **test_2** #SC")
+        # Current sprint time assigned with SCC without SCB tag
+        block: Block = Block(content="""- SCRUM TEST #SCC/1""")
 
-        with pytest.raises(Exception, match="Invalid SC SCRUM tag: SC"):
+        with pytest.raises(Exception, match="SCRUM SCC tag found without SCB tag: SCRUM TEST #SCC/1"):
             block.parse()
 
-        # SC tag without Backlog or Current time and not DONE
+        # Backlog time assigned without project
+        # Not needed to raise with SCC since SCC cannot exists without SCB
+        # and this exception triggers first.
         block: Block = Block(
-            content="- A block at page **test_2_page** in graph **test_2** #SC/Test")
+            content="- SCRUM TEST #SCB/1")
 
-        with pytest.raises(Exception, match="SCRUM SC tag found without Backlog time in a not DONE block."):
+        with pytest.raises(Exception, match="SCRUM SCB assigned without P tag: SCRUM TEST #SCB/1"):
             block.parse()
 
-        # DONE with Backlog time
-        block: Block = Block(
-            content="- DONE A block at page **test_2_page** in graph **test_2** #SC/Test/2")
+        # Time SCB assigned to DONE
+        # Not needed to raise with SCC since SCC cannot exists without SCB
+        # and this exception triggers first.
+        block: Block = Block(content="- DONE SCRUM TEST #P/Client/Project #SCB/1")
 
-        with pytest.raises(Exception, match="SCRUM with Backlog or Current time found in a DONE block."):
-            block.parse()
-
-        # DONE with Current time
-        block: Block = Block(
-            content="- DONE A block at page **test_2_page** in graph **test_2** #SC/Test/2 #S/2")
-
-        with pytest.raises(Exception, match="SCRUM with Backlog or Current time found in a DONE block."):
+        with pytest.raises(Exception, match="SCRUM tags found in DONE block: DONE SCRUM TEST #P/Client/Project #SCB/1"):
             block.parse()
 
 

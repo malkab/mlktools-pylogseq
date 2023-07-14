@@ -6,6 +6,8 @@ import typer
 import arrow
 from datetime import timedelta as td, datetime as dt
 import statistics
+from rich import print as pprint
+from rich.markup import escape
 from rich.console import Console
 from rich.text import Text
 from rich.table import Table
@@ -30,7 +32,7 @@ app = typer.Typer()
 #
 # ----------------------------------
 @app.command()
-def a(
+def sprint(
     graph_path: str = typer.Argument(..., help="The path of the graph to analyze.")
     # tags: list[str] = typer.Option(None, "--tag", "-t", help="A tag to filter in the tag cloud output.")
 ):
@@ -55,16 +57,20 @@ def a(
                 blocks.extend(bs)
         except PageParserError as e:
             print()
-            print("Error parsing block")
-            print("File: ", e.page.title)
-            print("Error: ", e.original_exception)
-            print("Block:\n", e.block_content)
+            print()
+            pprint(":WARNING: [red bold]Error parsing block[/]")
+            pprint("[bold]File:[/]")
+            print("     " + e.page.title)
+            pprint("[bold]Error:[/]")
+            print("     " + str(e.original_exception))
+            pprint("[bold]Block:[/]")
+            print(e.block_content)
             sys.exit(1)
 
     print()
 
     # Calculate the average speed of the last 4 weeks
-    # TODO: hard coded 4 seamana, posible parámetro
+    # TODO: hard coded 4 semanas, posible parámetro
     # Calculate Arrow spans for the last weeks
     today = arrow.now()
 
@@ -128,7 +134,9 @@ def a(
     if scrum_elapsed_time_weeks != []:
         average_scrum_speed_last_weeks = statistics.mean(scrum_elapsed_time_weeks)
 
-    # Prepare the Pandas DataFrame with the following data:
+    # Prepare the Pandas DataFrame with the following data for blocks that
+    # collides with the current week and/or have P tags (Projects):
+    #
     # - Block title
     # - Block tags
     # - Block SCRUM project
@@ -153,6 +161,8 @@ def a(
     for block in blocks:
 
         # Add the data if the block qualify
+        # TODO: AQUÍ SE ESTÁ FILTRANDO LOS PROJECT Y NO SE ESTÁN CONTANDO LAS
+        # VELOCIDADES DE TAREAS QUE NO TIENEN P EN LA SEMANA, MIRAR
         if block.scrum_project is not None:
             # Some vars
             time_clocked_sprint = td(0)
@@ -194,16 +204,25 @@ def a(
                     time_clocked_sprint
 
             # Check for negative remaining times
-            if data["remaining_backlog_time"] < td(hours=0):
-                data["remaining_backlog_time"] = td(hours=0)
-
-                print(f"WARNING: Block has no more available time in backlog: {block.title}")
-
             if data["remaining_current_time"] < td(hours=0):
                 data["remaining_current_time"] = td(hours=0)
 
-                print(f"WARNING: Block has no more available time in current: {block.title}")
+                pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in sprint
+    Block:                  [bright_black]{str(block.title)}[/]
+    Sprint clocked time:    [bright_black]{dt_to_hours(time_clocked_sprint)}[/]
+    Current time:           [bright_black]{dt_to_hours(block.scrum_current_time)}[/]
+""")
 
+            if data["remaining_backlog_time"] < td(hours=0):
+                data["remaining_backlog_time"] = td(hours=0)
+
+                pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in backlog
+    Block:                  [bright_black]{str(block.title)}[/]
+    Total clocked time:     [bright_black]{dt_to_hours(time_clocked_total)}[/]
+    Backlog time:           [bright_black]{dt_to_hours(block.scrum_backlog_time)}[/]
+""")
+
+            # Add to the dataframe
             dataframe_data.append(data)
 
     # No data?
@@ -214,132 +233,24 @@ def a(
     # Create the DataFrame
     df = pd.DataFrame(dataframe_data)
 
-    print("D: k3k3k", df)
-
-    # # Get total SCRUM times in blocks, but substracting the already
-    # # elapsed time in the clocks, so calculating remaining allocated time.
-    # # Get also the total time spent on tasks this week.
-    # total_t_time = datetime.timedelta(0)
-    # total_s_time = datetime.timedelta(0)
-    # total_sprint_time = datetime.timedelta(0)
-
-    # # Dictionaries to group total allocated, current, and time spent this sprint
-    # # times by SCRUM projects
-    # project_allocated_times = {}
-    # project_current_times = {}
-    # project_week_times = {}
-
-    # # Iterate blocks to look for blocks that has remaining time, the ones that
-    # # has current time and the ones that has a clock colliding with the current
-    # # sprint week
-    # # Get current week span
-    # span = today.span("week")
-    # current_week = Clock(span[0].naive, span[1].naive)
-
-    # # Iterate
-    # for block in blocks:
-
-    #     # Calculate time of the block in this week
-    #     colliding_clocks: list[Clock] = block.intersect_clock(current_week)
-
-    #     # To store the total block time this week
-    #     block_time_this_week = datetime.timedelta(0)
-
-    #     # Aggregate total to the total sprint time and the block time this week
-    #     if len(colliding_clocks) > 0:
-    #         for clock in colliding_clocks:
-    #             total_sprint_time += clock.elapsed
-    #             block_time_this_week += clock.elapsed
-
-    #     # If the block has a SCRUM project, analyze it
-    #     if block.scrum_project is not None:
-
-    #         # If the remaining time is greater than 0, aggregate to the total
-    #         if block.remaining_time > datetime.timedelta(0):
-    #             total_t_time += block.remaining_time
-
-    #             # Aggregate by SCRUM project
-    #             if block.scrum_project not in project_allocated_times:
-    #                 project_allocated_times[block.scrum_project] = datetime.timedelta(0)
-
-    #             project_allocated_times[block.scrum_project] += block.remaining_time
-
-    #         else:
-    #             print(f"WARNING!: Block {block.title} has exceeded the allocated time by {abs(dt_to_hours(block.remaining_time, 1))}")
-
-    #         # Aggregate by SCRUM project the time spent in the block this week
-    #         if block.scrum_project not in project_week_times:
-    #             project_week_times[block.scrum_project] = datetime.timedelta(0)
-
-    #         project_week_times[block.scrum_project] += block_time_this_week
-
-    #         # If the block as an assigned current time, aggregate to the total
-    #         if block.scrum_current_time is not None:
-    #             total_s_time += block.scrum_current_time - block_time_this_week
-
-    #             print("D: k333", total_s_time)
-
-    #             # Aggregate by SCRUM project
-    #             if block.scrum_project not in project_current_times:
-    #                 project_current_times[block.scrum_project] = datetime.timedelta(0)
-
-    #             project_current_times[block.scrum_project] += block.remaining_time
-
-
-
-    # print("D: k3kk3", total_sprint_time)
-
-    # print("D: 3n333", project_week_times)
-
-
-
-
-
-
-
-    # # Print grouping by SCRUM project
-    # keys_t = set(project_allocated_times.keys())
-    # keys_s = set(project_current_times.keys())
-
-    # all_keys = sorted(list(keys_t.union(keys_s)))
-
-    # table = Table(title="SCRUM", title_style="red bold",
-    #               header_style="blue bold", box=box.SIMPLE_HEAD)
-    # table.add_column("Project")
-    # table.add_column("T", justify="center")
-    # table.add_column("S", justify="center")
-
-    # for i in all_keys:
-    #     table.add_row(
-    #         i,
-    #         str(round(dt_to_hours(project_allocated_times[i] if i in project_allocated_times else
-    #                                 datetime.timedelta(0)), 1)),
-    #         str(round(dt_to_hours(project_current_times[i] if i in project_current_times else
-    #                                 datetime.timedelta(0)), 1))
-    #     )
-
-    # console= Console()
-    # console.print(table)
-    # print()
-
     # Print table with total SCRUM times
     totals: pd.DataFrame = df.sum()
 
-    # Get the current week day
-    day_of_week = dt.now().weekday()
-
     print()
 
+    # Rich Console object
+    console= Console()
+
     # Print general analysis
-    table = Table(title="General", title_style="red bold",
+    table = Table(title="SCRUM Summary", title_style="red bold",
                   header_style="blue bold", box=box.SIMPLE_HEAD)
     table.add_column("Pages", justify="center")
     table.add_column("Blocks", justify="center")
     table.add_column("Avg Speed Total", justify="center")
     table.add_column("Avg Speed SCRUM", justify="center")
-    table.add_column("Backlog", justify="center")
-    table.add_column("Current", justify="center")
-    table.add_column("Remaining hours", justify="center")
+    table.add_column("Current Speed", justify="center")
+    table.add_column("Remaining Backlog", justify="center")
+    table.add_column("Remaining Current", justify="center")
     table.add_column("Sprints to complete", justify="center")
     table.add_column("Sprints to complete (max)", justify="center")
 
@@ -348,20 +259,42 @@ def a(
         str(len(blocks)),
         str(round(average_total_speed_last_weeks, 1)),
         str(round(average_scrum_speed_last_weeks, 1)),
-        str(round(dt_to_hours(totals["remaining_backlog_time"]), 1)),
-        str(round(dt_to_hours(totals["remaining_current_time"]), 1)),
-        # TODO: se asumen 6 horas por día, posible parámetro
-        str((5-day_of_week)*6),
-        str(round(dt_to_hours(totals["remaining_backlog_time"]) / average_total_speed_last_weeks, 1)),
+        str(dt_to_hours(totals["time_clocked_sprint"], 1)),
+        str(dt_to_hours(totals["remaining_backlog_time"], 1)),
+        str(dt_to_hours(totals["remaining_current_time"], 1)),
+        str(dt_to_hours(totals["remaining_backlog_time"] / average_scrum_speed_last_weeks, 1)),
         # TODO: codificado en duro para 30 horas, posible parámetro
-        str(round(dt_to_hours(totals["remaining_backlog_time"]) / 30.0, 1))
+        str(dt_to_hours(totals["remaining_backlog_time"] / 30.0, 1))
     )
 
-    console= Console()
     console.print(table)
     print()
 
+    # Group by Project
+    df_grouped = df.groupby(["scrum_project"]).sum()
 
+    table = Table(title="SCRUM Projects", title_style="red bold",
+                  header_style="blue bold", box=box.SIMPLE_HEAD)
+    table.add_column("Project", justify="left")
+    table.add_column("Remaining Backlog", justify="center")
+    table.add_column("Remaining Current", justify="center")
+    table.add_column("Sprints to complete", justify="center")
+    table.add_column("Sprints to complete (max)", justify="center")
+
+    # Iterate rows
+    for i, r in df_grouped.sort_index().iterrows():
+
+        table.add_row(
+            i,
+            str(dt_to_hours(r["remaining_backlog_time"], 1)),
+            str(dt_to_hours(r["remaining_current_time"], 1)),
+            str(dt_to_hours(r["remaining_backlog_time"] / average_scrum_speed_last_weeks, 1)),
+            # TODO: codificado en duro para 30 horas, posible parámetro
+            str(dt_to_hours(r["remaining_backlog_time"] / 30.0, 1))
+        )
+
+    console.print(table)
+    print()
 
 
 # ----------------------------------

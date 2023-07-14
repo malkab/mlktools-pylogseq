@@ -48,7 +48,7 @@ class TestGraph:
         assert [ p.path for p in pages ] == [
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/A.md',
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/a_page_with_a_title.md',
-                '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/Gestión general.md',
+                '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/SCRUM_TEST.md',
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/a_pages_folder/page.md',
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/journals/2023_03_30.md'
             ]
@@ -56,4 +56,4 @@ class TestGraph:
         assert [ p.content for p in pages ] == [ None, None, None, None, None ]
 
         assert [ p.title for p in pages ] == [
-            'A', 'a_page_with_a_title', 'Gestión general', 'page', '2023_03_30' ]
+            'A', 'a_page_with_a_title', 'SCRUM_TEST', 'page', '2023_03_30' ]

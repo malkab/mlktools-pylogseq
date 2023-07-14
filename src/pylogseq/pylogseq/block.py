@@ -191,74 +191,75 @@ class Block():
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-        # Check for SC SCRUM TAGS
-        if "SC" in self.tags:
+        # Check for P project tags
+        if "P" in self.tags:
+
+            # Try to parse the project name
+            try:
+                project_tag = list(filter(lambda x: x.startswith("P/"), self.tags))
+
+                longest: str = sorted(project_tag, key=len, reverse=True)[0]
+
+                self.scrum_project = "/".join(longest.split("/")[1:])
+
+            except Exception:
+
+                raise Exception("Invalid Project tag: " + self.title)
+
+        # Check for SCB SCRUM TAGS
+        if "SCB" in self.tags:
 
             # Try to parse the SCRUM tag
             try:
-                time_tag = list(filter(lambda x: x.startswith("SC/"), self.tags))
+                time_tag = list(filter(lambda x: x.startswith("SCB/"), self.tags))[0]
 
-                # A default value for tag to make the exception work at except
-                tag = "SC"
-
-                # Get the longest tag, which is the most specific
-                tag = sorted(time_tag, key=len)[-1]
-
-                # Use a regex to get the elements S/Project/allocated/sprint
-                # and split them
-                t = re.sub(r"SC/", "", tag)
-                t = t.split("/")
-
-                # Get components. The last one is optional.
-                self.scrum_project = t[0]
+                # Get the time
+                time: int = int(time_tag.split("/")[1])
 
                 # Check if there is a backlog time
-                self.scrum_backlog_time = datetime.timedelta(hours=int(t[1])) \
-                    if len(t) == 2 else None
+                self.scrum_backlog_time = datetime.timedelta(hours=time)
 
-            except Exception as e:
+            except Exception:
 
-                raise Exception("Invalid SC SCRUM tag: " + tag)
+                raise Exception("Invalid SCB SCRUM tag: " + self.title)
 
-        # Check if there is a SCRUM tag S for current time
-        if "S" in self.tags:
+        # Check if there is a SCRUM tag SCC for current time
+        if "SCC" in self.tags:
 
             # Try to parse the SCRUM tag
             try:
-                time_tag = list(filter(lambda x: x.startswith("S/"), self.tags))
+                time_tag = list(filter(lambda x: x.startswith("SCC/"), self.tags))[0]
 
-                # Get the longest tag, which is the most specific
-                tag = sorted(time_tag, key=len)[-1]
+                # Get the time
+                time: int = int(time_tag.split("/")[1])
 
-                # Use a regex to get the elements S/Project/allocated/sprint
-                # and split them
-                t = re.sub(r"S/", "", tag)
+                # Check if there is a backlog time
+                self.scrum_current_time = datetime.timedelta(hours=time)
 
-                t = t.split("/")
+            except Exception:
 
-                # Get components. The last one is optional.
-                self.scrum_current_time = datetime.timedelta(hours=int(t[0]))
+                raise Exception("Invalid SCC SCRUM tag: " + self.title)
 
-            except:
-                raise Exception("Invalid S SCRUM tag: " + tag)
+        # SCRUM exceptions
 
-            # Raise exception if a S tag is found without a project
-            if self.scrum_project is None:
-                raise Exception("SCRUM S current time tag found without a project.")
+        # Current time without Backlog time
+        if self.scrum_current_time is not None and self.scrum_backlog_time is None:
+            raise Exception("SCRUM SCC tag found without SCB tag: " + self.title)
 
-        # Raise exception if SC tag is found without Backlog or current time in
-        # a not DONE block
-        if self.scrum_project is not None and \
-            self.scrum_backlog_time is None and \
-            self.scrum_current_time is None and \
-            not self.done:
-            raise Exception("SCRUM SC tag found without Backlog time in a not DONE block.")
+        # Backlog time without project
+        # Current time without project will not raise because there can't be
+        # SCC without SCB, so that exception will always trigger before this one
+        if self.scrum_project is None and \
+            self.scrum_backlog_time is not None:
+            raise Exception("SCRUM SCB assigned without P tag: " + self.title)
 
-        # Raise exception if there is Backlog or Current time while DONE
-        if (self.scrum_backlog_time is not None or \
-            self.scrum_current_time is not None) and \
-            self.done:
-            raise Exception("SCRUM with Backlog or Current time found in a DONE block.")
+        # DONE with P and with SCB
+        # Not needed to raise with SCC since SCC cannot exists without SCB
+        # and this exception triggers first.
+        if self.done and self.scrum_project is not None and \
+            self.scrum_backlog_time is not None:
+            raise Exception("SCRUM tags found in DONE block: " + self.title)
+
 
     # ----------------------------------
     #
