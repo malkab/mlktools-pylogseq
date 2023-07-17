@@ -45,15 +45,20 @@ class TestGraph:
 
         pages = g.get_pages()
 
-        assert [ p.path for p in pages ] == [
+        assert sorted([ p.path for p in pages ]) == [
+                '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/journals/2023_03_30.md',
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/A.md',
-                '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/a_page_with_a_title.md',
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/SCRUM_TEST.md',
+                '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/a_page_with_a_title.md',
                 '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/pages/a_pages_folder/page.md',
-                '/workspaces/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph/journals/2023_03_30.md'
             ]
 
         assert [ p.content for p in pages ] == [ None, None, None, None, None ]
 
-        assert [ p.title for p in pages ] == [
-            'A', 'a_page_with_a_title', 'SCRUM_TEST', 'page', '2023_03_30' ]
+        assert sorted([ p.title for p in pages ]) == [
+                '2023_03_30',
+                'A',
+                'SCRUM_TEST',
+                'a_page_with_a_title',
+                'page'
+            ]

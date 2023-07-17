@@ -10,6 +10,7 @@ FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 import re
 import marko
 import datetime
+from datetime import timedelta as td
 from typing import Any
 from pylogseq.parser import Parser
 from pylogseq.clock import Clock
@@ -155,6 +156,78 @@ class Block():
             else None
         """The title of the block, the first line of the content, without '-'.
         """
+
+
+    # ----------------------------------
+    #
+    # Total clocked time for the block.
+    #
+    # ----------------------------------
+    @property
+    def total_clocked_time(self) -> td:
+        """Returns the total clocked time for the block.
+
+        Returns:
+            td: Total clocked time.
+        """
+
+        total: td = td(0)
+
+        for clock in self.clocks:
+            total += clock.elapsed
+
+        return total
+
+
+    # ----------------------------------
+    #
+    # Returns remaining backlog time, backlog time in the SCB tag minus total
+    # clocked time. If it is less than 0 a timedelta of 0 is returned.
+    #
+    # ----------------------------------
+    @property
+    def scrum_remaining_backlog_time(self) -> td:
+        """Returns remaining backlog time, backlog time in the SCB tag minus
+        total clocked time. If it is less than 0 a timedelta of 0 is returned.
+
+        Returns:
+            td: A timedelta with the remaining backlog time, None if there is no
+                SCRUM backlog time.
+        """
+
+        if self.scrum_backlog_time is None: return None
+
+        diff: td = self.scrum_backlog_time - self.total_clocked_time
+
+        return diff if diff > td(0) else td(0)
+
+
+    # ----------------------------------
+    #
+    # Returns remaining current time, the time in SCC tags minus total clocked
+    # in the given sprint period, which is a Clock object. If it is less than
+    # 0 a timedelta of 0 is returned.
+    #
+    # ----------------------------------
+    def scrum_remaining_current_time(self, period: Clock) -> td:
+        """Returns remaining current time, the time in SCC tags minus total
+        time clocked in the given period (usually a sprint) as a Clock interval.
+        It it is less than 0 a timedelta of 0 is returned.
+
+        Args:
+            period (Clock): The period to calculate the intersections, usually
+                a sprint.
+
+        Returns:
+            td: The remaining current time in the period, None if there is no
+                SCRUM current time.
+        """
+
+        if self.scrum_current_time is None: return None
+
+        diff: td = self.scrum_current_time - self.total_intersection_time(period)
+
+        return diff if diff > td(0) else td(0)
 
 
     # ----------------------------------
@@ -356,6 +429,31 @@ class Block():
 
         # Purge Nones
         return [ c for c in clocks if c is not None ]
+
+
+    # ----------------------------------
+    #
+    # Returns total time as a timedelta of clocks intersecting another one.
+    #
+    # ----------------------------------
+    def total_intersection_time(self, clock: Clock) -> datetime.timedelta:
+        """Returns the total time as a timedelta of the clocks of this block
+        as they intersect with the given clock interval.
+
+        Args:
+            clock (Clock): The interval to test intersections with.
+
+        Returns:
+            datetime.timedelta: Total time of intersection.
+        """
+
+        total_time: td = td(0)
+
+        # Iterate intersections and sum
+        for inter in self.intersect_clock(clock):
+            total_time += inter.elapsed
+
+        return total_time
 
 
     # ----------------------------------

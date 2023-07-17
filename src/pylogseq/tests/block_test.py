@@ -1,6 +1,6 @@
 from pylogseq import Block, Clock
-import datetime
 import pytest
+from datetime import timedelta as td, datetime as dt
 
 blockExample = """
 
@@ -102,8 +102,8 @@ class TestBlock:
 
         block.parse()
 
-        assert block.scheduled == datetime.datetime(2021, 1, 1, 10, 0)
-        assert block.deadline == datetime.datetime(2021, 1, 2, 0, 0)
+        assert block.scheduled == dt(2021, 1, 1, 10, 0)
+        assert block.deadline == dt(2021, 1, 2, 0, 0)
 
 
     # ----------------------------------
@@ -144,8 +144,11 @@ class TestBlock:
         assert block.priorities == [ ]
         assert block.highest_priority is None
         assert block.scrum_project == "Client/Project"
-        assert block.scrum_backlog_time == datetime.timedelta(hours=2)
-        assert block.scrum_current_time == datetime.timedelta(hours=1)
+        assert block.scrum_backlog_time == td(hours=2)
+        assert block.scrum_current_time == td(hours=1)
+        assert block.scrum_remaining_backlog_time == td(hours=2)
+        assert block.scrum_remaining_current_time(
+            Clock(dt(2023, 10, 10, 10, 00), dt(2023, 10, 11, 10, 00))) == td(hours=1)
 
         # No current time assigned
         block: Block = Block(content="""- SCRUM TEST #P/Client/Project/SubactivityB #SCB/2""")
@@ -160,7 +163,7 @@ class TestBlock:
         assert block.priorities == [ ]
         assert block.highest_priority is None
         assert block.scrum_project == "Client/Project"
-        assert block.scrum_backlog_time == datetime.timedelta(hours=2)
+        assert block.scrum_backlog_time == td(hours=2)
         assert block.scrum_current_time is None
 
         # Done SCRUM
@@ -216,7 +219,7 @@ class TestBlock:
     # ----------------------------------
     def test_clock_intersection(self):
 
-        clock: Clock = Clock(datetime.datetime(2023,5,10,11,25), datetime.datetime(2023,5,10,13,15))
+        clock: Clock = Clock(dt(2023,5,10,11,25), dt(2023,5,10,13,15))
 
         block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2**
             :LOGBOOK:
@@ -229,11 +232,11 @@ class TestBlock:
         block.parse()
 
         assert block.intersect_clock(clock) == [
-            Clock(datetime.datetime(2023, 5, 10, 11, 25), datetime.datetime(2023, 5, 10, 11, 30)),
-            Clock(datetime.datetime(2023, 5, 10, 13, 0), datetime.datetime(2023, 5, 10, 13, 15))
+            Clock(dt(2023, 5, 10, 11, 25), dt(2023, 5, 10, 11, 30)),
+            Clock(dt(2023, 5, 10, 13, 0), dt(2023, 5, 10, 13, 15))
         ]
 
-        clock: Clock = Clock(datetime.datetime(2023, 2, 10, 11, 25), datetime.datetime(2023, 2, 10, 13, 15))
+        clock: Clock = Clock(dt(2023, 2, 10, 11, 25), dt(2023, 2, 10, 13, 15))
 
         block: Block = Block(content="""- [#A] A block at page **test_2_page** in graph **test_2**
             :LOGBOOK:
@@ -246,3 +249,31 @@ class TestBlock:
         block.parse()
 
         assert block.intersect_clock(clock) == []
+
+        # Test total intersection time
+        clock: Clock = Clock(dt(2023,5,10,11,25), dt(2023,5,10,13,15))
+
+        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2**
+            :LOGBOOK:
+            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+            :END:
+            """)
+
+        block.parse()
+
+        assert block.total_intersection_time(clock) == td(minutes=20)
+
+        # Total clocked time
+        block: Block = Block(content="""- A block at page **test_2_page** in graph **test_2**
+            :LOGBOOK:
+            CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+            CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+            :END:
+            """)
+
+        block.parse()
+
+        assert block.total_clocked_time == td(minutes=50)

@@ -15,6 +15,7 @@ from rich import box
 import re
 import pandas as pd
 import sys
+from libmlkgraph import *
 
 
 # ----------------------------------
@@ -32,8 +33,9 @@ app = typer.Typer()
 #
 # ----------------------------------
 @app.command()
-def sprint(
-    graph_path: str = typer.Argument(..., help="The path of the graph to analyze.")
+def current(
+    graph_path: str = typer.Argument(..., help="The path of the graph to analyze."),
+    backlog: bool = typer.Option(False, "--backlog", "-b", help="Show projects with backlog."),
     # tags: list[str] = typer.Option(None, "--tag", "-t", help="A tag to filter in the tag cloud output.")
 ):
 
@@ -41,7 +43,7 @@ def sprint(
     graph: Graph = Graph(graph_path)
 
     # Get pages
-    pages: list[Page] = graph.get_pages()
+    pages: list[Page] = [] #graph.get_pages()
 
     # Blocks
     blocks: list[Block] = []
@@ -49,25 +51,17 @@ def sprint(
     # Parse graph, with a progress bar
     print("\nParsing graph...\n")
 
-    with typer.progressbar(length=len(pages)) as progress:
-        # Catch parsing errors
-        try:
-            for p, bs in graph.parse_iter():
-                progress.update(1)
-                blocks.extend(bs)
-        except PageParserError as e:
-            print()
-            print()
-            pprint(":WARNING: [red bold]Error parsing block[/]")
-            pprint("[bold]File:[/]")
-            print("     " + e.page.title)
-            pprint("[bold]Error:[/]")
-            print("     " + str(e.original_exception))
-            pprint("[bold]Block:[/]")
-            print(e.block_content)
-            sys.exit(1)
+    pages, blocks = parse_graph(graph)
+
+    # Store original number of objects read from the graph
+    original_number_blocks = len(blocks)
+    original_number_pages = len(pages)
 
     print()
+
+    # Store the blocks that has a P SCRUM project tag, since they are often
+    # processed separately
+    scrum_blocks: list[Block] = [ b for b in blocks if b.scrum_project is not None ]
 
     # Calculate the average speed of the last 4 weeks
     # TODO: hard coded 4 semanas, posible parámetro
@@ -86,33 +80,8 @@ def sprint(
         span = today.shift(weeks=-i).span("week")
         clock = Clock(span[0].naive, span[1].naive)
 
-        # To store all clocks that collides with the week span
-        # Total and SCRUM clocks
-        total_colliding_clocks = []
-        scrum_colliding_clocks = []
-
-        # Intersect all clocks
-        for block in blocks:
-
-            # Compute clock intersection
-            inter: Clock = block.intersect_clock(clock)
-
-            # Add to the total
-            total_colliding_clocks.extend(inter)
-
-            # Add to the SCRUM
-            if block.scrum_project is not None:
-                scrum_colliding_clocks.extend(inter)
-
-        # Aggregate elapsed time
-        total_time = td(0)
-        scrum_time = td(0)
-
-        for cc in total_colliding_clocks:
-            total_time = total_time + cc.elapsed
-
-        for cc in scrum_colliding_clocks:
-            scrum_time = scrum_time + cc.elapsed
+        total_time: td = total_time_period(blocks, clock)
+        scrum_time: td = total_time_period(scrum_blocks, clock)
 
         # Store
         total_elapsed_time_weeks.append(total_time.total_seconds() / 3600.0)
@@ -157,6 +126,15 @@ def sprint(
     span = today.span("week")
     current_week = Clock(span[0].naive, span[1].naive)
 
+    # Calculate total time clocked this week for all blocks and SCRUM blocks
+    time_clocked_current_week: td = total_time_period(blocks, current_week)
+    time_clocked_current_week_scrum: td = total_time_period(scrum_blocks, current_week)
+
+    # Check if the backlog option is active. If not, filter out blocks
+    # with no current time left
+    if backlog == False:
+        blocks = [ b for b in blocks if b.scrum_current_time is not None ]
+
     # Get block data and add to the dataframe if it qualifies
     for block in blocks:
 
@@ -164,62 +142,39 @@ def sprint(
         # TODO: AQUÍ SE ESTÁ FILTRANDO LOS PROJECT Y NO SE ESTÁN CONTANDO LAS
         # VELOCIDADES DE TAREAS QUE NO TIENEN P EN LA SEMANA, MIRAR
         if block.scrum_project is not None:
-            # Some vars
-            time_clocked_sprint = td(0)
-            time_clocked_total = td(0)
 
-            # Colliding clocks in this week
-            colliding_clocks: list[Clock] = block.intersect_clock(current_week)
-
-            # time_clocked_sprint total
-            for clock in colliding_clocks:
-                time_clocked_sprint += clock.elapsed
-
-            # Calculate total clocked time
-            for clock in block.clocks:
-                time_clocked_total += clock.elapsed
-
+            # Get Block data
             data = {
                     "title": block.title,
                     "tags": block.tags,
                     "scrum_project": block.scrum_project,
                     "scrum_backlog_time": block.scrum_backlog_time,
                     "scrum_current_time": block.scrum_current_time,
-                    "time_clocked_total": time_clocked_total,
-                    "time_clocked_sprint": time_clocked_sprint,
+                    "time_clocked_total": block.total_clocked_time,
+                    "time_clocked_current": block.total_intersection_time(current_week),
+                    "remaining_backlog_time": block.scrum_remaining_backlog_time,
+                    "remaining_current_time": block.scrum_remaining_current_time(current_week),
                     "now": block.now,
                     "done": block.done
                 }
 
-            # Calculate remaining times for backlog and current
-            data["remaining_backlog_time"] = td(hours=0)
-            data["remaining_current_time"] = td(hours=0)
-
-            if block.scrum_backlog_time:
-                data["remaining_backlog_time"] = block.scrum_backlog_time - \
-                    time_clocked_total
-
-            if block.scrum_current_time:
-                data["remaining_current_time"] = block.scrum_current_time - \
-                    time_clocked_sprint
-
             # Check for negative remaining times
-            if data["remaining_current_time"] < td(hours=0):
-                data["remaining_current_time"] = td(hours=0)
+            if data["remaining_current_time"] == td(hours=0):
 
-                pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in sprint
+                pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in current
+    Project:                [bright_black]{str(block.scrum_project)}[/]
     Block:                  [bright_black]{str(block.title)}[/]
-    Sprint clocked time:    [bright_black]{dt_to_hours(time_clocked_sprint)}[/]
-    Current time:           [bright_black]{dt_to_hours(block.scrum_current_time)}[/]
+    Current clocked time:   [bright_black]{dt_to_hours(data["time_clocked_current"])}[/]
+    Current time:           [bright_black]{dt_to_hours(data["scrum_current_time"])}[/]
 """)
 
-            if data["remaining_backlog_time"] < td(hours=0):
-                data["remaining_backlog_time"] = td(hours=0)
+            if data["remaining_backlog_time"] == td(hours=0):
 
                 pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in backlog
+    Project:                [bright_black]{str(block.scrum_project)}[/]
     Block:                  [bright_black]{str(block.title)}[/]
-    Total clocked time:     [bright_black]{dt_to_hours(time_clocked_total)}[/]
-    Backlog time:           [bright_black]{dt_to_hours(block.scrum_backlog_time)}[/]
+    Total clocked time:     [bright_black]{dt_to_hours(data["time_clocked_total"])}[/]
+    Backlog time:           [bright_black]{dt_to_hours(data["scrum_backlog_time"])}[/]
 """)
 
             # Add to the dataframe
@@ -233,9 +188,6 @@ def sprint(
     # Create the DataFrame
     df = pd.DataFrame(dataframe_data)
 
-    # Print table with total SCRUM times
-    totals: pd.DataFrame = df.sum()
-
     print()
 
     # Rich Console object
@@ -248,23 +200,16 @@ def sprint(
     table.add_column("Blocks", justify="center")
     table.add_column("Avg Speed Total", justify="center")
     table.add_column("Avg Speed SCRUM", justify="center")
-    table.add_column("Current Speed", justify="center")
-    table.add_column("Remaining Backlog", justify="center")
-    table.add_column("Remaining Current", justify="center")
-    table.add_column("Sprints to complete", justify="center")
-    table.add_column("Sprints to complete (max)", justify="center")
+    table.add_column("Current Speed Total", justify="center")
+    table.add_column("Current Speed SCRUM", justify="center")
 
     table.add_row(
-        str(len(pages)),
-        str(len(blocks)),
+        str(original_number_pages),
+        str(original_number_blocks),
         str(round(average_total_speed_last_weeks, 1)),
         str(round(average_scrum_speed_last_weeks, 1)),
-        str(dt_to_hours(totals["time_clocked_sprint"], 1)),
-        str(dt_to_hours(totals["remaining_backlog_time"], 1)),
-        str(dt_to_hours(totals["remaining_current_time"], 1)),
-        str(dt_to_hours(totals["remaining_backlog_time"] / average_scrum_speed_last_weeks, 1)),
-        # TODO: codificado en duro para 30 horas, posible parámetro
-        str(dt_to_hours(totals["remaining_backlog_time"] / 30.0, 1))
+        str(dt_to_hours(time_clocked_current_week)),
+        str(dt_to_hours(time_clocked_current_week_scrum)),
     )
 
     console.print(table)
@@ -274,7 +219,8 @@ def sprint(
     df_grouped = df.groupby(["scrum_project"]).sum()
 
     table = Table(title="SCRUM Projects", title_style="red bold",
-                  header_style="blue bold", box=box.SIMPLE_HEAD)
+                  header_style="blue bold", box=box.SIMPLE_HEAD,
+                  footer_style="red bold", show_footer=True)
     table.add_column("Project", justify="left")
     table.add_column("Remaining Backlog", justify="center")
     table.add_column("Remaining Current", justify="center")
@@ -285,35 +231,30 @@ def sprint(
     for i, r in df_grouped.sort_index().iterrows():
 
         table.add_row(
-            i,
-            str(dt_to_hours(r["remaining_backlog_time"], 1)),
-            str(dt_to_hours(r["remaining_current_time"], 1)),
-            str(dt_to_hours(r["remaining_backlog_time"] / average_scrum_speed_last_weeks, 1)),
+                i,
+                str(dt_to_hours(r["remaining_backlog_time"])),
+                str(dt_to_hours(r["remaining_current_time"])),
+                str(dt_to_hours(r["remaining_backlog_time"] / average_scrum_speed_last_weeks)),
+                # TODO: codificado en duro para 30 horas, posible parámetro
+                str(dt_to_hours(r["remaining_backlog_time"] / 30.0))
+            )
+
+    # Print table with total SCRUM times
+    totals: pd.DataFrame = df.sum()
+
+    table.add_section()
+
+    table.add_row(
+            "TOTAL",
+            str(dt_to_hours(totals["remaining_backlog_time"])),
+            str(dt_to_hours(totals["remaining_current_time"])),
+            str(dt_to_hours(totals["remaining_backlog_time"] / average_scrum_speed_last_weeks)),
             # TODO: codificado en duro para 30 horas, posible parámetro
-            str(dt_to_hours(r["remaining_backlog_time"] / 30.0, 1))
-        )
+            str(dt_to_hours(totals["remaining_backlog_time"] / 30.0))
+        , style="red bold")
 
     console.print(table)
     print()
-
-
-# ----------------------------------
-#
-# Returns a datetime.timedelta in fraction of hours, with optional rounding.
-#
-# ----------------------------------
-def dt_to_hours(dt: td, r: int=None) -> float:
-
-    # If None, return None
-    if dt is None:
-        return None
-
-    hours = dt.total_seconds() / 3600.0
-
-    if r is not None:
-        return round(hours, r)
-    else:
-        return hours
 
 
 # ----------------------------------
