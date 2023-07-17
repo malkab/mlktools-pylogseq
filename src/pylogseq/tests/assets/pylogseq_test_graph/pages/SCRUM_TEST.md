@@ -1,8 +1,9 @@
 - SCRUM test
 
-- Current #SCB/2 #SCC/2 #P/Test
+- Current #SCB/10 #SCC/2 #P/Test/a/b
   :LOGBOOK:
   CLOCK: [2023-07-12 Mon 10:00:00]--[2023-07-12 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2023-07-17 Mon 10:00:00]--[2023-07-17 Mon 11:00:00] =>  01:00:00
   :END:
 
 - Backlog #SCB/3 #P/Test

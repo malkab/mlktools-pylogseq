@@ -200,7 +200,9 @@ class Block():
 
                 longest: str = sorted(project_tag, key=len, reverse=True)[0]
 
-                self.scrum_project = "/".join(longest.split("/")[1:])
+                # Only 0 and 1 elements, the rest are subactivities and are
+                # ignored
+                self.scrum_project = "/".join(longest.split("/")[1:3])
 
             except Exception:
 

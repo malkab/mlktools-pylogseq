@@ -132,12 +132,12 @@ class TestBlock:
 
         # Full
         block: Block = \
-            Block(content="""- SCRUM TEST #P/Client/Project #SCB/2 #SCC/1""")
+            Block(content="""- SCRUM TEST #P/Client/Project/SubactivityA #SCB/2 #SCC/1""")
 
         block.parse()
 
-        assert block.title == "SCRUM TEST #P/Client/Project #SCB/2 #SCC/1"
-        assert block.tags == ['P', 'P/Client', 'P/Client/Project', 'SCB', 'SCB/2', 'SCC', 'SCC/1']
+        assert block.title == "SCRUM TEST #P/Client/Project/SubactivityA #SCB/2 #SCC/1"
+        assert block.tags == ['P', 'P/Client', 'P/Client/Project', 'P/Client/Project/SubactivityA', 'SCB', 'SCB/2', 'SCC', 'SCC/1']
         assert block.done is False
         assert block.later is False
         assert block.now is False
@@ -148,12 +148,12 @@ class TestBlock:
         assert block.scrum_current_time == datetime.timedelta(hours=1)
 
         # No current time assigned
-        block: Block = Block(content="""- SCRUM TEST #P/Client/Project #SCB/2""")
+        block: Block = Block(content="""- SCRUM TEST #P/Client/Project/SubactivityB #SCB/2""")
 
         block.parse()
 
-        assert block.title == "SCRUM TEST #P/Client/Project #SCB/2"
-        assert block.tags == ['P', 'P/Client', 'P/Client/Project', 'SCB', 'SCB/2']
+        assert block.title == "SCRUM TEST #P/Client/Project/SubactivityB #SCB/2"
+        assert block.tags == ['P', 'P/Client', 'P/Client/Project', 'P/Client/Project/SubactivityB', 'SCB', 'SCB/2']
         assert block.done is False
         assert block.later is False
         assert block.now is False
@@ -164,18 +164,18 @@ class TestBlock:
         assert block.scrum_current_time is None
 
         # Done SCRUM
-        block: Block = Block(content="""- DONE SCRUM TEST #P/Client/Project""")
+        block: Block = Block(content="""- DONE SCRUM TEST #P/Client""")
 
         block.parse()
 
-        assert block.title == "DONE SCRUM TEST #P/Client/Project"
-        assert block.tags == ['P', 'P/Client', 'P/Client/Project']
+        assert block.title == "DONE SCRUM TEST #P/Client"
+        assert block.tags == ['P', 'P/Client']
         assert block.done is True
         assert block.later is False
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Client/Project"
+        assert block.scrum_project == "Client"
         assert block.scrum_backlog_time is None
         assert block.scrum_current_time is None
 
