@@ -1,16 +1,47 @@
 {
-  "image": "malkab/python:3.9-buster",
+  "image": "malkab/python:3.11-bullseye",
   "name": "pylogseq-dev-container",
+
+  "runArgs": [
+    "--network=host",
+    "--name=pylogseq-dev-container"
+  ],
 
   "customizations": {
     "vscode": {
-      "extensions": [ "ms-python.python" ]
+      "extensions": [
+        "donjayamanne.githistory",
+        "GitHub.copilot",
+        "mechatroner.rainbow-csv",
+        "mhutchie.git-graph",
+        "ms-python.isort",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.vscode-jupyter-slideshow",
+        "njpwerner.autodocstring",
+        "redhat.vscode-yaml",
+        "Tyriar.lorem-ipsum"
+      ]
     }
   },
 
-  "containerEnv": {
-    "PYTHONPATH": "/workspaces/mlktools-pylogseq/src"
-  },
+  // Add ENVVARS to the container here:
+  // "SOMETHING": "A_VALUE"
+  // "containerEnv": {
+  //   "PYTHONPATH": "${PYTHONPATH};/workspaces/mlktools-pylogseq/src/pylogseq"
+  // },
 
-  "remoteUser": "1000"
+  "mounts": [
+    "type=bind,source=${localEnv:HOME}/.mlkctxt,target=/home/user{{ cookiecutter.docker_remote_user }}/.mlkctxt"
+  ],
+
+  "remoteUser": "1000",
+
+  "postCreateCommand": "bash -c \"./.devcontainer/post_install.sh\"",
+
+  "postStartCommand": "bash -c \"echo postStartCommand\""
 }
