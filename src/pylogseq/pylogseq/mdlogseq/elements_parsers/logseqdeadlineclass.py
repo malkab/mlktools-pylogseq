@@ -2,6 +2,8 @@ from marko import inline
 from datetime import datetime
 import re
 
+# TODO: DOCUMENT
+
 # --------------------------------------
 #
 # Parses an DEADLINE section.

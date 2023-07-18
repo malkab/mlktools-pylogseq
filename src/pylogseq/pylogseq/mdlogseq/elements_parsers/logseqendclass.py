@@ -1,5 +1,7 @@
 from marko import inline
 
+# TODO: DOCUMENT
+
 class LogseqEnd(inline.InlineElement):
 
   pattern = r'(:END:)'

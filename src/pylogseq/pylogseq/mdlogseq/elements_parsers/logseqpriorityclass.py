@@ -1,6 +1,8 @@
 from marko import inline
 from re import Match
 
+# TODO: DOCUMENT
+
 # --------------------------------------
 #
 # Parser element: Logseq priority

@@ -1,5 +1,7 @@
 from marko import inline
 
+# TODO: DOCUMENT
+
 class LogseqLogBook(inline.InlineElement):
 
   pattern = r'(:LOGBOOK:)'

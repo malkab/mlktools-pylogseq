@@ -1,277 +1,261 @@
 #!/usr/bin/env python3
 # coding=UTF8
 
+from pylogseq import Graph, Page, Block, Clock, PageParserError
 import typer
-import os
-from pylogseq import Clock, Graph, Page, Block, Page, PageParserError, ArrayBlock
-from datetime import datetime, timedelta, date
+import arrow
+from datetime import timedelta as td, datetime as dt
+import statistics
+from rich import print as pprint
+from rich.markup import escape
 from rich.console import Console
 from rich.text import Text
 from rich.table import Table
-from enum import Enum
+from rich import box
+import re
 import pandas as pd
+import sys
+from libmlkgraph import *
+
+
+# ----------------------------------
+#
+# CLI application
+#
+# ----------------------------------
 
 # Typer app
 app = typer.Typer()
 
-# Time lapses option choices
-class TimeLapsesChoices(str, Enum):
-    today = "today"
-    week = "week"
-    month = "month"
-    year = "year"
-
-# Time aggregation option choices
-class TimeAggregationChoices(str, Enum):
-    daily = "daily"
-    weekly = "weekly"
-    monthly = "monthly"
-    yearly = "yearly"
-
 # ----------------------------------
 #
-# Command to check time spent in each graph.
+# Command.
 #
 # ----------------------------------
 @app.command()
-def clock(
-    graphs: list[str] = typer.Argument(..., help="List of graphs to parse."),
-    time_limit: TimeLapsesChoices = typer.Option(TimeLapsesChoices.week, "--time-limit", "-t", case_sensitive=False),
-    time_aggregation: TimeAggregationChoices = typer.Option(TimeAggregationChoices.daily, "--time-aggregation", "-a", case_sensitive=False),
-    verbose: bool = typer.Option(False, "--verbose", "-v", case_sensitive=False)
+def current(
+    graph_path: str = typer.Argument(..., help="The path of the graph to analyze."),
+    backlog: bool = typer.Option(False, "--backlog", "-b", help="Show projects with backlog."),
+    # tags: list[str] = typer.Option(None, "--tag", "-t", help="A tag to filter in the tag cloud output.")
 ):
 
-    # To store the processed graphs
-    processed_graphs = []
+    # Create a graph
+    graph: Graph = Graph(graph_path)
 
-    # Get graphs
-    for graph_path in graphs:
-        g = Graph(graph_path)
-        processed_graphs.append(g)
+    # Get pages
+    pages: list[Page] = [] #graph.get_pages()
 
-    # Total pages, getting them
-    total_pages = 0
+    # Blocks
+    blocks: list[Block] = []
 
-    for g in processed_graphs:
-        total_pages = total_pages + len(g.get_pages())
+    # Parse graph, with a progress bar
+    print("\nParsing graph...\n")
 
-    print(f"Total number of pages to process: {total_pages}\n")
+    pages, blocks = parse_graph(graph)
 
-    with typer.progressbar(length=total_pages) as progress:
-        for g in processed_graphs:
-
-            # Catch parsing errors
-            try:
-                for p in g.parse_iter():
-                    progress.update(1)
-            except PageParserError as e:
-                print()
-                print("Error parsing block")
-                print("File: ", e.page.title)
-                print("Error: ", e.original_exception)
-                print("Block:\n", e.block_content)
+    # Store original number of objects read from the graph
+    original_number_blocks = len(blocks)
+    original_number_pages = len(pages)
 
     print()
 
-    # Gather all pages in graphs to check for small content
-    all_pages: list[Page] = []
+    # Store the blocks that has a P SCRUM project tag, since they are often
+    # processed separately
+    scrum_blocks: list[Block] = [ b for b in blocks if b.scrum_project is not None ]
 
-    for graph in processed_graphs:
-        all_pages.extend(graph.pages)
+    # Calculate the average speed of the last 4 weeks
+    # TODO: hard coded 4 semanas, posible parámetro
+    # Calculate Arrow spans for the last weeks
+    today = arrow.now()
 
-    # Delete pages with content = 0
-    for page in all_pages:
-        if len(page.content) == 0 or page.content == "-\n" or page.content == "-":
-            print(f"WARNING: page '{page.title}' in graph '{page.graph.title}' has no content, deleting it.")
-            os.remove(page.abs_path)
+    # To store the total elapsed time for each of the weeks and the SCRUM
+    # elapsed time
+    total_elapsed_time_weeks = []
+    scrum_elapsed_time_weeks = []
 
-        # Warning for very small pages
-        elif len(page.content) < 5:
-            print(f"WARNING: page '{page.title}' in graph '{page.graph.title}' has less than 5 characters.")
+    # TODO: codificado en duro para 4 semanas, posible parámetro
+    for i in range(1, 5):
 
-    # Gather all blocks and create an ArrayBlock
-    all_blocks: list[Block] = []
+        # Get the clock interval spanning the week
+        span = today.shift(weeks=-i).span("week")
+        clock = Clock(span[0].naive, span[1].naive)
 
-    for graph in processed_graphs:
-        all_blocks.extend(graph.get_all_blocks())
+        total_time: td = total_time_period(blocks, clock)
+        scrum_time: td = total_time_period(scrum_blocks, clock)
 
-    ab = ArrayBlock(all_blocks)
+        # Store
+        total_elapsed_time_weeks.append(total_time.total_seconds() / 3600.0)
+        scrum_elapsed_time_weeks.append(scrum_time.total_seconds() / 3600.0)
 
-    # Check for NOW blocks
-    now_blocks = list(filter(lambda b: b.now, ab))
+    # Filter zeros from week elapsed times
+    total_elapsed_time_weeks = list(filter(lambda x: x != 0, total_elapsed_time_weeks))
+    scrum_elapsed_time_weeks = list(filter(lambda x: x != 0, scrum_elapsed_time_weeks))
 
-    for b in now_blocks:
-        print(f"WARNING: block '{b.title}' in page '{b.page.title}' of graph '{b.page.graph.title}' is in NOW state.")
+    # Default speeds
+    # TODO: 30 horas codificado en duro, posible parámetro
+    average_total_speed_last_weeks = 30
+    average_scrum_speed_last_weeks = 30
 
-    # Process the time lapse interval: today, week, month, year
-    # Today
-    if time_limit == TimeLapsesChoices.today:
-        start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        end = start + timedelta(days=1)
+    # Calculate average speed
+    if total_elapsed_time_weeks != []:
+        average_total_speed_last_weeks = statistics.mean(total_elapsed_time_weeks)
 
-    # Week
-    if time_limit == TimeLapsesChoices.week:
-        now = datetime.now()
-        days_since_monday = (now.weekday() - 0) % 7
-        last_monday = now - timedelta(days=days_since_monday)
-        start = datetime(last_monday.year, last_monday.month, last_monday.day)
-        end = start + timedelta(days=7)
+    if scrum_elapsed_time_weeks != []:
+        average_scrum_speed_last_weeks = statistics.mean(scrum_elapsed_time_weeks)
 
-    # Month
-    if time_limit == TimeLapsesChoices.month:
-        now = datetime.now()
-        start = datetime(now.year, now.month, 1)
-        end = start + timedelta(days=31)
-
-    # Get all ClockBlocks hitting the interval
-    clock_blocks = ab.get_clock_blocks(filter_interval=Clock(start, end))
-
-    # Sort by start date
-    clock_blocks.sort(key=lambda b: b.clock.start)
-
-    # Check if there is an overlapping between logbook entries
-    for c in range(0, len(clock_blocks)-1):
-        if clock_blocks[c+1].clock.start < clock_blocks[c].clock.end:
-            print(f"WARNING: block '{clock_blocks[c+1].block.title}' in page '{clock_blocks[c+1].block.page.title}' of graph '{clock_blocks[c+1].block.page.graph.title}' has overlapping logbook entries with block '{clock_blocks[c].block.title}' in page '{clock_blocks[c].block.page.title}' of graph '{clock_blocks[c].block.page.graph.title}': {clock_blocks[c+1].clock.start} < {clock_blocks[c].clock.end}")
-
-    # Compose the Pandas dataframe data
+    # Prepare the Pandas DataFrame with the following data for blocks that
+    # collides with the current week and/or have P tags (Projects):
+    #
+    # - Block title
+    # - Block tags
+    # - Block SCRUM project
+    # - Block SCRUM backlog time (total)
+    # - Block SCRUM current time (total)
+    # - Block clocked time (total)
+    # - Block clocked time (this week)
+    # - Block now
+    # - Block done
+    # - remaining_backlog_time
+    # - remaining_current_time
+    #
+    # Therefore, the only condition to enter the data is that either the block
+    # has clocked time this week or has SCRUM data.
     dataframe_data = []
 
-    for entry in clock_blocks:
-        dataframe_data.append({
-            "id": entry.block.id,
-            "elapsed_time": entry.clock.elapsed
-        })
+    # Get current week span
+    span = today.span("week")
+    current_week = Clock(span[0].naive, span[1].naive)
 
-    # Check if the DF is empty: no colliding time intervals
+    # Calculate total time clocked this week for all blocks and SCRUM blocks
+    time_clocked_current_week: td = total_time_period(blocks, current_week)
+    time_clocked_current_week_scrum: td = total_time_period(scrum_blocks, current_week)
+
+    # Check if the backlog option is active. If not, filter out blocks
+    # with no current time left
+    if backlog == False:
+        blocks = [ b for b in blocks if b.scrum_current_time is not None ]
+
+    # Get block data and add to the dataframe if it qualifies
+    for block in blocks:
+
+        # Add the data if the block qualify
+        # TODO: AQUÍ SE ESTÁ FILTRANDO LOS PROJECT Y NO SE ESTÁN CONTANDO LAS
+        # VELOCIDADES DE TAREAS QUE NO TIENEN P EN LA SEMANA, MIRAR
+        if block.scrum_project is not None:
+
+            # Get Block data
+            data = {
+                    "title": block.title,
+                    "tags": block.tags,
+                    "scrum_project": block.scrum_project,
+                    "scrum_backlog_time": block.scrum_backlog_time,
+                    "scrum_current_time": block.scrum_current_time,
+                    "time_clocked_total": block.total_clocked_time,
+                    "time_clocked_current": block.total_intersection_time(current_week),
+                    "remaining_backlog_time": block.scrum_remaining_backlog_time,
+                    "remaining_current_time": block.scrum_remaining_current_time(current_week),
+                    "now": block.now,
+                    "done": block.done
+                }
+
+            # Check for negative remaining times
+            if data["remaining_current_time"] == td(hours=0):
+
+                pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in current
+    Project:                [bright_black]{str(block.scrum_project)}[/]
+    Block:                  [bright_black]{str(block.title)}[/]
+    Current clocked time:   [bright_black]{dt_to_hours(data["time_clocked_current"])}[/]
+    Current time:           [bright_black]{dt_to_hours(data["scrum_current_time"])}[/]
+""")
+
+            if data["remaining_backlog_time"] == td(hours=0):
+
+                pprint(f"""[bold red]:timer_clock:  WARNING![/] Block has no more available time in backlog
+    Project:                [bright_black]{str(block.scrum_project)}[/]
+    Block:                  [bright_black]{str(block.title)}[/]
+    Total clocked time:     [bright_black]{dt_to_hours(data["time_clocked_total"])}[/]
+    Backlog time:           [bright_black]{dt_to_hours(data["scrum_backlog_time"])}[/]
+""")
+
+            # Add to the dataframe
+            dataframe_data.append(data)
+
+    # No data?
     if len(dataframe_data) == 0:
-        print("No colliding time intervals found.")
+        print("No relevant blocks found.")
         sys.exit(0)
 
+    # Create the DataFrame
     df = pd.DataFrame(dataframe_data)
 
-    # Filter the ID in the all_blocks
-    all_blocks_filtered = list(filter(lambda b: b.id in df["id"].values, all_blocks))
-
-    # Create another DF with the filtered blocks
-    df_all_blocks_filtered_data = []
-
-    for entry in all_blocks_filtered:
-        df_all_blocks_filtered_data.append({
-            "id": entry.id,
-            "graph": entry.page.graph.title,
-            "block": entry.title,
-            "highest_priority": entry.highest_priority,
-            "allocated_time": entry.allocated_time,
-            "time_left": entry.time_left_hours,
-            "tags": entry.tags
-        })
-
-    df_all_blocks_filtered = pd.DataFrame(df_all_blocks_filtered_data)
-
-    # Group by ID and sum the elapsed time
-    df = df.groupby("id").agg(elapsed_time=("elapsed_time", "sum"))
-
-    # Merge the DF with the elapsed_time sum with the DF with the filtered blocks
-    df_merge = df_all_blocks_filtered.join(df, on="id")
-
-    if verbose:
-        table = Table(title="Blocks")
-
-        table.add_column("Graph")
-        table.add_column("Block")
-        table.add_column("P", justify="center")
-        table.add_column("Allocated time", justify="center")
-        table.add_column("Time left", justify="center")
-        table.add_column("Elapsed time", justify="center")
-
-        # Reset the index and sort by ellapsed time
-        verbose=df_merge.reset_index().sort_values(by="elapsed_time", ascending=False)
-
-        # Add rows
-        for k,v in verbose.iterrows():
-            table.add_row(v["graph"], Text(v["block"]), v['highest_priority'],
-                          str(v["allocated_time"]),
-                          f"{str(round(v['time_left'], 1))} hours",
-                          str(v["elapsed_time"]))
-
-        # Print
-        console = Console()
-        console.print(table)
-
-    # Do the final aggregation of allocated_time, time_left, and elapsed_time
-    # by id
-    final = df_merge[[ "graph", "allocated_time", "time_left", "elapsed_time" ]] \
-        .groupby("graph").agg(
-            allocated_time=("allocated_time", "sum"),
-            time_left=("time_left", "sum"),
-            elapsed_time=("elapsed_time", "sum")
-        )
-
-    # --------------------------------
-    # Final output in a table
-    # --------------------------------
     print()
 
-    table = Table(title="Time by graph")
+    # Rich Console object
+    console= Console()
 
-    table.add_column("Graph")
-    table.add_column("Allocated time", justify="right")
-    table.add_column("Time left", justify="right")
-    table.add_column("Elapsed time", justify="right")
+    # Print general analysis
+    table = Table(title="SCRUM Summary", title_style="red bold",
+                  header_style="blue bold", box=box.SIMPLE_HEAD)
+    table.add_column("Pages", justify="center")
+    table.add_column("Blocks", justify="center")
+    table.add_column("Avg Speed Total", justify="center")
+    table.add_column("Avg Speed SCRUM", justify="center")
+    table.add_column("Current Speed Total", justify="center")
+    table.add_column("Current Speed SCRUM", justify="center")
 
-    # Reset the index and sort by ellapsed time
-    final = final.reset_index().sort_values(by="elapsed_time", ascending=False)
+    table.add_row(
+        str(original_number_pages),
+        str(original_number_blocks),
+        str(round(average_total_speed_last_weeks, 1)),
+        str(round(average_scrum_speed_last_weeks, 1)),
+        str(dt_to_hours(time_clocked_current_week)),
+        str(dt_to_hours(time_clocked_current_week_scrum)),
+    )
 
-    # Add rows
-    for k,v in final.iterrows():
-        table.add_row(v["graph"], str(v["allocated_time"]),
-                      str(round(v["time_left"], 1)),
-                      str(v["elapsed_time"]))
-
-    # Print
-    console = Console()
     console.print(table)
-
-    # --------------------------------
-    # Final
-    # --------------------------------
     print()
 
-    # Sum all columns
-    final = final[[ "allocated_time", "time_left", "elapsed_time" ]].sum()
+    # Group by Project
+    df_grouped = df.groupby(["scrum_project"]).sum()
 
-    # Calculate days since last monday, max 5 days per week
-    if time_limit == TimeLapsesChoices.today:
-        days = 1
+    table = Table(title="SCRUM Projects", title_style="red bold",
+                  header_style="blue bold", box=box.SIMPLE_HEAD,
+                  footer_style="red bold", show_footer=True)
+    table.add_column("Project", justify="left")
+    table.add_column("Remaining Backlog", justify="center")
+    table.add_column("Remaining Current", justify="center")
+    table.add_column("Sprints to complete", justify="center")
+    table.add_column("Sprints to complete (max)", justify="center")
 
-    if time_limit == TimeLapsesChoices.week:
-        now = datetime.now()
-        days_since_monday = (now.weekday() - 0) % 7
-        days = min(5, days_since_monday + 1)
+    # Iterate rows
+    for i, r in df_grouped.sort_index().iterrows():
 
-    if time_limit == TimeLapsesChoices.month:
-        weeks = datetime.now().day / 7.0
-        days = 5 * weeks
+        table.add_row(
+                i,
+                str(dt_to_hours(r["remaining_backlog_time"])),
+                str(dt_to_hours(r["remaining_current_time"])),
+                str(dt_to_hours(r["remaining_backlog_time"] / average_scrum_speed_last_weeks)),
+                # TODO: codificado en duro para 30 horas, posible parámetro
+                str(dt_to_hours(r["remaining_backlog_time"] / 30.0))
+            )
 
-    final["per_day"] = round(((final["elapsed_time"] / days).total_seconds() / 3600.0), 1)
+    # Print table with total SCRUM times
+    totals: pd.DataFrame = df.sum()
 
-    table = Table(title="Totals and daily average")
+    table.add_section()
 
-    table.add_column("Allocated time", justify="center")
-    table.add_column("Time left", justify="center")
-    table.add_column("Elapsed time", justify="center")
-    table.add_column("Elapsed time per day", justify="center")
+    table.add_row(
+            "TOTAL",
+            str(dt_to_hours(totals["remaining_backlog_time"])),
+            str(dt_to_hours(totals["remaining_current_time"])),
+            str(dt_to_hours(totals["remaining_backlog_time"] / average_scrum_speed_last_weeks)),
+            # TODO: codificado en duro para 30 horas, posible parámetro
+            str(dt_to_hours(totals["remaining_backlog_time"] / 30.0))
+        , style="red bold")
 
-    # Add row
-    table.add_row(str(final["allocated_time"]),
-                    str(round(final["time_left"], 1)),
-                    str(final["elapsed_time"]),
-                    str(f'{final["per_day"]} hours'))
-
-    # Print
-    console = Console()
     console.print(table)
+    print()
+
 
 # ----------------------------------
 #

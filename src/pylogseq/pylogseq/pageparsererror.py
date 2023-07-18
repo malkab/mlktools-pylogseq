@@ -1,4 +1,6 @@
-from pylogseq.page import Page
+from pylogseq.forward_declarations import Page
+
+# TODO: DOCUMENT
 
 class PageParserError(Exception):
 

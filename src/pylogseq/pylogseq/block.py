@@ -1,16 +1,19 @@
 """This class takes a top block (the ones starting by "- " in text read from a
 Logseq page and parses it into Markdown, analyzing everything.
+
+Child blocks are not parsed separately, they are part of the parent block.
+
+TODO: THIS CLASS NEEDS A REVIEW IN DOC AFTER DROPPING THE S AND T OLD TAGS
+FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 """
 
 import re
 import marko
 import datetime
+from datetime import timedelta as td
 from typing import Any
-import hashlib
-from pylogseq.common import sanitize_content
 from pylogseq.parser import Parser
 from pylogseq.clock import Clock
-from pylogseq.forward_declarations import ClockBlock, Page
 from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
 from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
 from pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
@@ -30,15 +33,23 @@ from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadlin
 #
 # ----------------------------------
 class Block():
-    """A class to represent a top level block.
+    """A class to represent a top level block in a page. Subblocks are processed
+    as part of this block but not parsed on separate ones. We are only
+    interested in top level ones.
+
+    How SCRUM Works
+
+    A block can be given special tags to be used in SCRUM:
+
+    - SC/project/X:         SCRUM Backlog time X for project.
+    - SC/project/X + S/X:   SCRUM Sprint time X for project.
+    - SC/project + DONE:    SCRUM DONE task for project.
 
     Attributes:
-        tags (list[str]):
-            List of unique tags found in the block.
         content (str):
             Sanitized content of the block, in plain str, suitable for moving.
-        content_hash (str):
-            The hash of the sanitized content.
+        tags (list[str]):
+            List of unique tags found in the block.
         highest_priority (str):
             The highest priority found in the block.
         done (bool):
@@ -47,48 +58,47 @@ class Block():
             Is the block marked as later?
         now (bool):
             Is the block marked as now?
-        words (list[str]):
-            List of unique words found in the block (subject to exclusion).
         priorities (list[str]):
             Unique priorities found in the block.
-        logbook (list[Any]):
-            List of LogBook entries found in the block.
-        excluded_words (list[str]):
-            The list of excluded words for finding unquiue words.
+        clocks (list[Clock]):
+            List of LogBook entries found in the block, as Clock objects.
+        scrum_project (str):
+            The SCRUM project SC tags.
+        scrum_backlog_time (int):
+            The SCRUM Backlog time in SC/Project/X tag.
+        scrum_current_time (int):
+            The SCRUM sprint time in S/X time tags.
+        scheduled (datetime.datetime):
+            A scheduled date for the block, in the SCHEDULED tag.
+        deadline (datetime.datetime):
+            A deadline date for the block, in the DEADLINE tag.
+        title (str):
+            The title of the block, the first line of the content.
 
     Raises:
-        Exception: _description_
+        Exception:
+            If the block content is empty.
+        Exception:
+            If the SCRUM tag is invalid.
     """
+
 
     # ----------------------------------
     #
     # Constructor.
     #
     # ----------------------------------
-    def __init__(self, content: str=None, page: Page=None,
-                 order_in_page: int=None):
+    def __init__(self, content: str=None):
         """Constructor.
 
         Args:
             content (str):
                 The block's content in a plain str. This will be parsed by the
                 Markdown parser.
-            excluded_words (list[str], optional):
-                List of words to filter in the list of unique words. Defaults to
-                [].
         """
-        from .page import Page
 
-        self.content: str = sanitize_content(content) if content else None
+        self.content: str = content.strip("\n").strip() if content else None
         """Sanitized content of the block. Content for a block must start with '- '.
-        """
-
-        self.page: Page = page
-        """The page this block belongs to.
-        """
-
-        self.order_in_page = order_in_page
-        """The order in the page this block is in.
         """
 
         self.tags: list[str] = []
@@ -115,12 +125,23 @@ class Block():
         """Unique priorities found in the block.
         """
 
-        self.logbook: list[Any] = []
-        """List of LogBook entries found in the block.
+        self.clocks: list[Clock] = []
+        """List of LogBook entries found in the block, as Clock objects.
         """
 
-        self.allocated_time: int = None
-        """The allocated time for the block found in T tags.
+        self.scrum_project: str = None
+        """The tag that identifies the SCRUM project, if any. It is the second
+        item in a SCRUM S/Project/allocated/sprint tag. Must be present.
+        """
+
+        self.scrum_backlog_time: datetime.timedelta = None
+        """The allocated time for the block found in SCRUM tags. It is the third
+        item in a SCRUM S/Project/allocated/sprint tag. Must be present.
+        """
+
+        self.scrum_current_time: datetime.timedelta = None
+        """The sprint time for the block found in SCRUM tags. It is the fourth
+        item in a SCRUM S/Project/allocated/sprint tag. Can be absent.
         """
 
         self.scheduled: datetime.datetime = None
@@ -131,15 +152,6 @@ class Block():
         """The deadline date for the block.
         """
 
-        self.elapsed_time: datetime.timedelta = None
-        """The elapsed time for the block as the sum of the logbook entries.
-        """
-
-        self.time_left: datetime.timedelta = None
-        """The time left for the block as the difference between the allocated
-        time and the sum of the elapsed times in logbook entries.
-        """
-
         self.title: str = content.split("\n")[0].strip("- ").strip() if content \
             else None
         """The title of the block, the first line of the content, without '-'.
@@ -148,41 +160,74 @@ class Block():
 
     # ----------------------------------
     #
-    # Property id.
-    # ID of the block.
+    # Total clocked time for the block.
     #
     # ----------------------------------
     @property
-    def id(self) -> str:
-        """The hashed ID. It depends on the path of the parent page and the
-        content of the block.
+    def total_clocked_time(self) -> td:
+        """Returns the total clocked time for the block.
+
+        Returns:
+            td: Total clocked time.
         """
-        if self.content is None:
-            raise Exception("Can't compute ID for Block since content is None")
 
-        if self.order_in_page is None:
-            raise Exception("Can't compute ID for Block since order_in_page is None")
+        total: td = td(0)
 
-        try:
-            hash = f"{self.page.id}{self.content}{self.order_in_page}"
-            hash = hashlib.sha256(hash.encode())
-            return hash.hexdigest()
-        except(Exception) as e:
-            raise Exception(f"Can't compute ID for Block: check parent page exists and that has a valid ID")
+        for clock in self.clocks:
+            total += clock.elapsed
+
+        return total
 
 
     # ----------------------------------
     #
-    # Property time_left_hours.
-    # Get the time_left as a value in hours.
+    # Returns remaining backlog time, backlog time in the SCB tag minus total
+    # clocked time. If it is less than 0 a timedelta of 0 is returned.
     #
     # ----------------------------------
     @property
-    def time_left_hours(self) -> float:
-        if self.time_left is not None:
-            return self.time_left.total_seconds() / 3600.0
-        else:
-            return None
+    def scrum_remaining_backlog_time(self) -> td:
+        """Returns remaining backlog time, backlog time in the SCB tag minus
+        total clocked time. If it is less than 0 a timedelta of 0 is returned.
+
+        Returns:
+            td: A timedelta with the remaining backlog time, None if there is no
+                SCRUM backlog time.
+        """
+
+        if self.scrum_backlog_time is None: return None
+
+        diff: td = self.scrum_backlog_time - self.total_clocked_time
+
+        return diff if diff > td(0) else td(0)
+
+
+    # ----------------------------------
+    #
+    # Returns remaining current time, the time in SCC tags minus total clocked
+    # in the given sprint period, which is a Clock object. If it is less than
+    # 0 a timedelta of 0 is returned.
+    #
+    # ----------------------------------
+    def scrum_remaining_current_time(self, period: Clock) -> td:
+        """Returns remaining current time, the time in SCC tags minus total
+        time clocked in the given period (usually a sprint) as a Clock interval.
+        It it is less than 0 a timedelta of 0 is returned.
+
+        Args:
+            period (Clock): The period to calculate the intersections, usually
+                a sprint.
+
+        Returns:
+            td: The remaining current time in the period, None if there is no
+                SCRUM current time.
+        """
+
+        if self.scrum_current_time is None: return None
+
+        diff: td = self.scrum_current_time - self.total_intersection_time(period)
+
+        return diff if diff > td(0) else td(0)
 
 
     # ----------------------------------
@@ -195,9 +240,11 @@ class Block():
         anidated blocks.
 
         Raises:
-            Exception: Raises an exception if the block's content is empty.
-            Exception: Raises an exception if the allocated time in T tags
-                cannot be processed.
+            Exception:
+                Raises an exception if the block's content is empty.
+            Exception:
+                Raises an exception if the SCRUM S tag does not adhere to the
+                S/Project/allocated/sprint format.
         """
 
         if not self.content:
@@ -217,21 +264,76 @@ class Block():
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-        # Check if there is an allocated time tag T
-        if "T" in self.tags:
+        # Check for P project tags
+        if "P" in self.tags:
 
-            time_tag = list(filter(lambda x: x.startswith("T/"), self.tags))[0]
-
+            # Try to parse the project name
             try:
-                time_tag = int(re.sub(r"\D", "", time_tag))
-                self.allocated_time = datetime.timedelta(hours=time_tag)
+                project_tag = list(filter(lambda x: x.startswith("P/"), self.tags))
 
-                # Check if there is are clocked time
-                if self.elapsed_time is not None:
-                    self.time_left = self.allocated_time - self.elapsed_time
+                longest: str = sorted(project_tag, key=len, reverse=True)[0]
 
-            except:
-                raise Exception("Invalid allocated time tag: " + time_tag)
+                # Only 0 and 1 elements, the rest are subactivities and are
+                # ignored
+                self.scrum_project = "/".join(longest.split("/")[1:3])
+
+            except Exception:
+
+                raise Exception("Invalid Project tag: " + self.title)
+
+        # Check for SCB SCRUM TAGS
+        if "SCB" in self.tags:
+
+            # Try to parse the SCRUM tag
+            try:
+                time_tag = list(filter(lambda x: x.startswith("SCB/"), self.tags))[0]
+
+                # Get the time
+                time: int = int(time_tag.split("/")[1])
+
+                # Check if there is a backlog time
+                self.scrum_backlog_time = datetime.timedelta(hours=time)
+
+            except Exception:
+
+                raise Exception("Invalid SCB SCRUM tag: " + self.title)
+
+        # Check if there is a SCRUM tag SCC for current time
+        if "SCC" in self.tags:
+
+            # Try to parse the SCRUM tag
+            try:
+                time_tag = list(filter(lambda x: x.startswith("SCC/"), self.tags))[0]
+
+                # Get the time
+                time: int = int(time_tag.split("/")[1])
+
+                # Check if there is a backlog time
+                self.scrum_current_time = datetime.timedelta(hours=time)
+
+            except Exception:
+
+                raise Exception("Invalid SCC SCRUM tag: " + self.title)
+
+        # SCRUM exceptions
+
+        # Current time without Backlog time
+        if self.scrum_current_time is not None and self.scrum_backlog_time is None:
+            raise Exception("SCRUM SCC tag found without SCB tag: " + self.title)
+
+        # Backlog time without project
+        # Current time without project will not raise because there can't be
+        # SCC without SCB, so that exception will always trigger before this one
+        if self.scrum_project is None and \
+            self.scrum_backlog_time is not None:
+            raise Exception("SCRUM SCB assigned without P tag: " + self.title)
+
+        # DONE with P and with SCB
+        # Not needed to raise with SCC since SCC cannot exists without SCB
+        # and this exception triggers first.
+        if self.done and self.scrum_project is not None and \
+            self.scrum_backlog_time is not None:
+            raise Exception("SCRUM tags found in DONE block: " + self.title)
 
 
     # ----------------------------------
@@ -246,10 +348,6 @@ class Block():
         Args:
             item (Any):
                 A Markdown parsed object.
-
-        Raises:
-            Exception:
-                Raises an exception if a type of block item is unprocessable.
         """
         if \
             isinstance(item, marko.block.Document) or \
@@ -274,16 +372,7 @@ class Block():
 
         elif isinstance(item, LogseqClock):
             if item.target:
-                if self.elapsed_time is None:
-                    self.elapsed_time = item.target.elapsed
-                else:
-                    self.elapsed_time += item.target.elapsed
-
-                # Recalculate time left
-                if self.allocated_time is not None:
-                    self.time_left = self.allocated_time - self.elapsed_time
-
-                self.logbook.append(item.target)
+                self.clocks.append(item.target)
 
         elif isinstance(item, LogseqLater):
             self.later = True
@@ -317,19 +406,54 @@ class Block():
 
     # ----------------------------------
     #
-    # Expand this block making copies of it for each logbook entry.
+    # Clock block intersections.
     #
     # ----------------------------------
-    def get_clock_blocks(self) -> list[ClockBlock]:
+    def intersect_clock(self, clock: Clock) -> list[Clock]:
+        """Returns a list of Clock objects that are the intersections of the
+        clocks in this block with the given clock interval.
 
-        from pylogseq.clockblock import ClockBlock
+        Args:
+            clock (Clock):
+                The Clock interval to compute intersections with.
 
-        tuples = []
+        Returns:
+            list[Clock]:
+                The list of intersections of Clock objects in the block
+                with the given clock interval. Returns an empty list if no
+                collisions at all.
+        """
 
-        for logbook_entry in self.logbook:
-            tuples.append(ClockBlock(logbook_entry, self))
+        # Clock intersection
+        clocks: list[Clock] = [ c.intersect(clock) for c in self.clocks ]
 
-        return tuples
+        # Purge Nones
+        return [ c for c in clocks if c is not None ]
+
+
+    # ----------------------------------
+    #
+    # Returns total time as a timedelta of clocks intersecting another one.
+    #
+    # ----------------------------------
+    def total_intersection_time(self, clock: Clock) -> datetime.timedelta:
+        """Returns the total time as a timedelta of the clocks of this block
+        as they intersect with the given clock interval.
+
+        Args:
+            clock (Clock): The interval to test intersections with.
+
+        Returns:
+            datetime.timedelta: Total time of intersection.
+        """
+
+        total_time: td = td(0)
+
+        # Iterate intersections and sum
+        for inter in self.intersect_clock(clock):
+            total_time += inter.elapsed
+
+        return total_time
 
 
     # ----------------------------------
@@ -343,13 +467,5 @@ class Block():
         Returns:
             str: representation of the block.
         """
-        graph_title = "No graph defined"
-        page_title = "No page defined"
 
-        if self.page:
-            page_title = self.page.title
-
-            if self.page.graph:
-                graph_title = self.page.graph.title
-
-        return f"Block({graph_title}, {page_title}, {self.title})"
+        return f"Block({self.title})"

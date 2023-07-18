@@ -17,3 +17,7 @@ class LogseqParse:
     elements = [ LogseqDone, LogseqLater, LogseqDeadline, LogseqScheduled,
         LogseqClock, LogseqLogBook, LogseqEnd, LogseqComposedTag, LogseqTag,
         LogseqSquareTag, LogseqPriority, LogseqNow ]
+
+    parser_mixins = []
+
+    renderer_mixins = []
