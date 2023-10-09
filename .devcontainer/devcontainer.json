@@ -1,47 +1,54 @@
 {
-  "image": "malkab/python:3.11-bullseye",
-  "name": "pylogseq-dev-container",
+    "image": "malkab/python:3.11-bullseye",
+    "name": "pylogseq-dev-container",
 
-  "runArgs": [
-    "--network=host",
-    "--name=pylogseq-dev-container"
-  ],
+    "runArgs": [
+        "--network=host",
+        "--name=pylogseq-dev-container"
+    ],
 
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "donjayamanne.githistory",
-        "GitHub.copilot",
-        "mechatroner.rainbow-csv",
-        "mhutchie.git-graph",
-        "ms-python.isort",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-toolsai.jupyter-keymap",
-        "ms-toolsai.jupyter-renderers",
-        "ms-toolsai.jupyter",
-        "ms-toolsai.vscode-jupyter-cell-tags",
-        "ms-toolsai.vscode-jupyter-slideshow",
-        "njpwerner.autodocstring",
-        "redhat.vscode-yaml",
-        "Tyriar.lorem-ipsum"
-      ]
-    }
-  },
+    "customizations": {
+        "vscode": {
+        "extensions": [
+            "donjayamanne.githistory",
+            "GitHub.copilot",
+            "mechatroner.rainbow-csv",
+            "mhutchie.git-graph",
+            "ms-python.isort",
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-toolsai.jupyter-keymap",
+            "ms-toolsai.jupyter-renderers",
+            "ms-toolsai.jupyter",
+            "ms-toolsai.vscode-jupyter-cell-tags",
+            "ms-toolsai.vscode-jupyter-slideshow",
+            "njpwerner.autodocstring",
+            "redhat.vscode-yaml",
+            "Tyriar.lorem-ipsum"
+        ]
+        }
+    },
 
-  // Add ENVVARS to the container here:
-  // "SOMETHING": "A_VALUE"
-  // "containerEnv": {
-  //   "PYTHONPATH": "${PYTHONPATH};/workspaces/mlktools-pylogseq/src/pylogseq"
-  // },
+    // Add ENVVARS to the container here:
+    // "SOMETHING": "A_VALUE"
+    // "containerEnv": {
+    //   "PYTHONPATH": "${PYTHONPATH};/workspaces/mlktools-pylogseq/src/pylogseq"
+    // },
 
-  "mounts": [
-    "type=bind,source=${localEnv:HOME}/.mlkctxt,target=/home/user{{ cookiecutter.docker_remote_user }}/.mlkctxt"
-  ],
+    // Add remote ENVVARS to the container here:
+    // "SOMETHING": "SOMETHING:${localEnv:SOMETHING}"
+    "remoteEnv": { },
 
-  "remoteUser": "1000",
+    // Add mounts here:
+    // "type=bind,source=/something,target=/something,readonly"
+    "mounts": [
+        "type=bind,source=${localEnv:HOME}/.mlkctxt,target=/home/user1000/.mlkctxt,readonly",
+        "type=bind,source=${localEnv:HOME}/.gitconfig,target=/home/user1000/.gitconfig,readonly"
+    ],
 
-  "postCreateCommand": "bash -c \"./.devcontainer/post_install.sh\"",
+    "remoteUser": "1000",
 
-  "postStartCommand": "bash -c \"echo postStartCommand\""
+    "postCreateCommand": "bash -c \"./.devcontainer/assets/post_install.sh\"",
+
+    "postStartCommand": "bash -c \"echo postStartCommand\""
 }

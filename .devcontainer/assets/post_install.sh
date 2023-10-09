@@ -18,16 +18,22 @@ sudo apt-get install -y \
 
 # sudo rm -rf /var/lib/apt/lists/*
 
-# PIP installs
-python -m pip install --upgrade pip
-python -m pip install --upgrade build
+# Update pip
+/usr/local/bin/python3 -m pip install --upgrade pip
 
-pip install -U \
-  marko==2.* \
-  pytest \
-  pytest-watch \
-  pyinstaller \
-  typer[all] \
-  pandas \
-  jinja2 \
-  arrow==1.*
+# PIP installs
+/usr/local/bin/python3 -m pip install --upgrade \
+    pytest \
+    pytest-watch \
+    build \
+    marko==2.* \
+    pyinstaller \
+    typer[all] \
+    pandas \
+    jinja2 \
+    arrow==1.*
+
+# Install Wheels packages
+# /usr/local/bin/python3 -m pip install \
+#     whl_packages/whatever.whl \
+#     whatever

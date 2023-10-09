@@ -11,7 +11,8 @@ import re
 import marko
 import datetime
 from datetime import timedelta as td
-from typing import Any
+from typing import Any, Self
+
 from pylogseq.parser import Parser
 from pylogseq.clock import Clock
 from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
@@ -37,14 +38,6 @@ class Block():
     as part of this block but not parsed on separate ones. We are only
     interested in top level ones.
 
-    How SCRUM Works
-
-    A block can be given special tags to be used in SCRUM:
-
-    - SC/project/X:         SCRUM Backlog time X for project.
-    - SC/project/X + S/X:   SCRUM Sprint time X for project.
-    - SC/project + DONE:    SCRUM DONE task for project.
-
     Attributes:
         content (str):
             Sanitized content of the block, in plain str, suitable for moving.
@@ -58,16 +51,12 @@ class Block():
             Is the block marked as later?
         now (bool):
             Is the block marked as now?
+        waiting (bool):
+            TODO
         priorities (list[str]):
             Unique priorities found in the block.
         clocks (list[Clock]):
             List of LogBook entries found in the block, as Clock objects.
-        scrum_project (str):
-            The SCRUM project SC tags.
-        scrum_backlog_time (int):
-            The SCRUM Backlog time in SC/Project/X tag.
-        scrum_current_time (int):
-            The SCRUM sprint time in S/X time tags.
         scheduled (datetime.datetime):
             A scheduled date for the block, in the SCHEDULED tag.
         deadline (datetime.datetime):
@@ -121,27 +110,16 @@ class Block():
         """Flag to signal that the block is marked as now.
         """
 
+        self.waiting: bool = False
+        """Flag to signal that the block is marked as waiting.
+        """
+
         self.priorities: list[str] = []
         """Unique priorities found in the block.
         """
 
         self.clocks: list[Clock] = []
         """List of LogBook entries found in the block, as Clock objects.
-        """
-
-        self.scrum_project: str = None
-        """The tag that identifies the SCRUM project, if any. It is the second
-        item in a SCRUM S/Project/allocated/sprint tag. Must be present.
-        """
-
-        self.scrum_backlog_time: datetime.timedelta = None
-        """The allocated time for the block found in SCRUM tags. It is the third
-        item in a SCRUM S/Project/allocated/sprint tag. Must be present.
-        """
-
-        self.scrum_current_time: datetime.timedelta = None
-        """The sprint time for the block found in SCRUM tags. It is the fourth
-        item in a SCRUM S/Project/allocated/sprint tag. Can be absent.
         """
 
         self.scheduled: datetime.datetime = None
@@ -264,77 +242,6 @@ class Block():
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-        # Check for P project tags
-        if "P" in self.tags:
-
-            # Try to parse the project name
-            try:
-                project_tag = list(filter(lambda x: x.startswith("P/"), self.tags))
-
-                longest: str = sorted(project_tag, key=len, reverse=True)[0]
-
-                # Only 0 and 1 elements, the rest are subactivities and are
-                # ignored
-                self.scrum_project = "/".join(longest.split("/")[1:3])
-
-            except Exception:
-
-                raise Exception("Invalid Project tag: " + self.title)
-
-        # Check for SCB SCRUM TAGS
-        if "SCB" in self.tags:
-
-            # Try to parse the SCRUM tag
-            try:
-                time_tag = list(filter(lambda x: x.startswith("SCB/"), self.tags))[0]
-
-                # Get the time
-                time: int = int(time_tag.split("/")[1])
-
-                # Check if there is a backlog time
-                self.scrum_backlog_time = datetime.timedelta(hours=time)
-
-            except Exception:
-
-                raise Exception("Invalid SCB SCRUM tag: " + self.title)
-
-        # Check if there is a SCRUM tag SCC for current time
-        if "SCC" in self.tags:
-
-            # Try to parse the SCRUM tag
-            try:
-                time_tag = list(filter(lambda x: x.startswith("SCC/"), self.tags))[0]
-
-                # Get the time
-                time: int = int(time_tag.split("/")[1])
-
-                # Check if there is a backlog time
-                self.scrum_current_time = datetime.timedelta(hours=time)
-
-            except Exception:
-
-                raise Exception("Invalid SCC SCRUM tag: " + self.title)
-
-        # SCRUM exceptions
-
-        # Current time without Backlog time
-        if self.scrum_current_time is not None and self.scrum_backlog_time is None:
-            raise Exception("SCRUM SCC tag found without SCB tag: " + self.title)
-
-        # Backlog time without project
-        # Current time without project will not raise because there can't be
-        # SCC without SCB, so that exception will always trigger before this one
-        if self.scrum_project is None and \
-            self.scrum_backlog_time is not None:
-            raise Exception("SCRUM SCB assigned without P tag: " + self.title)
-
-        # DONE with P and with SCB
-        # Not needed to raise with SCC since SCC cannot exists without SCB
-        # and this exception triggers first.
-        if self.done and self.scrum_project is not None and \
-            self.scrum_backlog_time is not None:
-            raise Exception("SCRUM tags found in DONE block: " + self.title)
-
 
     # ----------------------------------
     #
@@ -454,6 +361,37 @@ class Block():
             total_time += inter.elapsed
 
         return total_time
+
+
+    # ----------------------------------
+    #
+    # Add a tag to the end of the title (first line).
+    #
+    # ----------------------------------
+    def add_tag_to_title(self, tag: str) -> Self:
+        """Adds a tag to the block's title, the first line. This is very
+        useful to add a tag to a block in the index graph, for example to
+        note the origin of the block.
+
+        Args:
+            tag (str): The tag to add.
+
+        Returns:
+            Self: The block itself.
+        """
+
+        # Split content line by line
+        lines: list[str] = self.content.split("\n")
+
+        # Add tag to the end of the first line
+        lines[0] += f" #[[{tag}]]"
+
+        # Join the lines
+        self.title = lines[0]
+        self.content = "\n".join(lines)
+
+        # Return this
+        return self
 
 
     # ----------------------------------

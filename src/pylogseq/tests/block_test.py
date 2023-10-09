@@ -60,11 +60,9 @@ class TestBlock:
         assert b.done is False
         assert b.later is False
         assert b.now is False
+        assert b.waiting is False
         assert b.priorities == []
         assert b.clocks == []
-        assert b.scrum_project is None
-        assert b.scrum_backlog_time is None
-        assert b.scrum_current_time is None
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title is None
@@ -78,11 +76,9 @@ class TestBlock:
         assert b.done is False
         assert b.later is False
         assert b.now is False
+        assert b.waiting is False
         assert b.priorities == []
         assert b.clocks == []
-        assert b.scrum_project is None
-        assert b.scrum_backlog_time is None
-        assert b.scrum_current_time is None
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title == "A block"
@@ -118,9 +114,6 @@ class TestBlock:
         block.parse()
 
         assert block.title == "[#A] A block at page **test_2_page** in graph **test_2**"
-        assert block.highest_priority == "A"
-        assert block.scrum_project == None
-        assert block.scrum_backlog_time == None
 
 
     # ----------------------------------
@@ -143,12 +136,6 @@ class TestBlock:
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Client/Project"
-        assert block.scrum_backlog_time == td(hours=2)
-        assert block.scrum_current_time == td(hours=1)
-        assert block.scrum_remaining_backlog_time == td(hours=2)
-        assert block.scrum_remaining_current_time(
-            Clock(dt(2023, 10, 10, 10, 00), dt(2023, 10, 11, 10, 00))) == td(hours=1)
 
         # No current time assigned
         block: Block = Block(content="""- SCRUM TEST #P/Client/Project/SubactivityB #SCB/2""")
@@ -162,9 +149,6 @@ class TestBlock:
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Client/Project"
-        assert block.scrum_backlog_time == td(hours=2)
-        assert block.scrum_current_time is None
 
         # Done SCRUM
         block: Block = Block(content="""- DONE SCRUM TEST #P/Client""")
@@ -178,38 +162,6 @@ class TestBlock:
         assert block.now is False
         assert block.priorities == [ ]
         assert block.highest_priority is None
-        assert block.scrum_project == "Client"
-        assert block.scrum_backlog_time is None
-        assert block.scrum_current_time is None
-
-        # Incorrect project tag
-        block: Block = Block(content="""- SCRUM TEST #P""")
-
-        with pytest.raises(Exception, match="Invalid Project tag: SCRUM TEST #P"):
-            block.parse()
-
-        # Current sprint time assigned with SCC without SCB tag
-        block: Block = Block(content="""- SCRUM TEST #SCC/1""")
-
-        with pytest.raises(Exception, match="SCRUM SCC tag found without SCB tag: SCRUM TEST #SCC/1"):
-            block.parse()
-
-        # Backlog time assigned without project
-        # Not needed to raise with SCC since SCC cannot exists without SCB
-        # and this exception triggers first.
-        block: Block = Block(
-            content="- SCRUM TEST #SCB/1")
-
-        with pytest.raises(Exception, match="SCRUM SCB assigned without P tag: SCRUM TEST #SCB/1"):
-            block.parse()
-
-        # Time SCB assigned to DONE
-        # Not needed to raise with SCC since SCC cannot exists without SCB
-        # and this exception triggers first.
-        block: Block = Block(content="- DONE SCRUM TEST #P/Client/Project #SCB/1")
-
-        with pytest.raises(Exception, match="SCRUM tags found in DONE block: DONE SCRUM TEST #P/Client/Project #SCB/1"):
-            block.parse()
 
 
     # ----------------------------------
@@ -277,3 +229,53 @@ class TestBlock:
         block.parse()
 
         assert block.total_clocked_time == td(minutes=50)
+
+
+    # ----------------------------------
+    #
+    # Tests add_tag_to_title method.
+    #
+    # ----------------------------------
+    #@pytest.mark.skip
+    def test_add_tag_to_title(self):
+        """Tests the add_tag_to_title, that allows to add a tag to the title
+        of a block, effectively adding the tag to the first line of it.
+        """
+
+        block: Block = Block(content="""- A block #Test/A #Test/B
+  :LOGBOOK:
+  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+  :END:
+  Algo aquí
+  - Otra cosa aquí
+""")
+
+        block.parse()
+
+        block.add_tag_to_title("Test/C")
+
+        assert block.title == "- A block #Test/A #Test/B #[[Test/C]]"
+
+        assert block.content == """- A block #Test/A #Test/B #[[Test/C]]
+  :LOGBOOK:
+  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+  :END:
+  Algo aquí
+  - Otra cosa aquí"""
+
+        block.add_tag_to_title("L/Otra Tag/Compleja con espacios")
+
+        assert block.title == "- A block #Test/A #Test/B #[[Test/C]] #[[L/Otra Tag/Compleja con espacios]]"
+
+        assert block.content == """- A block #Test/A #Test/B #[[Test/C]] #[[L/Otra Tag/Compleja con espacios]]
+  :LOGBOOK:
+  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+  :END:
+  Algo aquí
+  - Otra cosa aquí"""
