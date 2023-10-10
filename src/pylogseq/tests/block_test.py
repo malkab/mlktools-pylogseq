@@ -271,7 +271,26 @@ class TestBlock:
 
         assert block.title == "- A block #Test/A #Test/B #[[Test/C]] #[[L/Otra Tag/Compleja con espacios]]"
 
+        assert block.tags == [ 'L', 'L/Otra Tag',
+                               'L/Otra Tag/Compleja con espacios', 'Test',
+                               'Test/A', 'Test/B', 'Test/C' ]
+
         assert block.content == """- A block #Test/A #Test/B #[[Test/C]] #[[L/Otra Tag/Compleja con espacios]]
+  :LOGBOOK:
+  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
+  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
+  :END:
+  Algo aquí
+  - Otra cosa aquí"""
+
+        block.remove_tag_from_title("L/Otra Tag/Compleja con espacios")
+
+        assert block.title == "- A block #Test/A #Test/B #[[Test/C]]"
+
+        assert block.tags == [ 'Test', 'Test/A', 'Test/B', 'Test/C' ]
+
+        assert block.content == """- A block #Test/A #Test/B #[[Test/C]]
   :LOGBOOK:
   CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
   CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00

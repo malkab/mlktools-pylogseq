@@ -1,5 +1,5 @@
 from marko import inline
-from pylogseq.mdlogseq.elements_parsers.processmultitags import processMultiTags
+from .process_multi_tags import process_multi_tags
 
 # TODO: DOCUMENT
 
@@ -10,4 +10,4 @@ class LogseqComposedTag(inline.InlineElement):
   priority = 7
 
   def __init__(self, match):
-    self.target = processMultiTags(match.group(1))
+    self.target = process_multi_tags(match.group(1))

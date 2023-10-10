@@ -11,7 +11,7 @@ import re
 import marko
 import datetime
 from datetime import timedelta as td
-from typing import Any, Self
+from typing import Any, Self, List
 
 from pylogseq.parser import Parser
 from pylogseq.clock import Clock
@@ -27,6 +27,7 @@ from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
 from pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
 from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
 from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
+from pylogseq.mdlogseq.elements_parsers.process_multi_tags import process_multi_tags
 
 # ----------------------------------
 #
@@ -389,6 +390,41 @@ class Block():
         # Join the lines
         self.title = lines[0]
         self.content = "\n".join(lines)
+
+        # Update tags
+        self.tags.extend(process_multi_tags(tag))
+
+        self.tags = list(sorted(list(set(self.tags))))
+
+        # Return this
+        return self
+
+
+    # ----------------------------------
+    #
+    # Removes a tag from title (first line).
+    #
+    # ----------------------------------
+    def remove_tag_from_title(self, tag: str) -> Self:
+        # TODO: USE THE CLASS DOCSTRING SNIPPET HERE TO DOCUMENT THE CLASS
+        # TODO: USE THE AUTODOCSTRING EXTENSION (CTRL + SHIFT + 2) TO DOCUMENT METHODS
+
+        # Split content line by line
+        lines: list[str] = self.content.split("\n")
+
+        # Add tag to the end of the first line
+        lines[0] = lines[0].replace(f"#[[{tag}]]", "") \
+                           .replace(f"#{tag}", "").strip()
+
+        # Join the lines
+        self.title = lines[0]
+        self.content = "\n".join(lines)
+
+        # Update tags
+        for tag in process_multi_tags(tag):
+            self.tags.remove(tag)
+
+        self.tags = list(sorted(list(set(self.tags))))
 
         # Return this
         return self

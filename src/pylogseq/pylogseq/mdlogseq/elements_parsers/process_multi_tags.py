@@ -1,8 +1,10 @@
+from typing import List
+
 # TODO: DOCUMENT
 
 # Process a tag in the form A/B/C and return
 # all tags
-def processMultiTags(tag):
+def process_multi_tags(tag) -> List:
   out = []
   sp = str.split(tag, "/")
 

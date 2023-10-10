@@ -26,9 +26,11 @@ class TestIntergraphOperations:
         # Read a page in graph_a
         page_a = Page(path="tests/assets/graph_a/journals/2023_03_30.md")
 
-        blocks: List[Block] = page_a.read_page_file()
+        page_a.read_page_file()
 
         # Parse it
-        page_a.parse()
+        blocks: List[Block] = page_a.parse()
 
-        TODO: MOVE A BLOCK BETWEEN GRAPHS
+        TODO CONTINUAR AQUÍ PROBANDO MOVER UN BLOQUE DE UNA PÁGINA A OTRA
+
+        pass

@@ -1,6 +1,7 @@
 from pylogseq.mdlogseq.exceptions.errorclock import ErrorClock
 from pylogseq.parser import Parser
 import pylogseq.mdlogseq.elements_parsers as le
+
 import marko
 import pytest
 import datetime
@@ -338,3 +339,16 @@ class TestParser:
         assert parsed.children[0].children[0].children[0].children[1].target == datetime.datetime(2023, 8, 2, 0, 0, 0)
 
         assert parsed.children[0].children[0].children[0].children[2].target == datetime.datetime(2023, 8, 6, 10, 0, 0)
+
+
+    # ----------------------------------
+    #
+    # Tests the parser process_multi_tags method.
+    #
+    # ----------------------------------
+    #@pytest.mark.skip
+    def test_process_multi_tags(self):
+        """Tests the parser process_multi_tags method.
+        """
+
+        assert le.process_multi_tags("A/B/C") == [ "A", "A/B", "A/B/C" ]

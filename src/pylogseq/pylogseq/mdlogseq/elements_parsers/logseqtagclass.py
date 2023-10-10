@@ -1,5 +1,5 @@
 from marko import inline
-from pylogseq.mdlogseq.elements_parsers.processmultitags import processMultiTags
+from .process_multi_tags import process_multi_tags
 from re import Match
 
 # TODO: DOCUMENT
@@ -22,4 +22,4 @@ class LogseqTag(inline.InlineElement):
     Args:
         match (Match): The match from the pattern.
     """
-    self.target = processMultiTags(match.group(1))
+    self.target = process_multi_tags(match.group(1))

@@ -1,5 +1,6 @@
 from pylogseq.block import Block
 from pylogseq.pageparsererror import PageParserError
+from typing import List
 import os
 import re
 
@@ -50,7 +51,7 @@ class Page():
     # Parse the page's Markdown.
     #
     # ----------------------------------
-    def parse(self) -> any:
+    def parse(self) -> List[Block]:
         """Parses the page's Markdown.
 
         Args:
@@ -122,7 +123,7 @@ class Page():
         with open(self.path, "r") as f:
             self.content = (f.read()).strip("\n").strip()
 
-            return self
+        return self
 
 
     # ----------------------------------

@@ -12,7 +12,7 @@ root: <%= GITDIRF %>/mlktools/mlktools-pylogseq
 
 windows:
   - docker: >
-      cd docker ;
+      cd .devcontainer/scripts ;
       sleep 0.2 ;
       clear ;
       echo Run dev environment at 010
