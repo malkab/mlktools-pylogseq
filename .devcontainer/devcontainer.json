@@ -31,9 +31,10 @@
 
     // Add ENVVARS to the container here:
     // "SOMETHING": "A_VALUE"
-    // "containerEnv": {
-    //   "PYTHONPATH": "${PYTHONPATH};/workspaces/mlktools-pylogseq/src/pylogseq"
-    // },
+    "containerEnv": {
+        "PYTHONPATH": "${PYTHONPATH}:/workspaces/mlktools-pylogseq/src/pylogseq",
+        "PATH": "${PATH}:/home/user1000/.local/bin"
+    },
 
     // Add remote ENVVARS to the container here:
     // "SOMETHING": "SOMETHING:${localEnv:SOMETHING}"
