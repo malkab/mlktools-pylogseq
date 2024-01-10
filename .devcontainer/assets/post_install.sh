@@ -12,11 +12,11 @@ sudo apt-get update
 sudo apt-get install -y \
     git
 
-# sudo apt-get -y upgrade
+sudo apt-get -y upgrade
 
-# sudo ldconfig
+sudo ldconfig
 
-# sudo rm -rf /var/lib/apt/lists/*
+sudo rm -rf /var/lib/apt/lists/*
 
 # Update pip
 /usr/local/bin/python3 -m pip install --upgrade pip

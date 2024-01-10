@@ -11,7 +11,7 @@ DEV_CONTAINER_ID=pylogseq-dev-container
 
 # The folder of the repo, as seen inside the Dev Container
 # It can be checked in the console of VSC once the DC is fired
-REPODIR=/workspaces/mlktools-pylogseq
+REPODIR=/home/git/mlktools/mlktools-pylogseq
 
 # Default user
 USER=1000:1000

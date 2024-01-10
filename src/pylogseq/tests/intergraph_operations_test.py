@@ -10,7 +10,8 @@ from pylogseq.block import Block
 #
 # ----------------------------------
 
-#@pytest.mark.skip
+
+# @pytest.mark.skip
 class TestIntergraphOperations:
     # TODO: AUTODOCSTRING HERE (C+S+2)
 
@@ -19,7 +20,7 @@ class TestIntergraphOperations:
     # Test opening comment
     #
     # ----------------------------------
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_test_name(self):
         # TODO: AUTODOCSTRING HERE (C+S+2)
 
@@ -31,6 +32,6 @@ class TestIntergraphOperations:
         # Parse it
         blocks: List[Block] = page_a.parse()
 
-        TODO CONTINUAR AQUÍ PROBANDO MOVER UN BLOQUE DE UNA PÁGINA A OTRA
+        # TODO CONTINUAR AQUÍ PROBANDO MOVER UN BLOQUE DE UNA PÁGINA A OTRA
 
         pass
