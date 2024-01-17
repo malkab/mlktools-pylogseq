@@ -7,11 +7,11 @@ TODO: THIS CLASS NEEDS A REVIEW IN DOC AFTER DROPPING THE S AND T OLD TAGS
 FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 """
 
-import re
 import marko
+import marko.inline as marko_inline
 import datetime
 from datetime import timedelta as td
-from typing import Any, Self, List
+from typing import Any, Self
 
 from pylogseq.parser import Parser
 from pylogseq.clock import Clock
@@ -29,12 +29,13 @@ from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqSchedu
 from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
 from pylogseq.mdlogseq.elements_parsers.process_multi_tags import process_multi_tags
 
+
 # ----------------------------------
 #
 # Block class.
 #
 # ----------------------------------
-class Block():
+class Block:
     """A class to represent a top level block in a page. Subblocks are processed
     as part of this block but not parsed on separate ones. We are only
     interested in top level ones.
@@ -72,13 +73,12 @@ class Block():
             If the SCRUM tag is invalid.
     """
 
-
     # ----------------------------------
     #
     # Constructor.
     #
     # ----------------------------------
-    def __init__(self, content: str=None):
+    def __init__(self, content: str):
         """Constructor.
 
         Args:
@@ -87,7 +87,7 @@ class Block():
                 Markdown parser.
         """
 
-        self.content: str = content.strip("\n").strip() if content else None
+        self.content: str = content.strip("\n").strip()
         """Sanitized content of the block. Content for a block must start with '- '.
         """
 
@@ -95,7 +95,7 @@ class Block():
         """List of unique tags found in the block.
         """
 
-        self.highest_priority: str = None
+        self.highest_priority: str | None = None
         """The highest priority found in the block.
         """
 
@@ -123,19 +123,17 @@ class Block():
         """List of LogBook entries found in the block, as Clock objects.
         """
 
-        self.scheduled: datetime.datetime = None
+        self.scheduled: datetime.datetime | None = None
         """The scheduled date for the block.
         """
 
-        self.deadline: datetime.datetime = None
+        self.deadline: datetime.datetime | None = None
         """The deadline date for the block.
         """
 
-        self.title: str = content.split("\n")[0].strip("- ").strip() if content \
-            else None
+        self.title: str = content.split("\n")[0].strip("- ").strip()
         """The title of the block, the first line of the content, without '-'.
         """
-
 
     # ----------------------------------
     #
@@ -156,58 +154,6 @@ class Block():
             total += clock.elapsed
 
         return total
-
-
-    # ----------------------------------
-    #
-    # Returns remaining backlog time, backlog time in the SCB tag minus total
-    # clocked time. If it is less than 0 a timedelta of 0 is returned.
-    #
-    # ----------------------------------
-    @property
-    def scrum_remaining_backlog_time(self) -> td:
-        """Returns remaining backlog time, backlog time in the SCB tag minus
-        total clocked time. If it is less than 0 a timedelta of 0 is returned.
-
-        Returns:
-            td: A timedelta with the remaining backlog time, None if there is no
-                SCRUM backlog time.
-        """
-
-        if self.scrum_backlog_time is None: return None
-
-        diff: td = self.scrum_backlog_time - self.total_clocked_time
-
-        return diff if diff > td(0) else td(0)
-
-
-    # ----------------------------------
-    #
-    # Returns remaining current time, the time in SCC tags minus total clocked
-    # in the given sprint period, which is a Clock object. If it is less than
-    # 0 a timedelta of 0 is returned.
-    #
-    # ----------------------------------
-    def scrum_remaining_current_time(self, period: Clock) -> td:
-        """Returns remaining current time, the time in SCC tags minus total
-        time clocked in the given period (usually a sprint) as a Clock interval.
-        It it is less than 0 a timedelta of 0 is returned.
-
-        Args:
-            period (Clock): The period to calculate the intersections, usually
-                a sprint.
-
-        Returns:
-            td: The remaining current time in the period, None if there is no
-                SCRUM current time.
-        """
-
-        if self.scrum_current_time is None: return None
-
-        diff: td = self.scrum_current_time - self.total_intersection_time(period)
-
-        return diff if diff > td(0) else td(0)
-
 
     # ----------------------------------
     #
@@ -243,7 +189,6 @@ class Block():
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-
     # ----------------------------------
     #
     # Recursive function to process the block's content.
@@ -257,22 +202,22 @@ class Block():
             item (Any):
                 A Markdown parsed object.
         """
-        if \
-            isinstance(item, marko.block.Document) or \
-            isinstance(item, marko.block.List) or \
-            isinstance(item, marko.block.ListItem) or \
-            isinstance(item, marko.block.Paragraph) or \
-            isinstance(item, marko.block.FencedCode) or \
-            isinstance(item, marko.block.Heading) or \
-            isinstance(item, marko.inline.StrongEmphasis): \
-
+        if (
+            isinstance(item, marko.block.Document)
+            or isinstance(item, marko.block.List)
+            or isinstance(item, marko.block.ListItem)
+            or isinstance(item, marko.block.Paragraph)
+            or isinstance(item, marko.block.FencedCode)
+            or isinstance(item, marko.block.Heading)
+            or isinstance(item, marko_inline.StrongEmphasis)
+        ):
             for child in item.children:
                 self._process(child)
 
         elif isinstance(item, LogseqDone):
             self.done = True
 
-        elif isinstance(item, marko.inline.RawText):
+        elif isinstance(item, marko_inline.RawText):
             pass
 
         elif isinstance(item, LogseqPriority):
@@ -288,29 +233,26 @@ class Block():
         elif isinstance(item, LogseqNow):
             self.now = True
 
-        elif \
-            isinstance(item, LogseqTag) or \
-            isinstance(item, LogseqComposedTag) or \
-            isinstance(item, LogseqSquareTag):
-
+        elif (
+            isinstance(item, LogseqTag)
+            or isinstance(item, LogseqComposedTag)
+            or isinstance(item, LogseqSquareTag)
+        ):
             self.tags.extend(item.target)
 
         elif isinstance(item, LogseqScheduled):
-
             self.scheduled = item.target
 
         elif isinstance(item, LogseqDeadline):
-
             self.deadline = item.target
 
-        elif \
-            isinstance(item, marko.inline.LineBreak) or \
-            isinstance(item, marko.block.BlankLine) or \
-            isinstance(item, LogseqLogBook) or \
-            isinstance(item, LogseqEnd):
-
+        elif (
+            isinstance(item, marko_inline.LineBreak)
+            or isinstance(item, marko.block.BlankLine)
+            or isinstance(item, LogseqLogBook)
+            or isinstance(item, LogseqEnd)
+        ):
             pass
-
 
     # ----------------------------------
     #
@@ -333,11 +275,10 @@ class Block():
         """
 
         # Clock intersection
-        clocks: list[Clock] = [ c.intersect(clock) for c in self.clocks ]
+        clocks: list[Clock] = [c.intersect(clock) for c in self.clocks]
 
         # Purge Nones
-        return [ c for c in clocks if c is not None ]
-
+        return [c for c in clocks if c is not None]
 
     # ----------------------------------
     #
@@ -362,7 +303,6 @@ class Block():
             total_time += inter.elapsed
 
         return total_time
-
 
     # ----------------------------------
     #
@@ -399,7 +339,6 @@ class Block():
         # Return this
         return self
 
-
     # ----------------------------------
     #
     # Removes a tag from title (first line).
@@ -413,8 +352,7 @@ class Block():
         lines: list[str] = self.content.split("\n")
 
         # Add tag to the end of the first line
-        lines[0] = lines[0].replace(f"#[[{tag}]]", "") \
-                           .replace(f"#{tag}", "").strip()
+        lines[0] = lines[0].replace(f"#[[{tag}]]", "").replace(f"#{tag}", "").strip()
 
         # Join the lines
         self.title = lines[0]
@@ -428,7 +366,6 @@ class Block():
 
         # Return this
         return self
-
 
     # ----------------------------------
     #

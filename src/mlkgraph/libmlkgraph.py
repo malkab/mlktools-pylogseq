@@ -11,9 +11,10 @@ from datetime import timedelta as td
 # Parses a graph.
 #
 # ----------------------------------
-def parse_graph(graph: Graph,
-                filter: Callable[[Block], Tuple[list[Page], list[Block]]]=lambda block: True) -> \
-                    Tuple[list[Page], list[Block]]:
+def parse_graph(
+    graph: Graph,
+    filter: Callable[[Block], bool] = lambda block: True,
+) -> Tuple[list[Page], list[Block]]:
     """Parses pages and blocks from the given graph, with error handling
     and progress indicator.
 
@@ -85,7 +86,7 @@ def total_time_period(blocks: list[Block], period: Clock) -> td:
 # Returns a datetime.timedelta in fraction of hours, with optional rounding.
 #
 # ----------------------------------
-def dt_to_hours(dt: td, r: int=1) -> float:
+def dt_to_hours(dt: td, r: int = 1) -> float:
     """Returns a timedelta in fraction of hours, with optional rounding.
 
     Args:
@@ -95,12 +96,6 @@ def dt_to_hours(dt: td, r: int=1) -> float:
     Returns:
         float: The number of fraction of hours
     """
-
-
-    # If None, return None
-    if dt is None:
-        return None
-
     hours = dt.total_seconds() / 3600.0
 
     if r is not None:

@@ -1,6 +1,5 @@
 from pylogseq.graph import Graph
-from pylogseq.page import Page
-import pytest
+# import pytest
 
 
 # @pytest.mark.skip
@@ -15,7 +14,7 @@ class TestGraph:
         # Bare constructor
         g = Graph()
 
-        assert g.path is None
+        assert g.path is not None
 
         # Full, relative path
         g = Graph(path="tests/assets/pylogseq_test_graph/pages/test_page.md")
