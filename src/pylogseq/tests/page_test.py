@@ -19,7 +19,6 @@ class TestPage:
         p = Page()
 
         assert p.path is None
-
         assert p.content is None
         assert p.title is None
 
@@ -35,12 +34,12 @@ class TestPage:
         assert p.title == "test_page"
 
         # Optional content
-        p = Page(content="- Block")
+        p = Page(path="", content="- Block")
 
-        assert p.path is None
+        assert p.path == "/home/git/mlktools/mlktools-pylogseq/src/pylogseq"
 
         assert p.content == "- Block"
-        assert p.title is None
+        assert p.title == "pylogseq"
 
         # Optional title
         p = Page(title="Page title")

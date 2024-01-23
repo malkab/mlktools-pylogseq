@@ -1,8 +1,8 @@
-from pylogseq.block import Block
-from pylogseq.pageparsererror import PageParserError
-from typing import List
 import os
 import re
+from typing import Any, List
+
+from pylogseq.block import Block
 
 # TODO: DOCUMENT
 
@@ -12,14 +12,18 @@ import re
 # Models a Logseq page.
 #
 # --------------------------------------
-class Page():
-
+class Page:
     # --------------------------------------
     #
     # Constructor.
     #
     # --------------------------------------
-    def __init__(self, path: str=None, content: str=None, title: str=None):
+    def __init__(
+        self,
+        path: str | None = None,
+        content: str | None = None,
+        title: str | None = None,
+    ):
         """Contructor.
 
         Args:
@@ -28,23 +32,25 @@ class Page():
             title (str, optional): Title. Defaults to None.
         """
 
-
-        self.path: str = os.path.abspath(
-            os.path.normpath(path)) if path else None
+        self.path: str | None = (
+            os.path.abspath(os.path.normpath(path)) if path is not None else None
+        )
         """The path to the page's file.
         """
 
-        self.content: str = content.strip("\n").strip() if content else None
+        self.content: str | None = content.strip("\n").strip() if content else None
         """The page's Markdown content.
         """
 
-        self.title: str = \
-            title if title else (os.path.split(self.path)[-1].strip(".md") if self.path else None)
+        self.title: str | None = (
+            title
+            if title
+            else (os.path.split(self.path)[-1].strip(".md") if self.path else None)
+        )
         """Page title: title if given in the constructor, the page file name
         if path is given, None otherwise. This member can be overrided if
         the page contains a title:: property block.
         """
-
 
     # ----------------------------------
     #
@@ -62,28 +68,39 @@ class Page():
             any: The parsed document.
         """
 
-        blocks: list[str] = self.content.split("\n- ")
+        from pylogseq.pageparsererror import PageParserError
 
-        out: list[Block] = []
+        blocks: List[str] = (
+            self.content.split("\n- ") if self.content is not None else []
+        )
+
+        # Clean blocks
+        for i, b in enumerate(blocks):
+            blocks[i] = b.strip("\n").strip("-").strip()
+
+        out: List[Block] = []
 
         # Check for the first block to be title:: or filter::
-        b0 = blocks[0]
+        if len(blocks) > 0:
+            b0 = blocks[0]
 
-        if b0.startswith("title::") or b0.startswith("filter::"):
-            # Extract the block so it's not processed as a block
-            b0 = blocks.pop(0)
+            # Extract filter and title headers
+            while blocks[0].startswith("title::") or blocks[0].startswith("filter::"):
+                # Regex the title
+                pattern = r"title::\s*(.+)\s*"
+                match = re.search(pattern, b0)
 
-            # Regex the title
-            pattern = r'title::\s*(.+)\s*'
-            match = re.search(pattern, b0)
+                # Set the title if there is one in the reg exp
+                if match is not None:
+                    if match.group(1):
+                        self.title = match.group(1).strip()
 
-            # Set the title if there is one in the reg exp
-            if match.group(1):
-                self.title = match.group(1).strip()
+                # Drop the first block
+                blocks.pop(0)
 
         # Process blocks
         for block in blocks:
-            block_clean = block.strip('\n').strip()
+            block_clean = block.strip("\n").strip()
 
             # Try to parse the block
             try:
@@ -94,17 +111,19 @@ class Page():
             except Exception as e:
                 raise PageParserError(
                     f"Error parsing block in page {self.path}: {e}",
-                    e, self, block_clean)
+                    e,
+                    self,
+                    block_clean,
+                )
 
         return out
-
 
     # --------------------------------------
     #
     # Read the page file.
     #
     # --------------------------------------
-    def read_page_file(self) -> any:
+    def read_page_file(self) -> Any:
         """
         Docstring
 
@@ -119,12 +138,12 @@ class Page():
             Page
         """
 
-        # Read the page file
-        with open(self.path, "r") as f:
-            self.content = (f.read()).strip("\n").strip()
+        # Read the page file
+        if self.path is not None:
+            with open(self.path, "r") as f:
+                self.content = (f.read()).strip("\n").strip()
 
         return self
-
 
     # ----------------------------------
     #
@@ -137,4 +156,4 @@ class Page():
         Returns:
             str: La representación del objeto para los print.
         """
-        return(f"Page(path={self.path}, title={self.title})")
+        return f"Page(path={self.path}, title={self.title})"

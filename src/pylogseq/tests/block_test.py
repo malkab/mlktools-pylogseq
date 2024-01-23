@@ -1,7 +1,8 @@
-from pylogseq import Block, Clock
+from datetime import datetime as dt
+from datetime import timedelta as td
 
-# import pytest
-from datetime import timedelta as td, datetime as dt
+import pytest
+from pylogseq import Block, Clock
 
 blockExample = """
 
@@ -109,12 +110,14 @@ class TestBlock:
     # ----------------------------------
     def test_title(self):
         block = Block(
-            content="""- [#A] A block at page **test_2_page** in graph **test_2**"""
+            content="""- [#A] A block at page **test_2_page** in graph **test_2** #T"""
         )
 
         block.parse()
 
-        assert block.title == "[#A] A block at page **test_2_page** in graph **test_2**"
+        assert (
+            block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T"
+        )
 
     # ----------------------------------
     #
@@ -190,7 +193,7 @@ class TestBlock:
         clock: Clock = Clock(dt(2023, 5, 10, 11, 25), dt(2023, 5, 10, 13, 15))
 
         block: Block = Block(
-            content="""- A block at page **test_2_page** in graph **test_2**
+            content="""- A block at page **test_2_page** in graph **test_2** #T
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
@@ -209,7 +212,7 @@ class TestBlock:
         clock: Clock = Clock(dt(2023, 2, 10, 11, 25), dt(2023, 2, 10, 13, 15))
 
         block: Block = Block(
-            content="""- [#A] A block at page **test_2_page** in graph **test_2**
+            content="""- [#A] A block at page **test_2_page** in graph **test_2** #T
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
@@ -226,7 +229,7 @@ class TestBlock:
         clock: Clock = Clock(dt(2023, 5, 10, 11, 25), dt(2023, 5, 10, 13, 15))
 
         block: Block = Block(
-            content="""- A block at page **test_2_page** in graph **test_2**
+            content="""- A block at page **test_2_page** in graph **test_2** #T
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
@@ -241,7 +244,7 @@ class TestBlock:
 
         # Total clocked time
         block: Block = Block(
-            content="""- A block at page **test_2_page** in graph **test_2**
+            content="""- A block at page **test_2_page** in graph **test_2** #T
             :LOGBOOK:
             CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
             CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
@@ -341,3 +344,17 @@ class TestBlock:
   Algo aquí
   - Otra cosa aquí"""
         )
+
+    # ----------------------
+    #
+    # Bad SCRUM time.
+    #
+    # ----------------------
+    def test_bad_scrum_time(self):
+        """Tests if a bad (non number) time for T/ tags has been given."""
+
+        block: Block = Block("- Bad SCRUM time #T/XXX")
+
+        # Check exception triggers
+        with pytest.raises(Exception):
+            block.parse()

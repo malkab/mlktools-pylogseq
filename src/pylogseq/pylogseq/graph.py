@@ -30,16 +30,12 @@ class Graph:
 
         self.path: str = os.path.abspath(os.path.normpath(path))
 
-        print()
-        """The path to the graph's folder.
-        """
-
     # ----------------------------------
     #
     # Get all .md files in graph, but do not parse them.
     #
     # ----------------------------------
-    def get_pages(self) -> list[Page]:
+    def get_pages(self) -> List[Page]:
         """Get all .md files in graph folder tree.
 
         Returns:
@@ -49,7 +45,7 @@ class Graph:
         if not os.path.exists(self.path):
             raise Exception(f"Graph path {self.path} does not exist.")
 
-        pages: list[Page] = []
+        pages: List[Page] = []
 
         for dirpath, dirnames, filenames in os.walk(self.path):
             page_file_n = fnmatch.filter(filenames, "*.md")

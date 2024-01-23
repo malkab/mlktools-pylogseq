@@ -1,8 +1,8 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
-from pylogseq.forward_declarations import Clock
 
 # TODO: DOCUMENT
+
 
 # ----------------------------------
 #
@@ -30,7 +30,6 @@ class Clock:
         self._start: dt = start
         self._end: dt = end
 
-
     # ----------------------------------
     #
     # Property start.
@@ -49,7 +48,6 @@ class Clock:
     @start.setter
     def page(self, start: dt) -> None:
         self._start = start
-
 
     # ----------------------------------
     #
@@ -70,7 +68,6 @@ class Clock:
     def page(self, end: dt) -> None:
         self._end = end
 
-
     # ----------------------------------
     #
     # Property elapsed.
@@ -86,13 +83,12 @@ class Clock:
         """
         return self._end - self._start
 
-
     # ----------------------------------
     #
     # Modify the clock member with the intersection with another Clock object.
     #
     # ----------------------------------
-    def intersect(self, clock: Clock) -> Clock:
+    def intersect(self, clock: "Clock") -> "Clock | None":
         """TODO
 
         Args:
@@ -106,21 +102,27 @@ class Clock:
         end_intersect = min(end1, end2)
 
         if start_intersect < end_intersect:
-            return Clock(start_intersect, end_intersect)
+            # return Self(start_intersect, end_intersect)
+            return Clock.new_instance(start_intersect, end_intersect)
         else:
             return None
-
 
     # ----------------------------------
     #
     # Built in methods.
     #
     # ----------------------------------
+    @classmethod
+    def new_instance(cls, start, end):
+        return cls(start, end)
+
     def __repr__(self):
         return f"Clock({self.start}, {self.end})"
 
     def __eq__(self, other) -> bool:
-        return type(self.start) == type(other.start) and \
-                type(self.end) == type(other.end) and \
-                self.start == other.start and \
-                self.end == other.end
+        return (
+            isinstance(other.start, dt)
+            and isinstance(other.end, dt)
+            and self.start == other.start
+            and self.end == other.end
+        )

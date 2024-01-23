@@ -7,27 +7,32 @@ TODO: THIS CLASS NEEDS A REVIEW IN DOC AFTER DROPPING THE S AND T OLD TAGS
 FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 """
 
-import marko
-import marko.inline as marko_inline
 import datetime
 from datetime import timedelta as td
-from typing import Any, Self
+from typing import Any, List, Self
 
-from pylogseq.parser import Parser
+import marko
+import marko.inline as marko_inline
+
 from pylogseq.clock import Clock
-from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
-from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
+from pylogseq.mdlogseq.elements_parsers import (
+    LogseqComposedTag,
+    LogseqSquareTag,
+    LogseqTag,
+)
 from pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
-from pylogseq.mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
-from pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
-from pylogseq.mdlogseq.elements_parsers import LogseqTag
-from pylogseq.mdlogseq.elements_parsers import LogseqComposedTag
-from pylogseq.mdlogseq.elements_parsers import LogseqSquareTag
-from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
-from pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
-from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
 from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
+from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
+from pylogseq.mdlogseq.elements_parsers.logseqwaitingclass import LogseqWaiting
+from pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
+from pylogseq.mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
+from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
+from pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
+from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
+from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
 from pylogseq.mdlogseq.elements_parsers.process_multi_tags import process_multi_tags
+from pylogseq.parser import Parser
+from pylogseq.scrum_status import SCRUM_STATUS
 
 
 # ----------------------------------
@@ -135,6 +140,20 @@ class Block:
         """The title of the block, the first line of the content, without '-'.
         """
 
+        self.scrum_status: SCRUM_STATUS = SCRUM_STATUS.NONE
+        """SCRUM status, NONE by default. Will be set when parsing
+        occurs.
+        """
+
+        self.scrum_time: int = 0
+        """SCRUM time, by default 0."""
+
+        self.repetitive: bool = False
+        """Repetitive task."""
+
+        self.period: str | None = None
+        """Period of repetition."""
+
     # ----------------------------------
     #
     # Total clocked time for the block.
@@ -189,6 +208,59 @@ class Block:
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
+        # Check for SCRUM status
+
+        # First, check for LATER or NOW, which are DOING irrespective of the ABC
+        if self.later is True or self.now is True:
+            # Error if there is a SCRUM tag but no SCRUM time
+            if self.scrum_time == 0 and "repetitiva" not in self.tags:
+                raise Exception(
+                    f"SCRUM time is 0 for block {self.title}, please set it to a positive integer."
+                )
+
+            self.scrum_status = SCRUM_STATUS.DOING
+
+        # DONE, should not have T tag
+        elif self.done is True:
+            if self.scrum_time > 0:
+                raise Exception(
+                    f"SCRUM time is {self.scrum_time} for block {self.title}, please set it to 0."
+                )
+
+            self.scrum_status = SCRUM_STATUS.DONE
+
+        # WAITING
+        elif self.waiting is True:
+            self.scrum_status = SCRUM_STATUS.WAITING
+
+        # Icebox, C
+        elif self.highest_priority == "C":
+            self.scrum_status = SCRUM_STATUS.ICEBOX
+
+        # Backlog, B
+        elif self.highest_priority == "B":
+            # Error if there is a SCRUM tag but no SCRUM time
+            if self.scrum_time == 0 and self.repetitive is False:
+                raise Exception(
+                    f"SCRUM time is 0 for block {self.title}, please set it to a positive integer."
+                )
+
+            self.scrum_status = SCRUM_STATUS.BACKLOG
+
+        # Current, priority, A
+        elif self.highest_priority == "A":
+            # Error if there is a SCRUM tag but no SCRUM time
+            if self.scrum_time == 0 and self.repetitive is False:
+                raise Exception(
+                    f"SCRUM time is 0 for block {self.title}, please set it to a positive integer."
+                )
+
+            self.scrum_status = SCRUM_STATUS.CURRENT
+
+            # If LATER, it is DOING
+            if self.later is True or self.now is True:
+                self.scrum_status = SCRUM_STATUS.DOING
+
     # ----------------------------------
     #
     # Recursive function to process the block's content.
@@ -233,6 +305,9 @@ class Block:
         elif isinstance(item, LogseqNow):
             self.now = True
 
+        elif isinstance(item, LogseqWaiting):
+            self.waiting = True
+
         elif (
             isinstance(item, LogseqTag)
             or isinstance(item, LogseqComposedTag)
@@ -254,12 +329,45 @@ class Block:
         ):
             pass
 
+        # Check if there is a SCRUM time tag
+        if "T" in self.tags:
+            # By default, SCRUM time is 1
+            self.scrum_time = 1
+
+            # Look for a T/X tag
+            for t in self.tags:
+                if t.startswith("T/"):
+                    try:
+                        self.scrum_time = int(t.split("/")[1])
+                    except Exception:
+                        raise Exception(
+                            f"Invalid SCRUM time tag {t} in block {self.title}."
+                        )
+
+        # Check for repetitive flag R plus period time
+        if "R" in self.tags:
+            # By default, period to "1 week"
+            self.period = "1 week"
+
+            # Look for a R/X tag
+            for t in self.tags:
+                if t.startswith("R/"):
+                    try:
+                        self.period = t.split("/")[1]
+                    except Exception:
+                        raise Exception(
+                            f"Invalid repetitive tag {t} in block {self.title}."
+                        )
+
+            # Repetitive flag
+            self.repetitive = True
+
     # ----------------------------------
     #
     # Clock block intersections.
     #
     # ----------------------------------
-    def intersect_clock(self, clock: Clock) -> list[Clock]:
+    def intersect_clock(self, clock: Clock) -> List[Clock | None]:
         """Returns a list of Clock objects that are the intersections of the
         clocks in this block with the given clock interval.
 
@@ -275,7 +383,7 @@ class Block:
         """
 
         # Clock intersection
-        clocks: list[Clock] = [c.intersect(clock) for c in self.clocks]
+        clocks: List[Clock | None] = [c.intersect(clock) for c in self.clocks]
 
         # Purge Nones
         return [c for c in clocks if c is not None]
@@ -300,7 +408,8 @@ class Block:
 
         # Iterate intersections and sum
         for inter in self.intersect_clock(clock):
-            total_time += inter.elapsed
+            if inter is not None:
+                total_time += inter.elapsed
 
         return total_time
 

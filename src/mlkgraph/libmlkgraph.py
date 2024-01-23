@@ -1,9 +1,12 @@
-from pylogseq import Graph, Block, PageParserError, Page, Clock
-import typer
-from rich import print as pprint
+import fnmatch
+import os
 import sys
-from typing import Tuple, Callable
 from datetime import timedelta as td
+from typing import Callable
+
+import typer
+from pylogseq import Block, Clock, Graph, Page, PageParserError
+from rich import print as pprint
 
 
 # ----------------------------------
@@ -14,7 +17,7 @@ from datetime import timedelta as td
 def parse_graph(
     graph: Graph,
     filter: Callable[[Block], bool] = lambda block: True,
-) -> Tuple[list[Page], list[Block]]:
+) -> tuple[list[Page], list[Block]]:
     """Parses pages and blocks from the given graph, with error handling
     and progress indicator.
 
@@ -47,7 +50,7 @@ def parse_graph(
             print()
             pprint("[red bold]:x: Error parsing block[/]")
             pprint("[bold]File:[/]")
-            print("     " + e.page.title)
+            print(f"     {e.page.title}")
             pprint("[bold]Error:[/]")
             print("     " + str(e.original_exception))
             pprint("[bold]Block:[/]")
@@ -102,3 +105,49 @@ def dt_to_hours(dt: td, r: int = 1) -> float:
         return round(hours, r)
     else:
         return hours
+
+
+# ----------------------
+#
+# Get graphs found in several paths and with ignore glob option.
+#
+# ----------------------
+def get_graphs(paths: list[str], ignore_paths: list[str] | None = None) -> list[str]:
+    """Get graphs found in a list of paths and filtering them with one or
+    several glob patterns.
+
+    Args:
+        paths (list[str]):                  The list of paths to look for graphs
+                                            in.
+        ignore_paths (list[str] | None):    Optional list of globs to ignore
+                                            graphs once they have been found in
+                                            paths.
+
+    Raises:
+        NotImplementedError: _description_
+
+    Returns:
+        list[str]: A list of valid graph paths.
+    """
+    # To store found graphs in the folder
+    graphs_list: list[str] = []
+
+    # Traverse the folder tree spanning from graphs_path
+    for path in paths:
+        for dirpath, dirnames, filenames in os.walk(path):
+            # Check if the folder contains a "logseq" subfolder
+            if "logseq" in dirnames and "journals" in dirnames and "pages" in dirnames:
+                # Check last item in path is not bak
+                if dirpath.split("/")[-1] != "bak":
+                    graphs_list.append(dirpath)
+
+    # No duplicates
+    graphs_list = list(set(graphs_list))
+
+    # Apply ignore globs
+    if ignore_paths is not None:
+        for g in ignore_paths:
+            graphs_list = [path for path in graphs_list if not fnmatch.fnmatch(path, g)]
+
+    # Final return
+    return graphs_list
