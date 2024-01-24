@@ -1,5 +1,6 @@
 import fnmatch
 import os
+import re
 import sys
 from datetime import timedelta as td
 from typing import Callable
@@ -151,3 +152,40 @@ def get_graphs(paths: list[str], ignore_paths: list[str] | None = None) -> list[
 
     # Final return
     return graphs_list
+
+
+# ----------------------
+#
+# Clean the title of a block of WAITING, LATER, [#ABC] and #T tags.
+#
+# ----------------------
+def clean_title(title: str) -> str:
+    """Cleans a block title from WAITING, LATER, [#ABC] and #T tags.
+
+    Args:
+        title (str): The title to clean.
+
+    Returns:
+        str: The cleaned title.
+    """
+
+    # Drop the #T/X tags
+    t = re.sub(r"#T/\d+", "", title)
+
+    # Drop common stuff
+    t: str = (
+        t.replace("WAITING", "")
+        .replace("LATER", "")
+        .replace("NOW", "")
+        .replace("**", "")
+        .replace("[#A]", "")
+        .replace("[#B]", "")
+        .replace("[#C]", "")
+        .replace("#T", "")
+        .replace("#", "")
+    )
+
+    # Drop [[ and ]]
+    t = t.replace("[[", "").replace("]]", "")
+
+    return t.strip()

@@ -97,11 +97,12 @@ class TestPage:
             == 'title:: A new title for the test_page set with a "title" property\nfilter:: a filter\n\n- Do not remove this test page, it is used in [[Python]] tests.\n- This is a block.'
         )
 
-        assert p.title == 'A new title for the test_page set with a "title" property'
+        assert p.title == "a_page_with_a_title"
 
         block_titles = [b.title for b in blocks]
 
         assert block_titles == [
+            'title:: A new title for the test_page set with a "title" property',
             "Do not remove this test page, it is used in [[Python]] tests.",
             "This is a block.",
         ]

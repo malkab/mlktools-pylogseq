@@ -80,23 +80,25 @@ class Page:
 
         out: List[Block] = []
 
-        # Check for the first block to be title:: or filter::
-        if len(blocks) > 0:
-            b0 = blocks[0]
+        # # Check for the first block to be title:: or filter::
+        # if len(blocks) > 0:
+        #     b0 = blocks[0]
 
-            # Extract filter and title headers
-            while blocks[0].startswith("title::") or blocks[0].startswith("filter::"):
-                # Regex the title
-                pattern = r"title::\s*(.+)\s*"
-                match = re.search(pattern, b0)
+        #     print("D: ", b0)
 
-                # Set the title if there is one in the reg exp
-                if match is not None:
-                    if match.group(1):
-                        self.title = match.group(1).strip()
+        #     # Extract filter and title headers
+        #     while b0.startswith("title::") or b0.startswith("filter::"):
+        #         # Regex the title
+        #         pattern = r"title::\s*(.+)\s*"
+        #         match = re.search(pattern, b0)
 
-                # Drop the first block
-                blocks.pop(0)
+        #         # Set the title if there is one in the reg exp
+        #         if match is not None:
+        #             if match.group(1):
+        #                 self.title = match.group(1).strip()
+
+        #         # Drop the first block
+        #         blocks.pop(0)
 
         # Process blocks
         for block in blocks:

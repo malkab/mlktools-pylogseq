@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 # coding=UTF8
 
+import os
 from datetime import timedelta as td
+from typing import Any
 
 import arrow
 import typer
-from libmlkgraph import parse_graph, total_time_period, get_graphs
-from pylogseq import Block, Clock, Graph, Page, SCRUM_STATUS
+from libmlkgraph import clean_title, get_graphs, parse_graph, total_time_period
+from pylogseq import SCRUM_STATUS, Block, Clock, Graph, Page
 from rich import box
-from rich.text import Text
 from rich.console import Console
 from rich.table import Table
-
-from typing import Any
-
-import os
+from rich.text import Text
 
 # ----------------------------------
 #
@@ -179,6 +177,9 @@ def speed(
 #
 # Command to check SCRUM marked blocks.
 #
+# By default it shows WAITING, DOING, and CURRENT (priority A).
+# Use --backlog and --icebox to show BACKLOG and ICEBOX (priority B and C).
+#
 # ----------------------
 @app.command()
 def scrum(
@@ -186,12 +187,14 @@ def scrum(
         ..., help="The paths of the graph to analyze."
     ),
     ignore_paths: list[str] = typer.Option([], "--ignore", "-i", help="Ignore a path"),
+    backlog: bool = typer.Option(False, "--backlog", "-b", help="Show backlog"),
+    icebox: bool = typer.Option(False, "--icebox", "-c", help="Show icebox"),
 ):
     # Get graphs in paths and ignores
     graphs_list: list[str] = get_graphs(graphs_paths, ignore_paths)
 
-    # To store the total time allocated in T tags
-    times: dict = {}
+    # Sort alphabetically
+    graphs_list = sorted(graphs_list)
 
     # Total blocks with SCRUM with its
     scrum_blocks: dict[Graph, list[Block]] = {}
@@ -220,8 +223,22 @@ def scrum(
 
         # Get blocks with SCRUM
         for b in blocks:
-            if b.scrum_status not in [SCRUM_STATUS.NONE, SCRUM_STATUS.DONE]:
-                graph_b.append(b)
+            if backlog is True:
+                if b.scrum_status == SCRUM_STATUS.BACKLOG:
+                    graph_b.append(b)
+
+            elif icebox is True:
+                if b.scrum_status == SCRUM_STATUS.ICEBOX:
+                    graph_b.append(b)
+
+            else:
+                if b.scrum_status not in [
+                    SCRUM_STATUS.NONE,
+                    SCRUM_STATUS.DONE,
+                    SCRUM_STATUS.BACKLOG,
+                    SCRUM_STATUS.ICEBOX,
+                ]:
+                    graph_b.append(b)
 
         # Store blocks along its graph
         if len(graph_b) > 0:
@@ -241,16 +258,21 @@ def scrum(
     table.add_column("Grafo", justify="left")
     table.add_column("Bloque", justify="left")
     table.add_column("Estado", justify="center")
-    table.add_column("Prioridad", justify="center")
-    table.add_column("Tiempo programado", justify="center")
-    table.add_column("Tiempo ejecutado", justify="center")
+    table.add_column("P", justify="center")
+    table.add_column("TP", justify="center")
+    table.add_column("TE", justify="center")
 
     # To store rows
     rows: list[list[Any]] = []
 
+    # To store the total of clocked time, scrum time, and number of blocks
+    total_scrum_time: int = 0
+    total_clocked_time: td = td(0)
+    total_blocks: int = 0
+
     # Iterate SCRUM categories
     for graph, blocks in scrum_blocks.items():
-        graph_name: str = os.path.join(*graph.path.split(os.sep)[-2:])
+        graph_name: str = os.path.join(*graph.path.split(os.sep)[-1:])
 
         for b in [
             i
@@ -260,7 +282,7 @@ def scrum(
             rows.append(
                 [
                     graph_name,
-                    b.title,
+                    clean_title(b.title),
                     b.scrum_status,
                     b.highest_priority,
                     b.scrum_time,
@@ -268,9 +290,13 @@ def scrum(
                 ]
             )
 
+            total_scrum_time += b.scrum_time
+            total_clocked_time += b.total_clocked_time
+            total_blocks += 1
+
     sorted_rows: list = sorted(rows, key=lambda x: x[2].value, reverse=True)
 
-    for r in sorted_rows:
+    for i, r in enumerate(sorted_rows):
         if r[2] == SCRUM_STATUS.WAITING:
             style = "yellow"
         elif r[2] == SCRUM_STATUS.DOING:
@@ -282,6 +308,10 @@ def scrum(
         else:
             style = "bright_black"
 
+        # Add shade for alternate rows
+        if (i + 1) % 4 == 0:
+            style += " on grey93"
+
         table.add_row(
             r[0],
             Text(r[1]),
@@ -292,7 +322,18 @@ def scrum(
             style=style,
         )
 
+    table.add_row(
+        "TOTAL",
+        str(total_blocks),
+        "-",
+        "-",
+        str(total_scrum_time),
+        str(total_clocked_time),
+        style="red bold",
+    )
+
     console.print(table)
+    print("P: Prioridad, TP: tiempo programado, TE: tiempo empleado")
     print()
 
 
