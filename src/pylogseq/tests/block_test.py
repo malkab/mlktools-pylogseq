@@ -67,6 +67,7 @@ class TestBlock:
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title == ""
+        assert b.clean_title == ""
 
         # Optional content
         b = Block(content="- A block")
@@ -83,6 +84,7 @@ class TestBlock:
         assert b.scheduled is None
         assert b.deadline is None
         assert b.title == "A block"
+        assert b.clean_title == "A block"
 
     # ----------------------------------
     #
@@ -118,6 +120,7 @@ class TestBlock:
         assert (
             block.title == "[#A] A block at page **test_2_page** in graph **test_2** #T"
         )
+        assert block.clean_title == "A block at page test_2_page in graph test_2"
 
     # ----------------------------------
     #
@@ -133,6 +136,9 @@ class TestBlock:
         block.parse()
 
         assert block.title == "SCRUM TEST #P/Client/Project/SubactivityA #SCB/2 #SCC/1"
+        assert (
+            block.clean_title == "SCRUM TEST P/Client/Project/SubactivityA SCB/2 SCC/1"
+        )
         assert block.tags == [
             "P",
             "P/Client",
@@ -157,6 +163,7 @@ class TestBlock:
         block.parse()
 
         assert block.title == "SCRUM TEST #P/Client/Project/SubactivityB #SCB/2"
+        assert block.clean_title == "SCRUM TEST P/Client/Project/SubactivityB SCB/2"
         assert block.tags == [
             "P",
             "P/Client",
@@ -177,6 +184,7 @@ class TestBlock:
         block.parse()
 
         assert block.title == "DONE SCRUM TEST #P/Client"
+        assert block.clean_title == "SCRUM TEST P/Client"
         assert block.tags == ["P", "P/Client"]
         assert block.done is True
         assert block.later is False
@@ -256,94 +264,6 @@ class TestBlock:
         block.parse()
 
         assert block.total_clocked_time == td(minutes=50)
-
-    # ----------------------------------
-    #
-    # Tests add_tag_to_title method.
-    #
-    # ----------------------------------
-    # @pytest.mark.skip
-    def test_add_tag_to_title(self):
-        """Tests the add_tag_to_title, that allows to add a tag to the title
-        of a block, effectively adding the tag to the first line of it.
-        """
-
-        block: Block = Block(
-            content="""- A block #Test/A #Test/B
-  :LOGBOOK:
-  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
-  :END:
-  Algo aquí
-  - Otra cosa aquí
-"""
-        )
-
-        block.parse()
-
-        block.add_tag_to_title("Test/C")
-
-        assert block.title == "- A block #Test/A #Test/B #[[Test/C]]"
-
-        assert (
-            block.content
-            == """- A block #Test/A #Test/B #[[Test/C]]
-  :LOGBOOK:
-  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
-  :END:
-  Algo aquí
-  - Otra cosa aquí"""
-        )
-
-        block.add_tag_to_title("L/Otra Tag/Compleja con espacios")
-
-        assert (
-            block.title
-            == "- A block #Test/A #Test/B #[[Test/C]] #[[L/Otra Tag/Compleja con espacios]]"
-        )
-
-        assert block.tags == [
-            "L",
-            "L/Otra Tag",
-            "L/Otra Tag/Compleja con espacios",
-            "Test",
-            "Test/A",
-            "Test/B",
-            "Test/C",
-        ]
-
-        assert (
-            block.content
-            == """- A block #Test/A #Test/B #[[Test/C]] #[[L/Otra Tag/Compleja con espacios]]
-  :LOGBOOK:
-  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
-  :END:
-  Algo aquí
-  - Otra cosa aquí"""
-        )
-
-        block.remove_tag_from_title("L/Otra Tag/Compleja con espacios")
-
-        assert block.title == "- A block #Test/A #Test/B #[[Test/C]]"
-
-        assert block.tags == ["Test", "Test/A", "Test/B", "Test/C"]
-
-        assert (
-            block.content
-            == """- A block #Test/A #Test/B #[[Test/C]]
-  :LOGBOOK:
-  CLOCK: [2023-05-08 Thu 11:20:00]--[2023-05-08 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 11:20:00]--[2023-05-10 Thu 11:30:00] =>  00:10:00
-  CLOCK: [2023-05-10 Thu 13:00:00]--[2023-05-10 Thu 13:30:00] =>  00:30:00
-  :END:
-  Algo aquí
-  - Otra cosa aquí"""
-        )
 
     # ----------------------
     #

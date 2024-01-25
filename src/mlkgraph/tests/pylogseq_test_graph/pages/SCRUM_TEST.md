@@ -71,8 +71,10 @@ title:: A title
 
 - DONE Done #[[P/Test 2]]
   :LOGBOOK:
-  CLOCK: [2024-01-15 Mon 10:00:00]--[2024-01-15 Mon 11:00:00] =>  01:00:00
-  CLOCK: [2024-01-16 Mon 10:00:00]--[2024-01-16 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2024-01-23 Mon 10:00:00]--[2024-01-23 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2024-01-23 Mon 10:00:00]--[2024-01-23 Mon 11:00:00] =>  01:00:00
   :END:
 
 - Something without SCRUM #[[P/Test C]]
+
+- NOW Estoy en NOW

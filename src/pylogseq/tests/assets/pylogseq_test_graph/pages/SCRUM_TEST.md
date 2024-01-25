@@ -6,11 +6,13 @@ title:: A title
 
 - [#C] Icebox
 
-- [#B] Backlog #T (1 por defecto)
+- [#B] Backlog (1 por defecto)
 
 - [#B] Backlog #T/5 (5 horas)
 
 - [#A] Current #T/3
+
+- [#A] Current (sin T, 1 por defecto)
 
 - LATER [#A] Doing #T/8
 
@@ -27,6 +29,11 @@ title:: A title
   SCHEDULED: <2024-01-26 Fri>
 
 - Todo esto acompañado de un comando que puede buscar grafos en un número indeterminado de rutas o negar ciertas rutas, que puede ser más rápido. Por ejemplo:
+
+- NOW [#A] Bloques que piden T: los que lo pidan y no la tengan, asumir simplemente que tienen una simple T y por tanto una hora asignada por defecto
+  :LOGBOOK:
+  CLOCK: [2024-01-25 Thu 12:38:09]
+  :END:
 
 - ```shell
   # Buscaría en las rutas siguientes

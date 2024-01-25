@@ -158,4 +158,4 @@ class Page:
         Returns:
             str: La representación del objeto para los print.
         """
-        return f"Page(path={self.path}, title={self.title})"
+        return f"Page(title={self.title})"

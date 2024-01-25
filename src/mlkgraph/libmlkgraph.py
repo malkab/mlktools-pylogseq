@@ -1,29 +1,35 @@
 import fnmatch
 import os
-import re
 import sys
 from datetime import timedelta as td
-from typing import Callable
+from typing import Callable, Any
 
 import typer
 from pylogseq import Block, Clock, Graph, Page, PageParserError
 from rich import print as pprint
 
+import pandas as pd
 
-# ----------------------------------
+
+# ----------------------
 #
-# Parses a graph.
+# Parse a group of graphs, presenting a single progress bar and
+# performing operations that must be performed on all blocks.
 #
-# ----------------------------------
-def parse_graph(
-    graph: Graph,
-    filter: Callable[[Block], bool] = lambda block: True,
-) -> tuple[list[Page], list[Block]]:
-    """Parses pages and blocks from the given graph, with error handling
+# ----------------------
+def parse_graph_group(
+    graph_group: list[Graph], filter: Callable[[Block], bool] = lambda block: True
+) -> pd.DataFrame:
+    """Parses pages and blocks from a group of graphs, with error handling
     and progress indicator.
 
+    Performs operations that must be performed on all blocks, such as searching
+    for the current NOW.
+
+    An optional lambda can be provided to filter the blocks.
+
     Args:
-        graph (Graph): The graph to parse.
+        graph_group (list[Graph]): The list of graphs to parse.
         filter (lambda, optional): A lambda filter on the block.
 
     Returns:
@@ -31,34 +37,52 @@ def parse_graph(
     """
 
     # Lists to store pages and blocks
-    pages: list[Page] = graph.get_pages()
-    blocks: list[Block] = []
+    pages: list[Page] = []
 
-    # Progress
+    # Total pages
+    for graph in graph_group:
+        pages_graph: list[Page] = graph.get_pages()
+
+        for page in pages_graph:
+            pages.append(page)
+
+    # To store final blocks
+    blocks: list[dict[str, Any]] = []
+
+    # Parse pages with progress
     with typer.progressbar(length=len(pages)) as progress:
         # Catch parsing errors
-        try:
-            for p, bs in graph.parse_iter():
-                progress.update(1)
+        for graph in graph_group:
+            try:
+                for g, p, bs in graph.parse_iter():
+                    progress.update(1)
 
-                # Iterate blocks and check filter
-                for b in bs:
-                    if filter(b):
-                        blocks.append(b)
+                    # Iterate blocks and check filter
+                    for b in bs:
+                        # Check for NOW and report
+                        if b.now is True:
+                            pprint(
+                                f'\n[red bold]:x: NOW block "{b.title}" in page "{p.title}" in graph "{g.name}"[/]'
+                            )
 
-        except PageParserError as e:
-            print()
-            print()
-            pprint("[red bold]:x: Error parsing block[/]")
-            pprint("[bold]File:[/]")
-            print(f"     {e.page.title}")
-            pprint("[bold]Error:[/]")
-            print("     " + str(e.original_exception))
-            pprint("[bold]Block:[/]")
-            print(e.block_content)
-            sys.exit(1)
+                        if filter(b):
+                            blocks.append({"graph": g, "page": p, "block": b})
 
-    return (pages, blocks)
+            except PageParserError as e:
+                print()
+                print()
+                pprint("[red bold]:x: Error parsing block[/]")
+                pprint("[bold]Graph:[/]")
+                print(f"     {graph.name}")
+                pprint("[bold]File:[/]")
+                print(f"     {e.page.title}")
+                pprint("[bold]Block:[/]")
+                print("     " + e.block_content)
+                pprint("[bold]Error:[/]")
+                print("     " + str(e.original_exception))
+                sys.exit(1)
+
+    return pd.DataFrame(blocks)
 
 
 # ----------------------------------
@@ -152,40 +176,3 @@ def get_graphs(paths: list[str], ignore_paths: list[str] | None = None) -> list[
 
     # Final return
     return graphs_list
-
-
-# ----------------------
-#
-# Clean the title of a block of WAITING, LATER, [#ABC] and #T tags.
-#
-# ----------------------
-def clean_title(title: str) -> str:
-    """Cleans a block title from WAITING, LATER, [#ABC] and #T tags.
-
-    Args:
-        title (str): The title to clean.
-
-    Returns:
-        str: The cleaned title.
-    """
-
-    # Drop the #T/X tags
-    t = re.sub(r"#T/\d+", "", title)
-
-    # Drop common stuff
-    t: str = (
-        t.replace("WAITING", "")
-        .replace("LATER", "")
-        .replace("NOW", "")
-        .replace("**", "")
-        .replace("[#A]", "")
-        .replace("[#B]", "")
-        .replace("[#C]", "")
-        .replace("#T", "")
-        .replace("#", "")
-    )
-
-    # Drop [[ and ]]
-    t = t.replace("[[", "").replace("]]", "")
-
-    return t.strip()

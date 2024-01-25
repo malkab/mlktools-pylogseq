@@ -7,6 +7,8 @@ TODO: THIS CLASS NEEDS A REVIEW IN DOC AFTER DROPPING THE S AND T OLD TAGS
 FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 """
 
+import re
+
 import datetime
 from datetime import timedelta as td
 from typing import Any, List, Self
@@ -136,7 +138,7 @@ class Block:
         """The deadline date for the block.
         """
 
-        self.title: str = content.split("\n")[0].strip("- ").strip()
+        self.title: str = content.split("\n")[0].strip().strip("- ").strip()
         """The title of the block, the first line of the content, without '-'.
         """
 
@@ -173,6 +175,37 @@ class Block:
             total += clock.elapsed
 
         return total
+
+    # ----------------------
+    #
+    # A clean version of the title of the block, stripping many marks and tags.
+    #
+    # ----------------------
+    @property
+    def clean_title(self) -> str:
+        """Cleans a block title from WAITING, LATER, [#ABC] and #T tags."""
+
+        # Drop the #T/X tags
+        t = re.sub(r"#T/\d+", "", self.title)
+
+        # Drop common stuff
+        t: str = (
+            t.replace("WAITING", "")
+            .replace("LATER", "")
+            .replace("NOW", "")
+            .replace("DONE", "")
+            .replace("**", "")
+            .replace("[#A]", "")
+            .replace("[#B]", "")
+            .replace("[#C]", "")
+            .replace("#T", "")
+            .replace("#", "")
+        )
+
+        # Drop [[ and ]]
+        t = t.replace("[[", "").replace("]]", "")
+
+        return t.strip()
 
     # ----------------------------------
     #
@@ -212,11 +245,9 @@ class Block:
 
         # First, check for LATER or NOW, which are DOING irrespective of the ABC
         if self.later is True or self.now is True:
-            # Error if there is a SCRUM tag but no SCRUM time
+            # If there is no T time tag, set to default 1 hour
             if self.scrum_time == 0 and "repetitiva" not in self.tags:
-                raise Exception(
-                    f"SCRUM time is 0 for block {self.title}, please set it to a positive integer."
-                )
+                self.scrum_time = 1
 
             self.scrum_status = SCRUM_STATUS.DOING
 
@@ -239,21 +270,17 @@ class Block:
 
         # Backlog, B
         elif self.highest_priority == "B":
-            # Error if there is a SCRUM tag but no SCRUM time
+            # If there is no T time tag, set to default 1 hour
             if self.scrum_time == 0 and self.repetitive is False:
-                raise Exception(
-                    f"SCRUM time is 0 for block {self.title}, please set it to a positive integer."
-                )
+                self.scrum_time = 1
 
             self.scrum_status = SCRUM_STATUS.BACKLOG
 
         # Current, priority, A
         elif self.highest_priority == "A":
-            # Error if there is a SCRUM tag but no SCRUM time
+            # If there is no T time tag, set to default 1 hour
             if self.scrum_time == 0 and self.repetitive is False:
-                raise Exception(
-                    f"SCRUM time is 0 for block {self.title}, please set it to a positive integer."
-                )
+                self.scrum_time = 1
 
             self.scrum_status = SCRUM_STATUS.CURRENT
 
@@ -412,69 +439,6 @@ class Block:
                 total_time += inter.elapsed
 
         return total_time
-
-    # ----------------------------------
-    #
-    # Add a tag to the end of the title (first line).
-    #
-    # ----------------------------------
-    def add_tag_to_title(self, tag: str) -> Self:
-        """Adds a tag to the block's title, the first line. This is very
-        useful to add a tag to a block in the index graph, for example to
-        note the origin of the block.
-
-        Args:
-            tag (str): The tag to add.
-
-        Returns:
-            Self: The block itself.
-        """
-
-        # Split content line by line
-        lines: list[str] = self.content.split("\n")
-
-        # Add tag to the end of the first line
-        lines[0] += f" #[[{tag}]]"
-
-        # Join the lines
-        self.title = lines[0]
-        self.content = "\n".join(lines)
-
-        # Update tags
-        self.tags.extend(process_multi_tags(tag))
-
-        self.tags = list(sorted(list(set(self.tags))))
-
-        # Return this
-        return self
-
-    # ----------------------------------
-    #
-    # Removes a tag from title (first line).
-    #
-    # ----------------------------------
-    def remove_tag_from_title(self, tag: str) -> Self:
-        # TODO: USE THE CLASS DOCSTRING SNIPPET HERE TO DOCUMENT THE CLASS
-        # TODO: USE THE AUTODOCSTRING EXTENSION (CTRL + SHIFT + 2) TO DOCUMENT METHODS
-
-        # Split content line by line
-        lines: list[str] = self.content.split("\n")
-
-        # Add tag to the end of the first line
-        lines[0] = lines[0].replace(f"#[[{tag}]]", "").replace(f"#{tag}", "").strip()
-
-        # Join the lines
-        self.title = lines[0]
-        self.content = "\n".join(lines)
-
-        # Update tags
-        for tag in process_multi_tags(tag):
-            self.tags.remove(tag)
-
-        self.tags = list(sorted(list(set(self.tags))))
-
-        # Return this
-        return self
 
     # ----------------------------------
     #

@@ -1,5 +1,7 @@
 - SCRUM test
 
+- NOW Estoy en NOW
+
 - Current #SCB/1 #SCC/1 #P/Test/a/b
   :LOGBOOK:
   CLOCK: [2023-07-12 Mon 10:00:00]--[2023-07-12 Mon 11:00:00] =>  01:00:00
@@ -32,7 +34,6 @@
 
 - DONE Done #[[P/Test 2]]
   :LOGBOOK:
-  CLOCK: [2024-01-23 Mon 10:00:00]--[2024-01-23 Mon 11:00:00] =>  01:00:00
   CLOCK: [2024-01-23 Mon 10:00:00]--[2024-01-23 Mon 11:00:00] =>  01:00:00
   :END:
 

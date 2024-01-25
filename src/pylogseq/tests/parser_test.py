@@ -8,26 +8,25 @@ import datetime
 
 parser = Parser()
 
-#@pytest.mark.skip
+
+# @pytest.mark.skip
 class TestParser:
-
-
     # ----------------------------------
     #
     # Simple parser test.
     #
     # ----------------------------------
     def test_parser_simple(self):
-        """Parses a simple Markdown list.
-        """
-        p = parser.parse("""
+        """Parses a simple Markdown list."""
+        p = parser.parse(
+            """
 - A
 - B
 - C
-        """)
+        """
+        )
 
         assert type(p.children[1]) is marko.block.List
-
 
     # ----------------------------------
     #
@@ -52,15 +51,14 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        assert isinstance(parsed, marko.block.Document) == True
-        assert isinstance(parsed.children[0], marko.block.List) == True
+        assert isinstance(parsed, marko.block.Document) is True
+        assert isinstance(parsed.children[0], marko.block.List) is True
 
-        listItem = parsed.children[0].children[0]
+        listItem = parsed.children[0].children[0]  # type: ignore
 
-        assert isinstance(listItem, marko.block.ListItem) == True
+        assert isinstance(listItem, marko.block.ListItem) is True
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_composed_tag(self):
         """Parses Logseq composed tags and return the full list of qualified
         tags. For example,
@@ -71,35 +69,31 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        listItem = parsed.children[0].children[0].children[0]
+        listItem = parsed.children[0].children[0].children[0]  # type: ignore
 
         assert type(listItem) is marko.block.Paragraph
         assert type(listItem.children[0]) is le.LogseqComposedTag
-        assert type(listItem.children[1]) is marko.inline.RawText
+        assert type(listItem.children[1]) is marko.inline.RawText  # type: ignore
         assert type(listItem.children[2]) is le.LogseqSquareTag
 
-        assert listItem.children[0].target == [ "Work", "Work/Composed A" ]
-        assert listItem.children[2].target == [ "A", "A/B", "A/B/Composed B" ]
+        assert listItem.children[0].target == ["Work", "Work/Composed A"]
+        assert listItem.children[2].target == ["A", "A/B", "A/B/Composed B"]
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_done(self):
-        """Detects the DONE keyword.
-        """
+        """Detects the DONE keyword."""
         markdown = """- DONE #[[Gestión/Gestión general]] Something"""
 
         parsed = parser.parse(markdown)
 
-        b = parsed.children[0].children[0].children[0].children[0]
+        b = parsed.children[0].children[0].children[0].children[0]  # type: ignore
 
         assert type(b) is le.LogseqDone
         assert b.target == "DONE"
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_end(self):
-        """Detects the END keyword.
-        """
+        """Detects the END keyword."""
         markdown = """- Something
         :LOGBOOK:
         CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
@@ -107,16 +101,14 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        b = parsed.children[0].children[0].children[0].children[4]
+        b = parsed.children[0].children[0].children[0].children[4]  # type: ignore
 
         assert type(b) is le.LogseqEnd
         assert b.target == ":END:"
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_later(self):
-        """Detects the LATER keyword.
-        """
+        """Detects the LATER keyword."""
         markdown = """- LATER Something
         :LOGBOOK:
         CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
@@ -124,16 +116,14 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        b = parsed.children[0].children[0].children[0].children[0]
+        b = parsed.children[0].children[0].children[0].children[0]  # type: ignore
 
         assert type(b) is le.LogseqLater
         assert b.target == "LATER"
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_logbook(self):
-        """Detects the LOGBOOK keyword.
-        """
+        """Detects the LOGBOOK keyword."""
         markdown = """- LATER Something
         :LOGBOOK:
         CLOCK: [2022-11-25 Fri 23:54:59]--[2022-11-26 Sat 00:05:01] =>  00:12:33
@@ -141,75 +131,63 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        b = parsed.children[0].children[0].children[0].children[3]
+        b = parsed.children[0].children[0].children[0].children[3]  # type: ignore
 
         assert type(b) is le.LogseqLogBook
         assert b.target == ":LOGBOOK:"
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_priority(self):
-        """Detects the priority ABC keyword.
-        """
-        markdown = [
-            "- [#A] Something",
-            "- [#B] Something",
-            "- [#C] Something"
-        ]
+        """Detects the priority ABC keyword."""
+        markdown = ["- [#A] Something", "- [#B] Something", "- [#C] Something"]
 
         out = []
 
         for m in markdown:
             parsed = parser.parse(m)
 
-            b = parsed.children[0].children[0].children[0].children[0]
+            b = parsed.children[0].children[0].children[0].children[0]  # type: ignore
 
             assert type(b) is le.LogseqPriority
             out.append(b.target)
 
-        assert out == [ "A", "B", "C" ]
+        assert out == ["A", "B", "C"]
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_square_tag(self):
-        """Detects the [[tag]].
-        """
+        """Detects the [[tag]]."""
         markdown = "- Something [[tag]]"
 
         parsed = parser.parse(markdown)
 
-        b = parsed.children[0].children[0].children[0].children[1]
+        b = parsed.children[0].children[0].children[0].children[1]  # type: ignore
 
         assert type(b) is le.LogseqSquareTag
-        assert b.target == [ "tag" ]
+        assert b.target == ["tag"]
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_tag(self):
-        """Detects #tag.
-        """
+        """Detects #tag."""
         markdown = "- #A Something #B Something #C"
 
         parsed = parser.parse(markdown)
 
-        b = parsed.children[0].children[0].children[0]
+        b = parsed.children[0].children[0].children[0]  # type: ignore
 
         assert type(b) is marko.block.Paragraph
 
         assert type(b.children[0]) is le.LogseqTag
-        assert b.children[0].target == [ "A" ]
+        assert b.children[0].target == ["A"]
 
         assert type(b.children[2]) is le.LogseqTag
-        assert b.children[2].target == [ "B" ]
+        assert b.children[2].target == ["B"]
 
         assert type(b.children[4]) is le.LogseqTag
-        assert b.children[4].target == [ "C" ]
+        assert b.children[4].target == ["C"]
 
-
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_mixed_tags(self):
-        """Detects a mix of tags of different types.
-        """
+        """Detects a mix of tags of different types."""
         markdown = """
 - #A #[[C tag]] #A/B/C [[A/BB/C]] #C
 - #[[C tag]] #A/B/C [[X/Y]] #[[A/BB/C]]
@@ -218,9 +196,9 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        l0 = parsed.children[1].children[0].children[0]
-        l1 = parsed.children[1].children[1].children[0]
-        l2 = parsed.children[1].children[2].children[0]
+        l0 = parsed.children[1].children[0].children[0]  # type: ignore
+        l1 = parsed.children[1].children[1].children[0]  # type: ignore
+        l2 = parsed.children[1].children[2].children[0]  # type: ignore
 
         assert type(l0) is marko.block.Paragraph
         assert type(l1) is marko.block.Paragraph
@@ -228,50 +206,48 @@ class TestParser:
 
         # l0
         assert type(l0.children[0]) is le.LogseqTag
-        assert l0.children[0].target == [ "A" ]
+        assert l0.children[0].target == ["A"]
 
         assert type(l0.children[2]) is le.LogseqComposedTag
-        assert l0.children[2].target == [ "C tag" ]
+        assert l0.children[2].target == ["C tag"]
 
         assert type(l0.children[4]) is le.LogseqTag
-        assert l0.children[4].target == [ "A", "A/B", "A/B/C" ]
+        assert l0.children[4].target == ["A", "A/B", "A/B/C"]
 
         assert type(l0.children[6]) is le.LogseqSquareTag
-        assert l0.children[6].target == [ "A", "A/BB", "A/BB/C" ]
+        assert l0.children[6].target == ["A", "A/BB", "A/BB/C"]
 
         assert type(l0.children[8]) is le.LogseqTag
-        assert l0.children[8].target == [ "C" ]
+        assert l0.children[8].target == ["C"]
 
         # l1
         assert type(l1.children[0]) is le.LogseqComposedTag
-        assert l1.children[0].target == [ "C tag" ]
+        assert l1.children[0].target == ["C tag"]
 
         assert type(l1.children[2]) is le.LogseqTag
-        assert l1.children[2].target == [ "A", "A/B", "A/B/C" ]
+        assert l1.children[2].target == ["A", "A/B", "A/B/C"]
 
         assert type(l1.children[4]) is le.LogseqSquareTag
-        assert l1.children[4].target == [ "X", "X/Y" ]
+        assert l1.children[4].target == ["X", "X/Y"]
 
         assert type(l1.children[6]) is le.LogseqComposedTag
-        assert l1.children[6].target == [ "A", "A/BB", "A/BB/C" ]
+        assert l1.children[6].target == ["A", "A/BB", "A/BB/C"]
 
         # l2
         assert type(l2.children[0]) is le.LogseqSquareTag
-        assert l2.children[0].target == [ "X", "X/Y" ]
+        assert l2.children[0].target == ["X", "X/Y"]
 
         assert type(l2.children[2]) is le.LogseqTag
-        assert l2.children[2].target == [ "A" ]
+        assert l2.children[2].target == ["A"]
 
         assert type(l2.children[4]) is le.LogseqComposedTag
-        assert l2.children[4].target == [ "A", "A/B", "A/B/C" ]
+        assert l2.children[4].target == ["A", "A/B", "A/B/C"]
 
         assert type(l2.children[6]) is le.LogseqSquareTag
-        assert l2.children[6].target == [ "T", "T/B" ]
-
+        assert l2.children[6].target == ["T", "T/B"]
 
     def test_error_clock_malformed(self):
-        """Clock parsing malformed, returning empty clock set.
-        """
+        """Clock parsing malformed, returning empty clock set."""
         markdown = """- DONE #[[Gestión/Gestión general]] Something
         :LOGBOOK:
         CLOCK: [2022-11-25 Fri 08:57:12]- e3 -[2022-11-25 Fri 09:09:45] =>  00:12:33
@@ -279,14 +255,11 @@ class TestParser:
 
         parsed = parser.parse(markdown)
 
-        assert parsed.children[0].children[0].children[0].children[6].target == None
-
+        assert parsed.children[0].children[0].children[0].children[6].target is None  # type: ignore
 
     def test_error_clock_starting_timestamp(self):
-        """Error parsing the starting timestamp.
-        """
+        """Error parsing the starting timestamp."""
         with pytest.raises(ErrorClock) as e:
-
             markdown = """- DONE #[[Gestión/Gestión general]] Something
                 :LOGBOOK:
                 CLOCK: [2022-11-25.3 Fri 08:57:12]--[2022-11-25 Fri 09:09:45] =>  00:12:33
@@ -294,14 +267,14 @@ class TestParser:
 
             parser.parse(markdown)
 
-        assert e.value.message == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
-
+        assert (
+            e.value.message
+            == "CLOCK error: unparseable start timestamp 2022-11-25.3 08:57:12"
+        )
 
     def test_error_clock_ending_timestamp(self):
-        """Error parsing the ending timestamp.
-        """
+        """Error parsing the ending timestamp."""
         with pytest.raises(ErrorClock) as e:
-
             markdown = """- DONE #[[Gestión/Gestión general]] Something
                 :LOGBOOK:
                 CLOCK: [2022-11-25 Fri 08:57:12]--[2022-11-25.6 Fri 09:09:45] =>  00:12:33
@@ -309,14 +282,14 @@ class TestParser:
 
             parser.parse(markdown)
 
-        assert e.value.message == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
-
+        assert (
+            e.value.message
+            == "CLOCK error: unparseable ending timestamp 2022-11-25.6 09:09:45"
+        )
 
     def test_error_clock_start_bigger(self):
-        """Error in clocking: starting time bigger than ending time.
-        """
+        """Error in clocking: starting time bigger than ending time."""
         with pytest.raises(ErrorClock) as e:
-
             markdown = """- DONE #[[Gestión/Gestión general]] Something
                 :LOGBOOK:
                 CLOCK: [2022-11-26 Fri 09:57:12]--[2022-11-26 Sat 09:09:45] =>  00:12:33
@@ -324,31 +297,44 @@ class TestParser:
 
             parser.parse(markdown)
 
-        assert e.value.message == "CLOCK error: start time bigger than end time 2022-11-26 09:57:12 > 2022-11-26 09:09:45"
-
+        assert (
+            e.value.message
+            == "CLOCK error: start time bigger than end time 2022-11-26 09:57:12 > 2022-11-26 09:09:45"
+        )
 
     def test_scheduled_deadline(self):
-        """Tests the parsing of an scheduled and deadline section.
-        """
+        """Tests the parsing of an scheduled and deadline section."""
         markdown = """- Board Meeting
   SCHEDULED: <2023-08-02 Wed>
   DEADLINE: <2023-08-06 Wed 10:00>"""
 
         parsed = parser.parse(markdown)
 
-        assert parsed.children[0].children[0].children[0].children[1].target == datetime.datetime(2023, 8, 2, 0, 0, 0)
+        assert (
+            parsed.children[0]
+            .children[0]  # type: ignore
+            .children[0]
+            .children[1]  # type: ignore
+            .target
+            == datetime.datetime(2023, 8, 2, 0, 0, 0)
+        )
 
-        assert parsed.children[0].children[0].children[0].children[2].target == datetime.datetime(2023, 8, 6, 10, 0, 0)
-
+        assert (
+            parsed.children[0]
+            .children[0]  # type: ignore
+            .children[0]
+            .children[2]  # type: ignore
+            .target
+            == datetime.datetime(2023, 8, 6, 10, 0, 0)
+        )
 
     # ----------------------------------
     #
     # Tests the parser process_multi_tags method.
     #
     # ----------------------------------
-    #@pytest.mark.skip
+    # @pytest.mark.skip
     def test_process_multi_tags(self):
-        """Tests the parser process_multi_tags method.
-        """
+        """Tests the parser process_multi_tags method."""
 
-        assert le.process_multi_tags("A/B/C") == [ "A", "A/B", "A/B/C" ]
+        assert le.process_multi_tags("A/B/C") == ["A", "A/B", "A/B/C"]

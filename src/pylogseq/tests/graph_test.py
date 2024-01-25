@@ -1,7 +1,6 @@
 from pylogseq.graph import Graph, Block
 from typing import List
 
-from pylogseq.scrum_status import SCRUM_STATUS
 # import pytest
 
 
@@ -18,6 +17,7 @@ class TestGraph:
         g = Graph()
 
         assert g.path is not None
+        assert g.name == "pylogseq"
 
         # Full, relative path
         g = Graph(path="tests/assets/pylogseq_test_graph")
@@ -26,16 +26,19 @@ class TestGraph:
             g.path
             == "/home/git/mlktools/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
         )
+        assert g.name == "pylogseq_test_graph"
 
         # Full, full path
         g = Graph(
-            path="/home/git/mlktools/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
+            path="/home/git/mlktools/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph",
+            name="grafo",
         )
 
         assert (
             g.path
             == "/home/git/mlktools/mlktools-pylogseq/src/pylogseq/tests/assets/pylogseq_test_graph"
         )
+        assert g.name == "grafo"
 
     # ----------------------------------
     #
@@ -104,6 +107,8 @@ class TestGraph:
             "BACKLOG",
             "CURRENT",
             "CURRENT",
+            "CURRENT",
+            "DOING",
             "DOING",
             "DOING",
             "DOING",
@@ -178,6 +183,8 @@ class TestGraph:
             0,
             1,
             1,
+            1,
+            1,
             3,
             5,
             8,
@@ -224,6 +231,8 @@ class TestGraph:
             False,
             False,
             False,
+            False,
+            False,
             True,
             True,
         ]
@@ -231,6 +240,8 @@ class TestGraph:
         assert sorted([str(b.period) for b in blocks]) == [
             "1 week",
             "2 semanas",
+            "None",
+            "None",
             "None",
             "None",
             "None",
