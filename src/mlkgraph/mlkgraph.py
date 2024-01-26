@@ -486,7 +486,7 @@ def profiles(
 
             print("D: ", k, v)
 
-        SEGUIR AQUÍ
+        # TODO: SEGUIR AQUÍ
 
         console.print(table)
 
