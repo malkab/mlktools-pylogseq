@@ -107,7 +107,6 @@ class TestGraph:
             "BACKLOG",
             "CURRENT",
             "CURRENT",
-            "CURRENT",
             "DOING",
             "DOING",
             "DOING",
@@ -117,6 +116,7 @@ class TestGraph:
             "DONE",
             "DONE",
             "ICEBOX",
+            "NONE",
             "NONE",
             "NONE",
             "NONE",
@@ -238,8 +238,8 @@ class TestGraph:
         ]
 
         assert sorted([str(b.period) for b in blocks]) == [
-            "1 week",
-            "2 semanas",
+            "1",
+            "2",
             "None",
             "None",
             "None",

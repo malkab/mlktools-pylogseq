@@ -1,14 +1,15 @@
 import fnmatch
 import os
 import sys
-from datetime import timedelta as td
-from typing import Callable, Any
 
-import typer
-from pylogseq import Block, Clock, Graph, Page, PageParserError
-from rich import print as pprint
+# TODO
+# from datetime import timedelta as td
+from typing import Any, Callable
 
 import pandas as pd
+import typer
+from pylogseq import Block, Graph, Page, PageParserError
+from rich import print as pprint
 
 
 # ----------------------
@@ -85,51 +86,53 @@ def parse_graph_group(
     return pd.DataFrame(blocks)
 
 
-# ----------------------------------
-#
-# Returns the total time clocked in a period for a set of blocks.
-#
-# ----------------------------------
-def total_time_period(blocks: list[Block], period: Clock) -> td:
-    """Returns the total time clocked in a period for a set of blocks.
+# TODO: posiblemente DEPRECATED
+# # ----------------------------------
+# #
+# # Returns the total time clocked in a period for a set of blocks.
+# #
+# # ----------------------------------
+# def total_time_period(blocks: list[Block], period: Clock) -> td:
+#     """Returns the total time clocked in a period for a set of blocks.
 
-    Args:
-        blocks (list[Block]): The blocks to test intersection with.
-        period (Clock): The Clock representing the period of intersection.
+#     Args:
+#         blocks (list[Block]): The blocks to test intersection with.
+#         period (Clock): The Clock representing the period of intersection.
 
-    Returns:
-        td: The total time of intersection for all blocks.
-    """
+#     Returns:
+#         td: The total time of intersection for all blocks.
+#     """
 
-    total_time: td = td(0)
+#     total_time: td = td(0)
 
-    for block in blocks:
-        total_time += block.total_intersection_time(period)
+#     for block in blocks:
+#         total_time += block.total_intersection_time(period)
 
-    return total_time
+#     return total_time
 
 
-# ----------------------------------
-#
-# Returns a datetime.timedelta in fraction of hours, with optional rounding.
-#
-# ----------------------------------
-def dt_to_hours(dt: td, r: int = 1) -> float:
-    """Returns a timedelta in fraction of hours, with optional rounding.
+# TODO: Posibly deprecated
+# # ----------------------------------
+# #
+# # Returns a datetime.timedelta in fraction of hours, with optional rounding.
+# #
+# # ----------------------------------
+# def dt_to_hours(dt: td, r: int = 1) -> float:
+#     """Returns a timedelta in fraction of hours, with optional rounding.
 
-    Args:
-        dt (td): The timedelta to convert.
-        r (int, optional): Number of decimals to round. Defaults to 1.
+#     Args:
+#         dt (td): The timedelta to convert.
+#         r (int, optional): Number of decimals to round. Defaults to 1.
 
-    Returns:
-        float: The number of fraction of hours
-    """
-    hours = dt.total_seconds() / 3600.0
+#     Returns:
+#         float: The number of fraction of hours
+#     """
+#     hours = dt.total_seconds() / 3600.0
 
-    if r is not None:
-        return round(hours, r)
-    else:
-        return hours
+#     if r is not None:
+#         return round(hours, r)
+#     else:
+#         return hours
 
 
 # ----------------------

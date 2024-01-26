@@ -1,6 +1,6 @@
 - SCRUM test
 
-- NOW Estoy en NOW
+- Estoy en NOW
 
 - Current #SCB/1 #SCC/1 #P/Test/a/b
   :LOGBOOK:

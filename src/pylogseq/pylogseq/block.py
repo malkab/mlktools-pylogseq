@@ -153,7 +153,7 @@ class Block:
         self.repetitive: bool = False
         """Repetitive task."""
 
-        self.period: str | None = None
+        self.period: int | None = None
         """Period of repetition."""
 
     # ----------------------------------
@@ -241,52 +241,49 @@ class Block:
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
-        # Check for SCRUM status
-
-        # First, check for LATER or NOW, which are DOING irrespective of the ABC
-        if self.later is True or self.now is True:
-            # If there is no T time tag, set to default 1 hour
-            if self.scrum_time == 0 and "repetitiva" not in self.tags:
-                self.scrum_time = 1
-
-            self.scrum_status = SCRUM_STATUS.DOING
-
-        # DONE, should not have T tag
-        elif self.done is True:
-            if self.scrum_time > 0:
-                raise Exception(
-                    f"SCRUM time is {self.scrum_time} for block {self.title}, please set it to 0."
-                )
-
-            self.scrum_status = SCRUM_STATUS.DONE
-
-        # WAITING
-        elif self.waiting is True:
-            self.scrum_status = SCRUM_STATUS.WAITING
-
-        # Icebox, C
-        elif self.highest_priority == "C":
-            self.scrum_status = SCRUM_STATUS.ICEBOX
-
-        # Backlog, B
-        elif self.highest_priority == "B":
-            # If there is no T time tag, set to default 1 hour
-            if self.scrum_time == 0 and self.repetitive is False:
-                self.scrum_time = 1
-
-            self.scrum_status = SCRUM_STATUS.BACKLOG
-
-        # Current, priority, A
-        elif self.highest_priority == "A":
-            # If there is no T time tag, set to default 1 hour
-            if self.scrum_time == 0 and self.repetitive is False:
-                self.scrum_time = 1
-
-            self.scrum_status = SCRUM_STATUS.CURRENT
-
-            # If LATER, it is DOING
+        # Check for SCRUM status. Repetitive tasks are not checked for SCRUM
+        if self.repetitive is False:
+            # First, check for LATER or NOW, which are DOING irrespective of the ABC
             if self.later is True or self.now is True:
+                # If there is no T time tag, set to default 1 hour
+                if self.scrum_time == 0:
+                    self.scrum_time = 1
+
                 self.scrum_status = SCRUM_STATUS.DOING
+
+            # DONE, should not have T tag
+            elif self.done is True:
+                if self.scrum_time > 0:
+                    self.scrum_time = 0
+                self.scrum_status = SCRUM_STATUS.DONE
+
+            # WAITING
+            elif self.waiting is True:
+                self.scrum_status = SCRUM_STATUS.WAITING
+
+            # Icebox, C
+            elif self.highest_priority == "C":
+                self.scrum_status = SCRUM_STATUS.ICEBOX
+
+            # Backlog, B
+            elif self.highest_priority == "B":
+                # If there is no T time tag, set to default 1 hour
+                if self.scrum_time == 0:
+                    self.scrum_time = 1
+
+                self.scrum_status = SCRUM_STATUS.BACKLOG
+
+            # Current, priority, A
+            elif self.highest_priority == "A":
+                # If there is no T time tag, set to default 1 hour
+                if self.scrum_time == 0:
+                    self.scrum_time = 1
+
+                self.scrum_status = SCRUM_STATUS.CURRENT
+
+                # If LATER, it is DOING
+                if self.later is True or self.now is True:
+                    self.scrum_status = SCRUM_STATUS.DOING
 
     # ----------------------------------
     #
@@ -371,16 +368,16 @@ class Block:
                             f"Invalid SCRUM time tag {t} in block {self.title}."
                         )
 
-        # Check for repetitive flag R plus period time
+        # Check for repetitive flag R/X plus period time
         if "R" in self.tags:
             # By default, period to "1 week"
-            self.period = "1 week"
+            self.period = 1
 
             # Look for a R/X tag
             for t in self.tags:
                 if t.startswith("R/"):
                     try:
-                        self.period = t.split("/")[1]
+                        self.period = int(t.split("/")[1])
                     except Exception:
                         raise Exception(
                             f"Invalid repetitive tag {t} in block {self.title}."

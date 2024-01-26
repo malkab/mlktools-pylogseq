@@ -12,9 +12,13 @@ title:: A title
 
 - [#A] Current #T/3
 
-- LATER [#A] Doing #T/8
+- LATER [#A] Doing #T/1
+  :LOGBOOK:
+  CLOCK: [2023-07-07 Mon 10:00:00]--[2023-07-07 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2023-07-12 Mon 10:00:00]--[2023-07-12 Mon 11:00:00] =>  01:00:00
+  :END:
 
-- NOW [#C] Doing #T/23
+- [#C] Doing #T/23
 
 - DONE Done
 
@@ -23,7 +27,7 @@ title:: A title
 - Repetitiva sin prioridad #R
   SCHEDULED: <2024-01-24 Wed>
 
-- [#A] Repetitiva con prioridad #[[R/2 semanas]]
+- [#A] Repetitiva con prioridad #[[R/2]]
   SCHEDULED: <2024-01-26 Fri>
 
 - Todo esto acompañado de un comando que puede buscar grafos en un número indeterminado de rutas o negar ciertas rutas, que puede ser más rápido. Por ejemplo:
@@ -71,10 +75,10 @@ title:: A title
 
 - DONE Done #[[P/Test 2]]
   :LOGBOOK:
-  CLOCK: [2024-01-23 Mon 10:00:00]--[2024-01-23 Mon 11:00:00] =>  01:00:00
-  CLOCK: [2024-01-23 Mon 10:00:00]--[2024-01-23 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2024-01-02 Mon 10:00:00]--[2024-01-02 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2024-01-28 Mon 10:00:00]--[2024-01-28 Mon 11:00:00] =>  01:00:00
   :END:
 
 - Something without SCRUM #[[P/Test C]]
 
-- NOW Estoy en NOW
+- Estoy en NOW

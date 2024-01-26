@@ -1,0 +1,21 @@
+# Example of profile configuration file for mlkgraph
+# Either in the current folder or at home of user
+# GLOBS must be quoted
+
+profile_a_folder:
+  name: "Profile A"
+  description: "Profile A description"
+  include:
+    - tests/graph_b
+    - tests/
+  exclude:
+    - "**/graph_b"
+
+profile_b:
+  name: "Profile B"
+  description: "Profile B description"
+  include:
+    - tests/graph_b
+    - tests/
+  exclude:
+    - "**/graph_b"
