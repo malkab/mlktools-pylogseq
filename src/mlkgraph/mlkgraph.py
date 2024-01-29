@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 # coding=UTF8
 
+import sys
 from typing import Any
 
 import arrow
 import pandas as pd
 import typer
-from libmlkgraph import get_graphs, parse_graph_group
+from libmlkgraph import (
+    get_graphs,
+    parse_graph_group,
+    process_comma_separated_options,
+    process_p_g_i_graph_paths,
+)
 from profiles import Profiles
 from pylogseq import SCRUM_STATUS, Clock, Graph
 from rich import box
+from rich import print as pprint
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+
+# TODO: documentar
 
 # ----------------------
 #
@@ -47,18 +56,64 @@ app = typer.Typer()
 # Command to check current week hours allocation between graphs.
 #
 # ----------------------
-@app.command()
+@app.command(help="Globs must be quoted to avoid shell expansion.")
 def sprint(
-    graphs_paths: list[str] = typer.Argument(
-        ..., help="The paths of the graph to analyze."
-    ),
-    ignore_paths: list[str] = typer.Option([], "--ignore", "-i", help="Ignore a path"),
     show_blocks: bool = typer.Option(
         False, "--blocks", "-b", help="Show time for blocks instead of graphs"
     ),
+    graphs_paths: list[str] = typer.Option(
+        [],
+        "--graph",
+        "-g",
+        help="Graphs to analyze, comma-separated. Multiple -g allowed. Glob can be provided.",
+    ),
+    selected_profiles: list[str] = typer.Option(
+        [],
+        "--profile",
+        "-p",
+        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+    ),
+    ignore_paths: list[str] = typer.Option(
+        [],
+        "--ignore",
+        "-i",
+        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Glob can be provided.",
+    ),
 ):
+    a: list[str] = process_p_g_i_graph_paths(
+        selected_profiles, graphs_paths, ignore_paths
+    )
+
+    print("D: aaaaaa", a)
+
+    # Process comma-separated -g options
+    graphs_paths = process_comma_separated_options(graphs_paths)
+
+    # Process comma-separated -p options
+    # To stored graphs coming from profiles
+    graphs_from_profiles: list[str] = []
+
+    selected_profiles = process_comma_separated_options(selected_profiles)
+
+    # Get the graphs read from the profiles, if any
+    if len(selected_profiles) > 0:
+        profiles: Profiles = Profiles()
+
+        profiles.read_profiles()
+
+        # graphs_from_profiles = get_graphs_from_profiles(
+        #     profiles.profiles, selected_profiles
+        # )
+
     # Get graphs in paths and ignores
-    final_graphs: list[str] = get_graphs(graphs_paths, ignore_paths)
+    final_graphs: list[str] = get_graphs(graphs_paths)
+
+    # Merge graphs from profiles -p and graphs -g
+    final_graphs += graphs_from_profiles
+
+    final_graphs = list(set(final_graphs))
+
+    #    print("D: jjjj", final_graphs)
 
     # The list of graphs
     graphs: list[Graph] = []
@@ -75,9 +130,19 @@ def sprint(
     clock = Clock(span[0].naive, span[1].naive)
 
     # Parse blocks in graphs
-    blocks: pd.DataFrame = parse_graph_group(
+    blocks_parsed = parse_graph_group(
         graphs, lambda x: x.total_intersection_time(clock).total_seconds() > 0
     )
+
+    # Bail out if no blocks found
+    if len(blocks_parsed) == 0:
+        pprint(
+            f"[red bold]No blocks found in the given time span: {span[0].naive} / {span[1].naive}[/]"
+        )
+        sys.exit(0)
+
+    # Transform blocks into a DataFrame
+    blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
 
     # Process dataframe columns
     blocks["graph"] = blocks["graph"].apply(lambda x: x.name)
@@ -194,7 +259,7 @@ def speed(
     ignore_paths: list[str] = typer.Option([], "--ignore", "-i", help="Ignore a path"),
 ):
     # Get graphs in paths and ignores
-    final_graphs: list[str] = get_graphs(graphs_paths, ignore_paths)
+    final_graphs: list[str] = get_graphs(graphs_paths)
 
     # The list of graphs
     graphs: list[Graph] = []
@@ -204,65 +269,65 @@ def speed(
         # Create a graph
         graphs.append(Graph(path))
 
-    # Parse blocks in graphs
-    blocks: pd.DataFrame = parse_graph_group(graphs, lambda x: len(x.clocks) > 0)
+    # # Parse blocks in graphs
+    # blocks: pd.DataFrame = parse_graph_group(graphs, lambda x: len(x.clocks) > 0)
 
-    print()
+    # print()
 
-    # To store weeks' time spans
-    spans: dict[str, Any] = {}
+    # # To store weeks' time spans
+    # spans: dict[str, Any] = {}
 
-    # Calculate Arrow spans for the last 4 weeks
-    today = arrow.now()
+    # # Calculate Arrow spans for the last 4 weeks
+    # today = arrow.now()
 
-    # TODO: codificado en duro para 4 semanas, posible parámetro
-    for i in range(1, 5):
-        # Get the clock interval spanning the week
-        span = today.shift(weeks=-i).span("week")
-        clock = Clock(span[0].naive, span[1].naive)
+    # # TODO: codificado en duro para 4 semanas, posible parámetro
+    # for i in range(1, 5):
+    #     # Get the clock interval spanning the week
+    #     span = today.shift(weeks=-i).span("week")
+    #     clock = Clock(span[0].naive, span[1].naive)
 
-        # ID for the week in the spans dict and as column name
-        week_id: str = f"week_{i}"
+    #     # ID for the week in the spans dict and as column name
+    #     week_id: str = f"week_{i}"
 
-        # Create a column for the week
-        blocks[week_id] = blocks["block"].apply(
-            lambda x: x.total_intersection_time(clock).total_seconds() / 3600.0
-        )
+    #     # Create a column for the week
+    #     blocks[week_id] = blocks["block"].apply(
+    #         lambda x: x.total_intersection_time(clock).total_seconds() / 3600.0
+    #     )
 
-        spans[
-            week_id
-        ] = f"{span[0].format('DD-MM-YYYY')} / {span[1].format('DD-MM-YYYY')}"
+    #     spans[
+    #         week_id
+    #     ] = f"{span[0].format('DD-MM-YYYY')} / {span[1].format('DD-MM-YYYY')}"
 
-    # Calculate totals for each week
-    week_speeds = blocks[["week_1", "week_2", "week_3", "week_4"]].sum()
+    # # Calculate totals for each week
+    # week_speeds = blocks[["week_1", "week_2", "week_3", "week_4"]].sum()
 
-    # Data visualization
-    console = Console()
+    # # Data visualization
+    # console = Console()
 
-    table = Table(
-        title="Velocidades de las últimas 4 semanas",
-        title_style=STYLE_TABLE_NAME,
-        header_style=STYLE_TABLE_HEADER,
-        box=box.SIMPLE_HEAD,
-    )
-    table.add_column("Semana", justify="left")
-    table.add_column("Velocidad", justify="center")
+    # table = Table(
+    #     title="Velocidades de las últimas 4 semanas",
+    #     title_style=STYLE_TABLE_NAME,
+    #     header_style=STYLE_TABLE_HEADER,
+    #     box=box.SIMPLE_HEAD,
+    # )
+    # table.add_column("Semana", justify="left")
+    # table.add_column("Velocidad", justify="center")
 
-    # for i in range(len(spans)):
-    #     table.add_row("JJ", "kk")
+    # # for i in range(len(spans)):
+    # #     table.add_row("JJ", "kk")
 
-    for index, value in week_speeds.items():
-        table.add_row(spans[str(index)], str(round(value, 1)))
+    # for index, value in week_speeds.items():
+    #     table.add_row(spans[str(index)], str(round(value, 1)))
 
-    # Mean final row
-    table.add_row(
-        "MEDIA",
-        str(round(week_speeds.mean(), 1)),
-        style=STYLE_TOTAL,
-    )
+    # # Mean final row
+    # table.add_row(
+    #     "MEDIA",
+    #     str(round(week_speeds.mean(), 1)),
+    #     style=STYLE_TOTAL,
+    # )
 
-    console.print(table)
-    print()
+    # console.print(table)
+    # print()
 
 
 # ----------------------
@@ -290,7 +355,7 @@ def scrum(
     # print("D: ", p.get_profile_names())
 
     # Get graphs in paths and ignores
-    final_graphs: list[str] = get_graphs(graphs_paths, ignore_paths)
+    final_graphs: list[str] = get_graphs(graphs_paths)
 
     # The list of graphs
     graphs: list[Graph] = []
@@ -314,137 +379,137 @@ def scrum(
             SCRUM_STATUS.CURRENT,
         ]
 
-    # Parse blocks in graphs
-    blocks: pd.DataFrame = parse_graph_group(
-        graphs, lambda x: x.scrum_status in target_scrum_status
-    )
+    # # Parse blocks in graphs
+    # blocks: pd.DataFrame = parse_graph_group(
+    #     graphs, lambda x: x.scrum_status in target_scrum_status
+    # )
 
-    print()
+    # print()
 
-    # New column with the SCRUM status
-    if blocks.empty is False:
-        # Status value
-        blocks["scrum_status_value"] = blocks["block"].apply(
-            lambda x: x.scrum_status.value
-        )
+    # # New column with the SCRUM status
+    # if blocks.empty is False:
+    #     # Status value
+    #     blocks["scrum_status_value"] = blocks["block"].apply(
+    #         lambda x: x.scrum_status.value
+    #     )
 
-        # Status name
-        blocks["scrum_status_name"] = blocks["block"].apply(
-            lambda x: x.scrum_status.name
-        )
+    #     # Status name
+    #     blocks["scrum_status_name"] = blocks["block"].apply(
+    #         lambda x: x.scrum_status.name
+    #     )
 
-        # Total time
-        blocks["total_time"] = blocks["block"].apply(
-            lambda x: x.total_clocked_time.total_seconds() / 3600.0
-        )
+    #     # Total time
+    #     blocks["total_time"] = blocks["block"].apply(
+    #         lambda x: x.total_clocked_time.total_seconds() / 3600.0
+    #     )
 
-        # Graph name (for sorting)
-        blocks["graph_name"] = blocks["graph"].apply(lambda x: x.name)
+    #     # Graph name (for sorting)
+    #     blocks["graph_name"] = blocks["graph"].apply(lambda x: x.name)
 
-        # Highest priority
-        blocks["h_priority"] = blocks["block"].apply(lambda x: x.highest_priority)
+    #     # Highest priority
+    #     blocks["h_priority"] = blocks["block"].apply(lambda x: x.highest_priority)
 
-        # Projected time
-        blocks["projected_time"] = blocks["block"].apply(lambda x: x.scrum_time)
+    #     # Projected time
+    #     blocks["projected_time"] = blocks["block"].apply(lambda x: x.scrum_time)
 
-        # Percentage of completiness
-        blocks["percentage"] = blocks.apply(
-            lambda row: row["total_time"] / row["block"].scrum_time
-            if row["block"].scrum_time > 0
-            else 0,
-            axis=1,
-        )
+    #     # Percentage of completiness
+    #     blocks["percentage"] = blocks.apply(
+    #         lambda row: row["total_time"] / row["block"].scrum_time
+    #         if row["block"].scrum_time > 0
+    #         else 0,
+    #         axis=1,
+    #     )
 
-    # Sort
-    blocks.sort_values(
-        by=["scrum_status_value", "graph_name", "h_priority", "projected_time"],
-        inplace=True,
-        ascending=[False, True, True, False],
-    )
+    # # Sort
+    # blocks.sort_values(
+    #     by=["scrum_status_value", "graph_name", "h_priority", "projected_time"],
+    #     inplace=True,
+    #     ascending=[False, True, True, False],
+    # )
 
-    # Data visualization
-    console = Console()
+    # # Data visualization
+    # console = Console()
 
-    table = Table(
-        title="Tareas",
-        title_style=STYLE_TABLE_NAME,
-        header_style=STYLE_TABLE_HEADER,
-        box=box.SIMPLE_HEAD,
-    )
-    table.add_column("Grafo", justify="left")
-    table.add_column("Bloque", justify="left")
-    table.add_column("Estado", justify="center")
-    table.add_column("P", justify="center")
-    table.add_column("TP", justify="center")
-    table.add_column("TE", justify="center")
-    table.add_column("%", justify="center")
+    # table = Table(
+    #     title="Tareas",
+    #     title_style=STYLE_TABLE_NAME,
+    #     header_style=STYLE_TABLE_HEADER,
+    #     box=box.SIMPLE_HEAD,
+    # )
+    # table.add_column("Grafo", justify="left")
+    # table.add_column("Bloque", justify="left")
+    # table.add_column("Estado", justify="center")
+    # table.add_column("P", justify="center")
+    # table.add_column("TP", justify="center")
+    # table.add_column("TE", justify="center")
+    # table.add_column("%", justify="center")
 
-    # An index to shade rows
-    i: int = 0
+    # # An index to shade rows
+    # i: int = 0
 
-    # Iterate rows
-    for index, row in blocks.iterrows():
-        if row["scrum_status_name"] == "WAITING":
-            style = STYLE_ROW_WAITING
-        elif row["scrum_status_name"] == "DOING":
-            style = STYLE_ROW_DOING
-        elif row["scrum_status_name"] == "CURRENT":
-            style = STYLE_ROW_CURRENT
-        elif row["scrum_status_name"] == "BACKLOG":
-            style = STYLE_ROW_BACKLOG
-        else:
-            style = STYLE_ROW_NORMAL
+    # # Iterate rows
+    # for index, row in blocks.iterrows():
+    #     if row["scrum_status_name"] == "WAITING":
+    #         style = STYLE_ROW_WAITING
+    #     elif row["scrum_status_name"] == "DOING":
+    #         style = STYLE_ROW_DOING
+    #     elif row["scrum_status_name"] == "CURRENT":
+    #         style = STYLE_ROW_CURRENT
+    #     elif row["scrum_status_name"] == "BACKLOG":
+    #         style = STYLE_ROW_BACKLOG
+    #     else:
+    #         style = STYLE_ROW_NORMAL
 
-        # Add shade for alternate rows
-        if (i + 1) % 4 == 0:
-            style += STYLE_SHADE
+    #     # Add shade for alternate rows
+    #     if (i + 1) % 4 == 0:
+    #         style += STYLE_SHADE
 
-        # Check for priority A
-        if row["block"].highest_priority == "A":
-            # Shade
-            if (i + 1) % 4 == 0:
-                style = STYLE_ROW_HIGHLIGHT_SHADE
-            else:
-                style = STYLE_ROW_HIGHLIGHT
+    #     # Check for priority A
+    #     if row["block"].highest_priority == "A":
+    #         # Shade
+    #         if (i + 1) % 4 == 0:
+    #             style = STYLE_ROW_HIGHLIGHT_SHADE
+    #         else:
+    #             style = STYLE_ROW_HIGHLIGHT
 
-        percentage_highlighted: Text = Text(
-            str(
-                round(
-                    row["percentage"],
-                    1,
-                )
-            ),
-            style=STYLE_TEXT_HIGHLIGHT if row["percentage"] > 1.0 else style,
-        )
+    #     percentage_highlighted: Text = Text(
+    #         str(
+    #             round(
+    #                 row["percentage"],
+    #                 1,
+    #             )
+    #         ),
+    #         style=STYLE_TEXT_HIGHLIGHT if row["percentage"] > 1.0 else style,
+    #     )
 
-        table.add_row(
-            row["graph"].name,
-            row["block"].clean_title,
-            row["scrum_status_name"],
-            row["block"].highest_priority,
-            str(row["block"].scrum_time),
-            str(round(row["total_time"], 1)),
-            percentage_highlighted,
-            style=style,
-        )
+    #     table.add_row(
+    #         row["graph"].name,
+    #         row["block"].clean_title,
+    #         row["scrum_status_name"],
+    #         row["block"].highest_priority,
+    #         str(row["block"].scrum_time),
+    #         str(round(row["total_time"], 1)),
+    #         percentage_highlighted,
+    #         style=style,
+    #     )
 
-        i += 1
+    #     i += 1
 
-    table.add_row(
-        "TOTAL",
-        str(blocks.shape[0]),
-        "-",
-        "-",
-        str(blocks["projected_time"].sum()),
-        str(round(blocks["total_time"].sum(), 1)),
-        style=STYLE_TOTAL,
-    )
+    # table.add_row(
+    #     "TOTAL",
+    #     str(blocks.shape[0]),
+    #     "-",
+    #     "-",
+    #     str(blocks["projected_time"].sum()),
+    #     str(round(blocks["total_time"].sum(), 1)),
+    #     style=STYLE_TOTAL,
+    # )
 
-    console.print(table)
-    print(
-        " P: Prioridad, TP: tiempo programado, TE: tiempo empleado, %: Porcentaje completado"
-    )
-    print()
+    # console.print(table)
+    # print(
+    #     " P: Prioridad, TP: tiempo programado, TE: tiempo empleado, %: Porcentaje completado"
+    # )
+    # print()
 
 
 # ----------------------
@@ -452,26 +517,51 @@ def scrum(
 # Work with profiles
 #
 # ----------------------
-@app.command()
+@app.command(
+    help="""Work with profiles. If no option -p, -g, or -i is given, the command just list
+    available profiles in .mlkgraphprofiles files.\n
+    .mlkgraphprofiles are searched in the current folder and in the home folder.
+
+    If -p, -g, and/or -i options are given, the command returns all graphs found in the resolution
+    of given options."""
+)
 def profiles(
-    list: bool = typer.Option(False, "--list", "-l", help="List profiles"),
+    selected_profiles: list[str] = typer.Option(
+        [],
+        "--profile",
+        "-p",
+        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+    ),
+    graphs_paths: list[str] = typer.Option(
+        [],
+        "--graph",
+        "-g",
+        help="Graphs to analyze, comma-separated. Multiple -g allowed. Glob can be provided.",
+    ),
+    ignore_paths: list[str] = typer.Option(
+        [],
+        "--ignore",
+        "-i",
+        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Glob can be provided.",
+    ),
 ):
-    print("D: ", list)
+    # List profiles if no -pgi option is given
+    if (
+        len(selected_profiles) == 0
+        and len(graphs_paths) == 0
+        and len(ignore_paths) == 0
+    ):
+        # Data visualization
+        console = Console()
 
-    p: Profiles = Profiles()
+        profiles: Profiles = Profiles()
 
-    p.read_profiles()
+        profiles.read_profiles()
 
-    df: pd.DataFrame = pd.DataFrame(p.profiles).T
+        df: pd.DataFrame = pd.DataFrame(profiles.profiles).T
 
-    print("D: \n", df)
-
-    # Data visualization
-    console = Console()
-
-    if list is False:
         table = Table(
-            title="Profiles",
+            title="Perfiles",
             title_style=STYLE_TABLE_NAME,
             header_style=STYLE_TABLE_HEADER,
             box=box.SIMPLE_HEAD,
@@ -480,15 +570,36 @@ def profiles(
         table.add_column("Nombre", justify="left")
         table.add_column("Descripción", justify="left")
 
-        # Index for shading
-        for k, v in df.iterrows():
-            table.add_row(str(k), v["name"], v["description"])
+        # Check if there are profiles in the DataFrame
+        if df.shape[0] > 0:
+            # Index for shading
+            for k, v in df.iterrows():
+                table.add_row(str(k), v["name"], v["description"])
 
-            print("D: ", k, v)
+            console.print(table)
 
-        # TODO: SEGUIR AQUÍ
+        else:
+            pprint("[red bold]No profiles found in .mlkgraphprofiles files\n[/]")
 
-        console.print(table)
+    # Tests graphs resolved if pgi options are given
+    else:
+        # Process pgi options
+        try:
+            paths: list[str] = process_p_g_i_graph_paths(
+                selected_profiles, graphs_paths, ignore_paths
+            )
+        except Exception as e:
+            pprint(f"[red bold]{e}[/]")
+            sys.exit(1)
+
+        graphs = get_graphs(paths)
+
+        # Check if any graph path was resolved
+        if len(graphs) == 0:
+            pprint("[red bold]No graphs resolved[/]")
+        else:
+            for f in sorted(graphs):
+                pprint(f"[green]{f}[/]")
 
 
 # ----------------------------------

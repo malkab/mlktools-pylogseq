@@ -1,7 +1,6 @@
 import os
 import yaml
 
-
 # TODO: documentar
 
 
@@ -19,6 +18,8 @@ class Profiles:
     def __init__(self):
         """Initializes the profiles object."""
         self.profiles = {}
+        """The dictionary describing all the profiles found in .mlkgraphprofiles files.
+        """
 
     # ----------------------
     #
@@ -26,13 +27,11 @@ class Profiles:
     #
     # ----------------------
     def read_profiles(self):
-        """Reads profiles from a file.
+        """Reads profiles from local folder and home folder .mlkgraphprofiles
+        files and store them in self.profiles.
 
-        Args:
-            profiles_file (str): The path to the profiles file.
-
-        Returns:
-            dict[str, dict[str, Any]]: A dictionary with the profiles.
+        Local folder file takes precedence over home folder file, overwriting
+        any profile with the same name.
         """
 
         # Try to find the file in the home folder
@@ -54,8 +53,17 @@ class Profiles:
         except Exception:
             pass
 
-        # If profiles is empty, raise an exception
-        if self.profiles == {}:
-            raise Exception(
-                "No profiles file .mlkgraphprofiles found in current or home folders."
+    # ----------------------
+    #
+    # Return a tuple with the include / exclude for a profile.
+    # Raises an exception if the profile does no exists.
+    #
+    # ----------------------
+    def get_profile(self, profile_name: str) -> tuple[list[str], list[str]]:
+        if profile_name in self.profiles:
+            return (
+                self.profiles[profile_name]["include"],
+                self.profiles[profile_name]["exclude"],
             )
+        else:
+            raise Exception(f"Profile {profile_name} not found")

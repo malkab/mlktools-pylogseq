@@ -11,7 +11,7 @@ import re
 
 import datetime
 from datetime import timedelta as td
-from typing import Any, List, Self
+from typing import Any
 
 import marko
 import marko.inline as marko_inline
@@ -32,9 +32,10 @@ from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
 from pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
 from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
 from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
-from pylogseq.mdlogseq.elements_parsers.process_multi_tags import process_multi_tags
 from pylogseq.parser import Parser
 from pylogseq.scrum_status import SCRUM_STATUS
+
+# TODO: revisar los imports y documentar
 
 
 # ----------------------------------
@@ -46,6 +47,9 @@ class Block:
     """A class to represent a top level block in a page. Subblocks are processed
     as part of this block but not parsed on separate ones. We are only
     interested in top level ones.
+
+    TODO: AQUÍ HAN CAMBIADO MUCHAS COSAS, REVISAR, REVISAR TODAS LAS API DE LAS
+    CLASES.
 
     Attributes:
         content (str):
@@ -151,9 +155,12 @@ class Block:
         """SCRUM time, by default 0."""
 
         self.repetitive: bool = False
-        """Repetitive task."""
+        """Non-priority repetitive task."""
 
-        self.period: int | None = None
+        self.repetitive_priority: bool = False
+        """Priority repetitive task."""
+
+        self.repetitive_period: int | None = None
         """Period of repetition."""
 
     # ----------------------------------
@@ -368,16 +375,17 @@ class Block:
                             f"Invalid SCRUM time tag {t} in block {self.title}."
                         )
 
-        # Check for repetitive flag R/X plus period time
+        # Check for repetitive flag R/X plus period time for non-priority
+        # repetitive tasks
         if "R" in self.tags:
             # By default, period to "1 week"
-            self.period = 1
+            self.repetitive_period = 1
 
             # Look for a R/X tag
             for t in self.tags:
                 if t.startswith("R/"):
                     try:
-                        self.period = int(t.split("/")[1])
+                        self.repetitive_period = int(t.split("/")[1])
                     except Exception:
                         raise Exception(
                             f"Invalid repetitive tag {t} in block {self.title}."
@@ -386,12 +394,31 @@ class Block:
             # Repetitive flag
             self.repetitive = True
 
+        # Check for repetitive flag RA/X plus period time for priority
+        # repetitive tasks
+        if "RA" in self.tags:
+            # By default, period to "1 week"
+            self.repetitive_period = 1
+
+            # Look for a R/X tag
+            for t in self.tags:
+                if t.startswith("RA/"):
+                    try:
+                        self.repetitive_period = int(t.split("/")[1])
+                    except Exception:
+                        raise Exception(
+                            f"Invalid repetitive tag {t} in block {self.title}."
+                        )
+
+            # Repetitive flag
+            self.repetitive_priority = True
+
     # ----------------------------------
     #
     # Clock block intersections.
     #
     # ----------------------------------
-    def intersect_clock(self, clock: Clock) -> List[Clock | None]:
+    def intersect_clock(self, clock: Clock) -> list[Clock | None]:
         """Returns a list of Clock objects that are the intersections of the
         clocks in this block with the given clock interval.
 
@@ -407,7 +434,7 @@ class Block:
         """
 
         # Clock intersection
-        clocks: List[Clock | None] = [c.intersect(clock) for c in self.clocks]
+        clocks: list[Clock | None] = [c.intersect(clock) for c in self.clocks]
 
         # Purge Nones
         return [c for c in clocks if c is not None]

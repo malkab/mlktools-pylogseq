@@ -68,6 +68,9 @@ class TestBlock:
         assert b.deadline is None
         assert b.title == ""
         assert b.clean_title == ""
+        assert b.repetitive is False
+        assert b.repetitive_priority is False
+        assert b.repetitive_period is None
 
         # Optional content
         b = Block(content="- A block")
@@ -85,6 +88,9 @@ class TestBlock:
         assert b.deadline is None
         assert b.title == "A block"
         assert b.clean_title == "A block"
+        assert b.repetitive is False
+        assert b.repetitive_priority is False
+        assert b.repetitive_period is None
 
     # ----------------------------------
     #

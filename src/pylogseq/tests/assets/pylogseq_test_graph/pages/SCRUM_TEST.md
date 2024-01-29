@@ -25,7 +25,7 @@ title:: A title
 - Repetitiva sin prioridad #R
   SCHEDULED: <2024-01-24 Wed>
 
-- [#A] Repetitiva con prioridad #R/2
+- Repetitiva con prioridad #RA/2
   SCHEDULED: <2024-01-26 Fri>
 
 - Todo esto acompañado de un comando que puede buscar grafos en un número indeterminado de rutas o negar ciertas rutas, que puede ser más rápido. Por ejemplo:

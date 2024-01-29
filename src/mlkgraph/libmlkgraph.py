@@ -1,15 +1,14 @@
-import fnmatch
+import glob
 import os
 import sys
-
-# TODO
-# from datetime import timedelta as td
 from typing import Any, Callable
 
-import pandas as pd
 import typer
+from profiles import Profiles
 from pylogseq import Block, Graph, Page, PageParserError
 from rich import print as pprint
+
+# TODO: documentar a fondo
 
 
 # ----------------------
@@ -19,8 +18,8 @@ from rich import print as pprint
 #
 # ----------------------
 def parse_graph_group(
-    graph_group: list[Graph], filter: Callable[[Block], bool] = lambda block: True
-) -> pd.DataFrame:
+    graph_paths: list[str], filter: Callable[[Block], bool] = lambda block: True
+) -> list:
     """Parses pages and blocks from a group of graphs, with error handling
     and progress indicator.
 
@@ -36,6 +35,9 @@ def parse_graph_group(
     Returns:
         Tuple[list[Page], list[Block]]: The lists of pages and blocks.
     """
+
+    # To store the graphs
+    graph_group: list[Graph] = [Graph(path) for path in graph_paths]
 
     # Lists to store pages and blocks
     pages: list[Page] = []
@@ -83,56 +85,7 @@ def parse_graph_group(
                 print("     " + str(e.original_exception))
                 sys.exit(1)
 
-    return pd.DataFrame(blocks)
-
-
-# TODO: posiblemente DEPRECATED
-# # ----------------------------------
-# #
-# # Returns the total time clocked in a period for a set of blocks.
-# #
-# # ----------------------------------
-# def total_time_period(blocks: list[Block], period: Clock) -> td:
-#     """Returns the total time clocked in a period for a set of blocks.
-
-#     Args:
-#         blocks (list[Block]): The blocks to test intersection with.
-#         period (Clock): The Clock representing the period of intersection.
-
-#     Returns:
-#         td: The total time of intersection for all blocks.
-#     """
-
-#     total_time: td = td(0)
-
-#     for block in blocks:
-#         total_time += block.total_intersection_time(period)
-
-#     return total_time
-
-
-# TODO: Posibly deprecated
-# # ----------------------------------
-# #
-# # Returns a datetime.timedelta in fraction of hours, with optional rounding.
-# #
-# # ----------------------------------
-# def dt_to_hours(dt: td, r: int = 1) -> float:
-#     """Returns a timedelta in fraction of hours, with optional rounding.
-
-#     Args:
-#         dt (td): The timedelta to convert.
-#         r (int, optional): Number of decimals to round. Defaults to 1.
-
-#     Returns:
-#         float: The number of fraction of hours
-#     """
-#     hours = dt.total_seconds() / 3600.0
-
-#     if r is not None:
-#         return round(hours, r)
-#     else:
-#         return hours
+    return blocks
 
 
 # ----------------------
@@ -140,7 +93,7 @@ def parse_graph_group(
 # Get graphs found in several paths and with ignore glob option.
 #
 # ----------------------
-def get_graphs(paths: list[str], ignore_paths: list[str] | None = None) -> list[str]:
+def get_graphs(paths: list[str]) -> list[str]:
     """Get graphs found in a list of paths and filtering them with one or
     several glob patterns.
 
@@ -172,10 +125,85 @@ def get_graphs(paths: list[str], ignore_paths: list[str] | None = None) -> list[
     # No duplicates
     graphs_list = list(set(graphs_list))
 
-    # Apply ignore globs
-    if ignore_paths is not None:
-        for g in ignore_paths:
-            graphs_list = [path for path in graphs_list if not fnmatch.fnmatch(path, g)]
-
     # Final return
     return graphs_list
+
+
+# ----------------------
+#
+# Process a list of graphs coming from a set of -p options to select the
+# profiles to apply. Those can be comma-separated values.
+#
+# ----------------------
+def process_comma_separated_options(options: list[str]) -> list[str]:
+    final_options: list[str] = []
+
+    # Untangle profiles that may be comma-separated
+    for p in options:
+        final_options += p.split(",")
+
+    return final_options
+
+
+# ----------------------
+#
+# Process final graph's paths coming from a set of -g, -p, and -i options, used
+# in most of commands.
+#
+# ----------------------
+def process_p_g_i_graph_paths(
+    p_options: list[str] = [],
+    g_options: list[str] = [],
+    i_options: list[str] = [],
+) -> list[str]:
+    """Process inputs from the -p, -g, and -i options to return a list of
+    potential paths to look for graphs in.
+
+    Paths are processed in that order.
+
+    Args:
+        p_options (list[str], optional): List of values passed in -p options. Defaults to [].
+        g_options (list[str], optional): List of values passed in -g options. Defaults to [].
+        i_options (list[str], optional): List of values passed in -i options. Defaults to [].
+
+    Returns:
+        list[str]: The list of potential paths to look for graphs in.
+    """
+    # To store the final paths
+    graphs: list[str] = []
+
+    # Process comma-separated options
+    glob_p = process_comma_separated_options(p_options)
+    glob_g = process_comma_separated_options(g_options)
+    glob_i = process_comma_separated_options(i_options)
+
+    # Read profiles if any has been selected
+    if len(glob_p) > 0:
+        profiles: Profiles = Profiles()
+        profiles.read_profiles()
+
+        # Cycle profiles applying includes and excludes
+        for p in glob_p:
+            i, e = profiles.get_profile(p)
+
+            for x in i:
+                graphs += glob.glob(x)
+
+            for x in e:
+                graphs = list(set(graphs) - set(glob.glob(x)))
+
+    graphs = list(set(graphs))
+
+    # Apply glob_g in order
+    for g in glob_g:
+        graphs += glob.glob(g)
+
+    graphs = list(set(graphs))
+
+    # Apply glob_i in order
+    for i in glob_i:
+        graphs = list(set(graphs) - set(glob.glob(i)))
+
+    graphs = list(set(graphs))
+
+    return graphs
