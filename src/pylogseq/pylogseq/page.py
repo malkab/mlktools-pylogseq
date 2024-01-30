@@ -84,8 +84,6 @@ class Page:
         # if len(blocks) > 0:
         #     b0 = blocks[0]
 
-        #     print("D: ", b0)
-
         #     # Extract filter and title headers
         #     while b0.startswith("title::") or b0.startswith("filter::"):
         #         # Regex the title

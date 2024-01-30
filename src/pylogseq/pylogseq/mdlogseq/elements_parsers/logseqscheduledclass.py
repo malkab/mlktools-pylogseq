@@ -4,6 +4,7 @@ import re
 
 # TODO: DOCUMENT
 
+
 # --------------------------------------
 #
 # Parses an SCHEDULED section.
@@ -27,7 +28,7 @@ class LogseqScheduled(inline.InlineElement):
     """Don't parse children, there is nothing interesting inside."""
 
     # Priority.
-    priority: int = 10
+    priority: int = 5
     """Priority."""
 
     # --------------------------------------
@@ -55,7 +56,8 @@ class LogseqScheduled(inline.InlineElement):
 
         # Check if there is a time or not
         if len(date_data) == 2:
-            self.target = datetime.strptime("%s" % (date_data[0]), '%Y-%m-%d')
+            self.target = datetime.strptime("%s" % (date_data[0]), "%Y-%m-%d")
         if len(date_data) == 3:
-            self.target = datetime.strptime("%s %s" %
-                (date_data[0], date_data[2]), '%Y-%m-%d %H:%M')
+            self.target = datetime.strptime(
+                "%s %s" % (date_data[0], date_data[2]), "%Y-%m-%d %H:%M"
+            )

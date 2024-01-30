@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 # TODO: documentar
@@ -17,9 +18,12 @@ class Profiles:
     # ----------------------
     def __init__(self):
         """Initializes the profiles object."""
-        self.profiles = {}
+        self.profiles: dict = {}
         """The dictionary describing all the profiles found in .mlkgraphprofiles files.
         """
+
+        self.root: str = ""
+        """The root path to test the globs against."""
 
     # ----------------------
     #
@@ -59,11 +63,26 @@ class Profiles:
     # Raises an exception if the profile does no exists.
     #
     # ----------------------
-    def get_profile(self, profile_name: str) -> tuple[list[str], list[str]]:
+    def get_profile(self, profile_name: str) -> tuple[str, list[str], list[str]]:
         if profile_name in self.profiles:
+            # Check if the profile has a root
+            if "root" not in self.profiles[profile_name]:
+                raise Exception(f"Profile {profile_name} does not have a root")
+
             return (
-                self.profiles[profile_name]["include"],
-                self.profiles[profile_name]["exclude"],
+                # The root
+                self.profiles[profile_name]["root"],
+                # include if there is an include key and the key has list items
+                self.profiles[profile_name]["include"]
+                if "include" in self.profiles[profile_name]
+                and self.profiles[profile_name]["include"] is not None
+                else [],
+                # exclude if there is an exclude key and the key has list items
+                self.profiles[profile_name]["exclude"]
+                if "exclude" in self.profiles[profile_name]
+                and self.profiles[profile_name]["exclude"] is not None
+                else [],
             )
+
         else:
             raise Exception(f"Profile {profile_name} not found")

@@ -83,3 +83,5 @@ title:: A title
   :END:
 
 - Something without SCRUM #[[P/Test C]]
+
+- [#A] **2 meses, 15 min:** revisar material en [/mnt/barracuda_hdd_4tb/malkab](file:///mnt/barracuda_hdd_4tb/malkab)/valuable_legacy_stuff y procesar algo #Home

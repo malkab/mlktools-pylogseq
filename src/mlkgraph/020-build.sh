@@ -5,4 +5,4 @@
 # Build script.
 #
 # -----------------------------------------------------------------
-pyinstaller --onefile --clean mlkgraph.py
+pyinstaller --onefile --clean mlkgraph_cli.py

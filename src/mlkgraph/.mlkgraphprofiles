@@ -4,8 +4,8 @@
 # Don't use commas in globs for clarity
 
 profile_a_folder:
-  name: "Profile A"
   description: "Profile A description"
+  root: .
   include:
     - mlkgraph_tests/graph_b
     - mlkgraph_tests/**
@@ -14,8 +14,8 @@ profile_a_folder:
     - mlkgraph_tests/graph_a
 
 profile_b:
-  name: "Profile B"
   description: "Profile B description"
+  root: .
   include:
     - mlkgraph_tests/graph_b
     - mlkgraph_tests/**

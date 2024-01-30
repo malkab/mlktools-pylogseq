@@ -25,9 +25,12 @@ title:: A title
 - WAITING [#C] Waiting con prioridad ABC #T
 
 - Repetitiva sin prioridad #R
-  SCHEDULED: <2024-01-24 Wed>
+  SCHEDULED: <2024-01-22 Wed>
 
-- [#A] Repetitiva con prioridad #[[R/2]]
+- Repetitiva con prioridad #RA/2
+  SCHEDULED: <2024-01-26 Fri>
+
+- Repetitiva sin prioridad #[[R/2]]
   SCHEDULED: <2024-01-26 Fri>
 
 - Todo esto acompañado de un comando que puede buscar grafos en un número indeterminado de rutas o negar ciertas rutas, que puede ser más rápido. Por ejemplo:
@@ -67,13 +70,13 @@ title:: A title
   CLOCK: [2023-07-17 Mon 10:00:00]--[2023-07-17 Mon 11:00:00] =>  01:00:00
   :END:
 
-- Current #[[P/A]] #SCB/6 #SCC/3
+- Current #[[P/A]] #SCB/6 #SCC/3 #T/4
   :LOGBOOK:
   CLOCK: [2023-07-07 Mon 10:00:00]--[2023-07-07 Mon 11:00:00] =>  01:00:00
-  CLOCK: [2023-07-10 Mon 10:00:00]--[2023-07-10 Mon 11:00:00] =>  01:00:00
+  CLOCK: [2024-01-30 Mon 10:00:00]--[2024-01-30 Mon 11:00:00] =>  01:00:00
   :END:
 
-- DONE Done #[[P/Test 2]]
+- DONE Done #[[P/Test 2]] #T/3
   :LOGBOOK:
   CLOCK: [2024-01-02 Mon 10:00:00]--[2024-01-02 Mon 11:00:00] =>  01:00:00
   CLOCK: [2024-01-29 Mon 10:00:00]--[2024-01-29 Mon 11:00:00] =>  01:00:00
@@ -82,3 +85,5 @@ title:: A title
 - Something without SCRUM #[[P/Test C]]
 
 - Estoy en NOW
+
+- [#A] **2 meses, 15 min:** revisar material en [/mnt/barracuda_hdd_4tb/malkab](file:///mnt/barracuda_hdd_4tb/malkab)/valuable_legacy_stuff y procesar algo #Home

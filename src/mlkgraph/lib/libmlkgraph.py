@@ -4,9 +4,10 @@ import sys
 from typing import Any, Callable
 
 import typer
-from profiles import Profiles
 from pylogseq import Block, Graph, Page, PageParserError
 from rich import print as pprint
+
+from .profiles import Profiles
 
 # TODO: documentar a fondo
 
@@ -155,6 +156,7 @@ def process_p_g_i_graph_paths(
     p_options: list[str] = [],
     g_options: list[str] = [],
     i_options: list[str] = [],
+    debug: bool = False,
 ) -> list[str]:
     """Process inputs from the -p, -g, and -i options to return a list of
     potential paths to look for graphs in.
@@ -184,26 +186,68 @@ def process_p_g_i_graph_paths(
 
         # Cycle profiles applying includes and excludes
         for p in glob_p:
-            i, e = profiles.get_profile(p)
+            r, i, e = profiles.get_profile(p)
 
             for x in i:
-                graphs += glob.glob(x)
+                if debug:
+                    pprint(
+                        f"[green bold]Resolving include glob '{x}' for profile '{p}'[/]"
+                    )
+                    pprint(sorted(test_glob(r, x)))
+                    print()
+
+                graphs += test_glob(r, x)
 
             for x in e:
-                graphs = list(set(graphs) - set(glob.glob(x)))
+                if debug:
+                    pprint(
+                        f"[green bold]Resolving exclude glob '{x}' for profile '{p}'[/]"
+                    )
+                    pprint(sorted(test_glob(r, x)))
+                    print()
+
+                graphs = list(set(graphs) - set(test_glob(r, x)))
 
     graphs = list(set(graphs))
 
     # Apply glob_g in order
     for g in glob_g:
+        if debug:
+            pprint(f"[green bold]Resolving -g glob '{g}'[/]")
+            pprint(sorted(glob.glob(g)))
+            print()
+
         graphs += glob.glob(g)
 
     graphs = list(set(graphs))
 
     # Apply glob_i in order
     for i in glob_i:
+        if debug:
+            pprint(f"[green bold]Resolving -i glob '{i}'[/]")
+            pprint(sorted(glob.glob(i)))
+            print()
+
         graphs = list(set(graphs) - set(glob.glob(i)))
 
     graphs = list(set(graphs))
 
     return graphs
+
+
+# ----------------------
+#
+# Tests a glob against a root path
+#
+# ----------------------
+def test_glob(root: str, check_glob: str) -> list[str]:
+    """Tests a glob against a root path.
+
+    Args:
+        root (str): The root path to test the glob against.
+        glob (str): The glob to test.
+
+    Returns:
+        list[str]: glob expansion.
+    """
+    return glob.glob(os.path.join(root, check_glob))

@@ -1,6 +1,5 @@
 import pytest
-
-from libmlkgraph import process_p_g_i_graph_paths, get_graphs
+from lib.libmlkgraph import get_graphs, process_p_g_i_graph_paths
 
 
 # @pytest.mark.skip
@@ -32,9 +31,9 @@ class TestLib:
         graphs = process_p_g_i_graph_paths(p_options=p_options)
 
         assert sorted(graphs) == [
-            "mlkgraph_tests/graph_b",
-            "mlkgraph_tests/no_es_grafo",
-            "mlkgraph_tests/pylogseq_test_graph",
+            "./mlkgraph_tests/graph_b",
+            "./mlkgraph_tests/no_es_grafo",
+            "./mlkgraph_tests/pylogseq_test_graph",
         ]
 
         # Multiple existing profiles
@@ -43,9 +42,9 @@ class TestLib:
         graphs = process_p_g_i_graph_paths(p_options=p_options)
 
         assert sorted(graphs) == [
-            "mlkgraph_tests/graph_a",
-            "mlkgraph_tests/no_es_grafo",
-            "mlkgraph_tests/pylogseq_test_graph",
+            "./mlkgraph_tests/graph_a",
+            "./mlkgraph_tests/no_es_grafo",
+            "./mlkgraph_tests/pylogseq_test_graph",
         ]
 
         # Single -g option

@@ -21,3 +21,8 @@ windows:
       sleep 0.2 ;
       clear ;
       echo Run dev environment at 010 to test the mlkgraph CLI app
+  - test_libmlkgraph: >
+      cd .devcontainer/scripts ;
+      sleep 0.2 ;
+      clear ;
+      echo Run dev environment at 015 to test the libmlkgraph module

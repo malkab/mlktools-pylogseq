@@ -7,9 +7,8 @@ TODO: THIS CLASS NEEDS A REVIEW IN DOC AFTER DROPPING THE S AND T OLD TAGS
 FOR TIME CONTROL AND IMPLEMENTING THE S/PROJECT/ALLOCATED/SPRINT TAGS.
 """
 
-import re
-
 import datetime
+import re
 from datetime import timedelta as td
 from typing import Any
 
@@ -25,13 +24,13 @@ from pylogseq.mdlogseq.elements_parsers import (
 from pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
 from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
 from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
-from pylogseq.mdlogseq.elements_parsers.logseqwaitingclass import LogseqWaiting
 from pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
 from pylogseq.mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
 from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
 from pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
 from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
 from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
+from pylogseq.mdlogseq.elements_parsers.logseqwaitingclass import LogseqWaiting
 from pylogseq.parser import Parser
 from pylogseq.scrum_status import SCRUM_STATUS
 
@@ -163,6 +162,13 @@ class Block:
         self.repetitive_period: int | None = None
         """Period of repetition."""
 
+        self.repetitive_score: float | None = None
+        """This is a synthetic score for repetitive tasks that represents its
+        delayeness. It is the ratio between the time elapsed in days from the
+        scheduled date and the number of days in its period. If equal to 1,
+        it has reached its period, if bigger, it has passed its period, if lower
+        than 0, it is still in its period."""
+
     # ----------------------------------
     #
     # Total clocked time for the block.
@@ -244,12 +250,67 @@ class Block:
         self.priorities = sorted(list(set(self.priorities)))
         self.tags = sorted(list(set(self.tags)))
 
+        # Check if there is a SCRUM time tag
+        if "T" in self.tags:
+            # By default, SCRUM time is 1
+            self.scrum_time = 1
+
+            # Look for a T/X tag
+            for t in self.tags:
+                if t.startswith("T/"):
+                    try:
+                        self.scrum_time = int(t.split("/")[1])
+                    except Exception:
+                        raise Exception(
+                            f"Invalid SCRUM time tag {t} in block {self.title}."
+                        )
+
+        # Check for repetitive flag R/X plus period time for non-priority
+        # repetitive tasks
+        if "R" in self.tags or "RA" in self.tags:
+            # Check there is a scheduled date
+            if self.scheduled is None:
+                raise Exception(
+                    f"Repetitive task '{self.title}' has no scheduled date."
+                )
+
+            # By default, period to "1 week"
+            self.repetitive_period = 1
+
+            if "R" in self.tags:
+                tag_to_look: str = "R/"
+            else:
+                tag_to_look: str = "RA/"
+
+            # Look for the tag
+            for t in self.tags:
+                if t.startswith(tag_to_look):
+                    try:
+                        self.repetitive_period = int(t.split("/")[1])
+                    except Exception:
+                        raise Exception(
+                            f"Invalid repetitive tag '{t}' in block {self.title}."
+                        )
+
+            # Repetitive flag
+            if "R" in self.tags:
+                self.repetitive = True
+            else:
+                self.repetitive_priority = True
+
+            # Check if there is a scheduled date
+            if self.scheduled is not None:
+                # Calculate the repetitive score
+                self.repetitive_score = (
+                    (datetime.datetime.now() - self.scheduled).days
+                ) / (int(self.repetitive_period) * 7)
+
         # Check for highest priority
         if len(self.priorities) > 0:
             self.highest_priority = self.priorities[0]
 
         # Check for SCRUM status. Repetitive tasks are not checked for SCRUM
-        if self.repetitive is False:
+        if self.repetitive is False and self.repetitive_priority is False:
             # First, check for LATER or NOW, which are DOING irrespective of the ABC
             if self.later is True or self.now is True:
                 # If there is no T time tag, set to default 1 hour
@@ -339,18 +400,18 @@ class Block:
         elif isinstance(item, LogseqWaiting):
             self.waiting = True
 
+        elif isinstance(item, LogseqScheduled):
+            self.scheduled = item.target
+
+        elif isinstance(item, LogseqDeadline):
+            self.deadline = item.target
+
         elif (
             isinstance(item, LogseqTag)
             or isinstance(item, LogseqComposedTag)
             or isinstance(item, LogseqSquareTag)
         ):
             self.tags.extend(item.target)
-
-        elif isinstance(item, LogseqScheduled):
-            self.scheduled = item.target
-
-        elif isinstance(item, LogseqDeadline):
-            self.deadline = item.target
 
         elif (
             isinstance(item, marko_inline.LineBreak)
@@ -359,59 +420,6 @@ class Block:
             or isinstance(item, LogseqEnd)
         ):
             pass
-
-        # Check if there is a SCRUM time tag
-        if "T" in self.tags:
-            # By default, SCRUM time is 1
-            self.scrum_time = 1
-
-            # Look for a T/X tag
-            for t in self.tags:
-                if t.startswith("T/"):
-                    try:
-                        self.scrum_time = int(t.split("/")[1])
-                    except Exception:
-                        raise Exception(
-                            f"Invalid SCRUM time tag {t} in block {self.title}."
-                        )
-
-        # Check for repetitive flag R/X plus period time for non-priority
-        # repetitive tasks
-        if "R" in self.tags:
-            # By default, period to "1 week"
-            self.repetitive_period = 1
-
-            # Look for a R/X tag
-            for t in self.tags:
-                if t.startswith("R/"):
-                    try:
-                        self.repetitive_period = int(t.split("/")[1])
-                    except Exception:
-                        raise Exception(
-                            f"Invalid repetitive tag {t} in block {self.title}."
-                        )
-
-            # Repetitive flag
-            self.repetitive = True
-
-        # Check for repetitive flag RA/X plus period time for priority
-        # repetitive tasks
-        if "RA" in self.tags:
-            # By default, period to "1 week"
-            self.repetitive_period = 1
-
-            # Look for a R/X tag
-            for t in self.tags:
-                if t.startswith("RA/"):
-                    try:
-                        self.repetitive_period = int(t.split("/")[1])
-                    except Exception:
-                        raise Exception(
-                            f"Invalid repetitive tag {t} in block {self.title}."
-                        )
-
-            # Repetitive flag
-            self.repetitive_priority = True
 
     # ----------------------------------
     #
