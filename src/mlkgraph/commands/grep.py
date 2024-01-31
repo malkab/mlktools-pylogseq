@@ -1,0 +1,171 @@
+import sys
+
+import pandas as pd
+import typer
+from lib.constants import (
+    STYLE_ROW_NORMAL,
+    STYLE_SHADE,
+    STYLE_TABLE_HEADER,
+    STYLE_TABLE_NAME,
+)
+from lib.libmlkgraph import (
+    get_graphs,
+    parse_graph_group,
+    process_p_g_i_graph_paths,
+)
+from rich import box
+from rich import print as pprint
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+
+
+# ----------------------
+#
+# Command to check info, for example, words in a block title or content.
+#
+# ----------------------
+def grep(
+    title: list[str] = typer.Option(
+        None,
+        "--title",
+        "-t",
+        help="Word to search in the title. Can be given multiple times.",
+    ),
+    content: list[str] = typer.Option(
+        None,
+        "--content",
+        "-c",
+        help="Word to search in the content. Can be given multiple times.",
+    ),
+    selected_profiles: list[str] = typer.Option(
+        [],
+        "--profile",
+        "-p",
+        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+    ),
+    graphs_paths: list[str] = typer.Option(
+        [],
+        "--graph",
+        "-g",
+        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
+    ),
+    ignore_paths: list[str] = typer.Option(
+        [],
+        "--ignore",
+        "-i",
+        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
+    ),
+):
+    # Default path to local
+    paths = ["."]
+
+    if not (
+        len(selected_profiles) == 0
+        and len(graphs_paths) == 0
+        and len(ignore_paths) == 0
+    ):
+        # Process pgi options
+        try:
+            paths: list[str] = process_p_g_i_graph_paths(
+                selected_profiles, graphs_paths, ignore_paths
+            )
+        except Exception as e:
+            pprint(f"[red bold]{e}[/]")
+            sys.exit(1)
+
+    # Get graphs in processed paths
+    graphs_paths_found: list[str] = get_graphs(paths)
+
+    # Define filtering lambda
+    lam: list = []  # noqa: E731
+    table_title: list[str] = []
+
+    # Check for title search
+    if title is not None:
+        for t in title:
+            lam.append(lambda x: t in x.title)
+            table_title.append(f"[green bold]'{t}'[/] en el título")
+
+    if content is not None:
+        for c in content:
+            lam.append(lambda x: c in x.content)
+            table_title.append(f"[green bold]'{c}'[/] en el contenido")
+
+    if title is None and content is None:
+        pprint("[red bold]Error:[/] no se ha proporcionado un término de búsqueda.")
+        sys.exit(0)
+
+    # Final blocks
+    blocks_parsed = []
+
+    for la in lam:
+        blocks_parsed = blocks_parsed + parse_graph_group(graphs_paths_found, la)
+
+    # Transform blocks into a DataFrame
+    blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
+
+    # Add new columns
+    # For sorting
+    blocks["graph_name"] = blocks["graph"].apply(lambda x: x.name)
+
+    blocks["page_title"] = blocks["page"].apply(lambda x: x.title)
+
+    blocks["block_clean_title"] = blocks["block"].apply(lambda x: x.clean_title)
+
+    blocks["repetitive"] = blocks["block"].apply(lambda x: "x" if x.repetitive else "-")
+
+    blocks["priority"] = blocks["block"].apply(
+        lambda x: x.highest_priority if x.highest_priority is not None else "-"
+    )
+
+    # Sort
+    blocks.sort_values(
+        by=["graph_name", "page_title", "block_clean_title"],
+        inplace=True,
+        ascending=[True, True, True],
+    )
+
+    print()
+
+    # Data visualization
+    console = Console()
+
+    table = Table(
+        title=f"Bloques con {' + '.join(table_title)}",
+        title_style=STYLE_TABLE_NAME,
+        header_style=STYLE_TABLE_HEADER,
+        box=box.SIMPLE_HEAD,
+    )
+    table.add_column("Grafo", justify="left")
+    table.add_column("Página", justify="left")
+    table.add_column("Bloque", justify="left")
+    table.add_column("R", justify="center")
+    table.add_column("P", justify="center")
+
+    # An index to shade rows
+    i: int = 0
+
+    for index, row in blocks.iterrows():
+        style = STYLE_ROW_NORMAL
+
+        # Add shade for alternate rows
+        if (i + 1) % 4 == 0:
+            style += STYLE_SHADE
+
+        table.add_row(
+            row["graph_name"],
+            row["page_title"],
+            Text(row["block_clean_title"]),
+            row["repetitive"],
+            row["priority"],
+            style=style,
+        )
+
+        i += 1
+
+    console.print(table)
+
+    print(" R: repetitiva, P: máxima prioridad")
+
+    print()

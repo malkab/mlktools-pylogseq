@@ -34,12 +34,12 @@
 #     -g "tests/**,tests/graph_b" \
 #     -p profile_a_folder
 
-# Sprint without blocks and options
-./mlkgraph_cli.py sprint \
-    -p profile_b
-    # -i **/graph_b,**/graph_a \
-    # -i "tests/**" \
-    # -g "tests/**,tests/graph_b" \
+# # Sprint without blocks and options
+# ./mlkgraph_cli.py sprint \
+#     -p profile_b
+#     # -i **/graph_b,**/graph_a \
+#     # -i "tests/**" \
+#     # -g "tests/**,tests/graph_b" \
 
 
 # ---
@@ -58,11 +58,12 @@
 # ./mlkgraph_cli.py speed -w 10
 
 # # speed with all options
-# ./mlkgraph_cli.py speed -w 2 \
-#     -i **/graph_b,**/graph_a \
-#     -i "tests/**" \
-#     -g "tests/**,tests/graph_b" \
-#     -p profile_a_folder
+# ./mlkgraph_cli.py speed -w 8 \
+#     -p profile_b
+#     # -i **/graph_b,**/graph_a \
+#     # -i "tests/**" \
+#     # -g "tests/**,tests/graph_b" \
+#     # -p profile_a_folder
 
 
 # ---
@@ -75,7 +76,7 @@
 # ./mlkgraph_cli.py scrum --help
 
 # # scrum without options, should return results for current folder
-# ./mlkgraph_cli.py scrum
+# ./mlkgraph_cli.py scrum -w 10
 
 # # scrum with -b option, should return results for current folder
 # ./mlkgraph_cli.py scrum -b
@@ -111,20 +112,20 @@
 
 
 # ---
-# repetitive command
+# scheduled command
 # ---
 
-# # repetitive help
-# ./mlkgraph_cli.py repetitive --help
+# # scheduled help
+# ./mlkgraph_cli.py scheduled --help
 
 # # No options, shows priority ones
-# ./mlkgraph_cli.py repetitive
+# ./mlkgraph_cli.py scheduled
 
 # # No options, shows non-priority ones
-# ./mlkgraph_cli.py repetitive -n
+# ./mlkgraph_cli.py scheduled -n
 
 # # Full options
-# ./mlkgraph_cli.py repetitive -n \
+# ./mlkgraph_cli.py scheduled -n \
 #     -p profile_a_folder \
 #     -i "./**/**b"
 
@@ -136,13 +137,26 @@
 # # deadline help
 # ./mlkgraph_cli.py deadline --help
 
-# # No options, shows priority ones
+# # No options
 # ./mlkgraph_cli.py deadline
 
-# # No options, shows non-priority ones
-# ./mlkgraph_cli.py repetitive -n
+# # Full options
+# ./mlkgraph_cli.py deadline \
+#     -p profile_a_folder \
+#     -i "./**/**b"
+
+
+# ---
+# grep command
+# ---
+
+# # grep help
+# ./mlkgraph_cli.py grep --help
+
+# No options
+./mlkgraph_cli.py grep
 
 # # Full options
-# ./mlkgraph_cli.py repetitive -n \
+# ./mlkgraph_cli.py grep \
 #     -p profile_a_folder \
 #     -i "./**/**b"

@@ -27,7 +27,7 @@ from rich.text import Text
 # Average speed in the last 4 weeks.
 #
 # ----------------------------------
-def repetitive(
+def scheduled(
     non_priority: bool = typer.Option(
         False, "--non-priority", "-n", help="Shows non-priotity repetitives."
     ),
@@ -97,7 +97,7 @@ def repetitive(
         pprint("[red bold]No SCRUM blocks found[/]")
         sys.exit(0)
 
-    # Graph name (for sorting)
+    # Date
     blocks["date"] = blocks["block"].apply(lambda x: x.scheduled)
 
     # Repetitive score

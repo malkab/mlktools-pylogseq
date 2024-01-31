@@ -1,16 +1,13 @@
 import sys
-from typing import Any
 
-import arrow
-import pandas as pd
 import typer
 from lib.constants import STYLE_TABLE_HEADER, STYLE_TABLE_NAME, STYLE_TOTAL
 from lib.libmlkgraph import (
+    calculate_speed,
     get_graphs,
     parse_graph_group,
     process_p_g_i_graph_paths,
 )
-from pylogseq import Clock
 from rich import box
 from rich import print as pprint
 from rich.console import Console
@@ -19,7 +16,7 @@ from rich.table import Table
 
 # ----------------------------------
 #
-# Average speed in the last 4 weeks.
+# Average speed in the last X weeks.
 #
 # ----------------------------------
 def speed(
@@ -66,42 +63,9 @@ def speed(
     # Parse blocks in graphs
     blocks_parsed = parse_graph_group(graphs_paths_found, lambda x: len(x.clocks) > 0)
 
-    # Transform blocks into a DataFrame
-    blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
-
-    print()
-
-    # To store weeks' time spans
-    spans: dict[str, Any] = {}
-
-    # Calculate Arrow spans for the last 4 weeks
-    today = arrow.now()
-
-    # To store the weeks id week_x to remember how many of them are
-    weeks_id: list[str] = []
-
-    # TODO: codificado en duro para 4 semanas, posible parámetro
-    for i in range(1, weeks + 1):
-        # Get the clock interval spanning the week
-        span = today.shift(weeks=-i).span("week")
-        clock = Clock(span[0].naive, span[1].naive)
-
-        # ID for the week in the spans dict and as column name
-        week_id: str = f"week_{i}"
-        weeks_id.append(week_id)
-
-        # Create a column for the week
-        blocks[week_id] = blocks["block"].apply(
-            lambda x: x.total_intersection_time(clock).total_seconds() / 3600.0
-        )
-
-        # Calculate week spans literals for presentation
-        spans[
-            week_id
-        ] = f"{span[0].format('DD-MM-YYYY')} / {span[1].format('DD-MM-YYYY')}"
-
-    # Calculate totals for each week
-    week_speeds = blocks[weeks_id].sum()
+    week_speeds, mean = calculate_speed(
+        [i["block"] for i in blocks_parsed], weeks=weeks
+    )
 
     # Data visualization
     console = Console()
@@ -120,15 +84,15 @@ def speed(
     week_n: int = 1
 
     # Add columns
-    for index, value in week_speeds.items():
-        table.add_row(str(-week_n), spans[str(index)], str(round(value, 1)))
+    for i in week_speeds:
+        table.add_row(str(-week_n), i["week_id"], str(round(i["speed"], 1)))
         week_n += 1
 
     # Mean final row
     table.add_row(
         "MEDIA",
         "",
-        str(round(week_speeds.mean(), 1)),
+        str(round(mean, 1)),
         style=STYLE_TOTAL,
     )
 

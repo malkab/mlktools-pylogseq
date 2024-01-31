@@ -202,8 +202,6 @@ def sprint(
 
     table = Table(show_header=False, show_lines=False, show_edge=False, pad_edge=False)
 
-    # table.add_row("Horas prorrateadas (5 días / semana)", justify="left")
-
     table.add_row(
         "Horas diarias prorrateadas (5 días / semana)", str(round(total_hours / 5.0, 1))
     )

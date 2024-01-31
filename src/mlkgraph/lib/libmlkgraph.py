@@ -3,8 +3,10 @@ import os
 import sys
 from typing import Any, Callable
 
+import arrow
+import pandas as pd
 import typer
-from pylogseq import Block, Graph, Page, PageParserError
+from pylogseq import Block, Clock, Graph, Page, PageParserError
 from rich import print as pprint
 
 from .profiles import Profiles
@@ -251,3 +253,57 @@ def test_glob(root: str, check_glob: str) -> list[str]:
         list[str]: glob expansion.
     """
     return glob.glob(os.path.join(root, check_glob))
+
+
+# ----------------------
+#
+# Calculates the average speed in the last X weeks for a list of blocks.
+#
+# ----------------------
+def calculate_speed(
+    clock_blocks: list[Block], weeks: int = 4
+) -> tuple[list[dict], float]:
+    # Transform blocks into a DataFrame
+    blocks: pd.DataFrame = pd.DataFrame(clock_blocks)
+
+    # To store weeks' time spans
+    spans: dict[str, Any] = {}
+
+    # Calculate Arrow spans for the last 4 weeks
+    today = arrow.now()
+
+    # To store the weeks id week_x to remember how many of them are
+    weeks_id: list[str] = []
+
+    # Iterate weeks backwards
+    for i in range(1, weeks + 1):
+        # Get the clock interval spanning the week
+        span = today.shift(weeks=-i).span("week")
+        clock = Clock(span[0].naive, span[1].naive)
+
+        # ID for the week in the spans dict and as column name
+        week_id: str = f"week_{i}"
+        weeks_id.append(week_id)
+
+        # Create a column for the week
+        blocks[week_id] = blocks[0].apply(
+            lambda x: x.total_intersection_time(clock).total_seconds() / 3600.0
+        )
+
+        # Calculate week spans literals for presentation
+        spans[
+            week_id
+        ] = f"{span[0].format('DD-MM-YYYY')} / {span[1].format('DD-MM-YYYY')}"
+
+    # Calculate totals for each week
+    week_speeds = blocks[weeks_id].sum()
+
+    # Compose output
+    out = []
+
+    # Speed info for each week
+    for i in range(1, weeks + 1):
+        out.append({"week_id": spans[f"week_{i}"], "speed": week_speeds[f"week_{i}"]})
+
+    # Return speed info for each week and the average of all speeds
+    return (out, week_speeds.mean())

@@ -6,8 +6,9 @@ from commands.profiles import profiles
 from commands.scrum import scrum
 from commands.speed import speed
 from commands.sprint import sprint
-from commands.repetitive import repetitive
+from commands.scheduled import scheduled
 from commands.deadline import deadline
+from commands.grep import grep
 
 # TODO: documentar
 
@@ -65,12 +66,12 @@ app.command(
 
 # repetitive command
 app.command(
-    help="""Check for repetitive tasks.
+    help="""Check for scheduled tasks with RA and R tags (repetitive).
 
             Globs in -pgi options must be quoted to avoid shell expansion.
 
             If no -pgi options are given, the command uses the current folder as the starting point to look for graphs."""
-)(repetitive)
+)(scheduled)
 
 # deadline command
 app.command(
@@ -80,6 +81,15 @@ app.command(
 
             If no -pgi options are given, the command uses the current folder as the starting point to look for graphs."""
 )(deadline)
+
+# grep command
+app.command(
+    help="""Checks for info in blocks, for example, words in a block title or content.
+
+            Globs in -pgi options must be quoted to avoid shell expansion.
+
+            If no -pgi options are given, the command uses the current folder as the starting point to look for graphs."""
+)(grep)
 
 # ----------------------------------
 #

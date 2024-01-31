@@ -17,6 +17,7 @@ from lib.constants import (
     STYLE_TOTAL,
 )
 from lib.libmlkgraph import (
+    calculate_speed,
     get_graphs,
     parse_graph_group,
     process_p_g_i_graph_paths,
@@ -40,6 +41,9 @@ from rich.text import Text
 def scrum(
     backlog: bool = typer.Option(False, "--backlog", "-b", help="Show backlog."),
     icebox: bool = typer.Option(False, "--icebox", "-c", help="Show icebox."),
+    weeks: int = typer.Option(
+        4, "--weeks", "-w", help="Number of weeks to analyze speed"
+    ),
     selected_profiles: list[str] = typer.Option(
         [],
         "--profile",
@@ -93,12 +97,24 @@ def scrum(
     # Get graphs in processed paths
     graphs_paths_found: list[str] = get_graphs(paths)
 
-    # Parse blocks in graphs
+    # Parse blocks in graphs, getting the ones with clocks or with the target
+    # SCRUM_STATUS
     blocks_parsed = parse_graph_group(
-        graphs_paths_found, lambda x: x.scrum_status in target_scrum_status
+        graphs_paths_found,
+        lambda x: (x.scrum_status in target_scrum_status) or (len(x.clocks) > 0),
     )
 
     blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
+
+    # Calculate speed
+    week_speeds, mean_speed = calculate_speed(
+        [i["block"] for i in blocks_parsed if len(i["block"].clocks) > 0], weeks=weeks
+    )
+
+    # Filter blocks to get only the ones with SCRUM
+    blocks = blocks[
+        blocks["block"].apply(lambda x: x.scrum_status in target_scrum_status)
+    ]
 
     print()
 
@@ -127,6 +143,11 @@ def scrum(
 
     # Projected time
     blocks["projected_time"] = blocks["block"].apply(lambda x: x.scrum_time)
+
+    # Remaining time
+    blocks["remaining_time"] = blocks.apply(
+        lambda x: max(0, (x["projected_time"] - x["total_time"])), axis=1
+    )
 
     # Percentage of completiness
     blocks["percentage"] = blocks.apply(
@@ -158,6 +179,7 @@ def scrum(
     table.add_column("P", justify="center")
     table.add_column("TP", justify="center")
     table.add_column("TE", justify="center")
+    table.add_column("TD", justify="center")
     table.add_column("%", justify="center")
 
     # An index to shade rows
@@ -205,6 +227,7 @@ def scrum(
             row["block"].highest_priority,
             str(row["block"].scrum_time),
             str(round(row["total_time"], 1)),
+            str(round(row["remaining_time"], 1)),
             percentage_highlighted,
             style=style,
         )
@@ -226,15 +249,31 @@ def scrum(
         "-",
         str(blocks["projected_time"].sum()),
         str(round(blocks["total_time"].sum(), 1)),
+        str(round(blocks["remaining_time"].sum(), 1)),
         total_highlighted,
-        # str(round(blocks["total_time"].sum() / blocks["projected_time"].sum(), 1)),
         style=STYLE_TOTAL,
     )
 
     console.print(table)
 
     print(
-        " P: Prioridad, TP: tiempo programado, TE: tiempo empleado, %: Porcentaje completado"
+        " P: Prioridad, TP: tiempo programado, TE: tiempo empleado, TD: tiempo disponible, %: Porcentaje completado"
     )
+
+    print()
+
+    table = Table(show_header=False, show_lines=False, show_edge=False, pad_edge=False)
+
+    table.add_row(
+        f" Velocidad media últimas [red bold]{weeks}[/] semanas",
+        f"[red bold]{round(mean_speed, 1)}[/]",
+    )
+
+    table.add_row(
+        " Semanas estimadas para conclusión de tiempo restante",
+        f"[red bold]{round(blocks['remaining_time'].sum() / mean_speed, 1)}[/]",
+    )
+
+    console.print(table)
 
     print()
