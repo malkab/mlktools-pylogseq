@@ -288,9 +288,9 @@ def clock(
         if day.format("d") not in ["6", "7"]:
             non_weekend_days += 1
 
-    table.add_row("Workdays in time span", f"[red bold]{str(non_weekend_days)}[/]")
+    table.add_row("  Workdays in time span", f"[red bold]{str(non_weekend_days)}[/]")
     table.add_row(
-        "Daily hours in time span",
+        "  Daily hours in time span",
         str(f"[red bold]{round(total_hours / non_weekend_days, 1)}[/]"),
     )
 
