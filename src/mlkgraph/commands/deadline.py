@@ -103,15 +103,15 @@ def deadline(
     console = Console()
 
     table = Table(
-        title="Fechas clave",
+        title="Deadlines",
         title_style=STYLE_TABLE_NAME,
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Grafo", justify="left")
-    table.add_column("Bloque", justify="left")
-    table.add_column("Fecha", justify="center")
-    table.add_column("Días restantes", justify="center")
+    table.add_column("Graph", justify="left")
+    table.add_column("Block", justify="left")
+    table.add_column("Deadline", justify="center")
+    table.add_column("Days Left", justify="center")
 
     # An index to shade rows
     i: int = 0

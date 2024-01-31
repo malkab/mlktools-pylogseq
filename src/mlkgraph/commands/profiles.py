@@ -61,13 +61,13 @@ def profiles(
         df: pd.DataFrame = pd.DataFrame(profiles.profiles).T
 
         table = Table(
-            title="Perfiles",
+            title="Profiles",
             title_style=STYLE_TABLE_NAME,
             header_style=STYLE_TABLE_HEADER,
             box=box.SIMPLE_HEAD,
         )
         table.add_column("ID", justify="left")
-        table.add_column("Descripción", justify="left")
+        table.add_column("Description", justify="left")
 
         # Sort by index (ID of the profile)
         df.sort_index(inplace=True)

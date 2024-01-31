@@ -101,7 +101,7 @@ def scrum(
     # SCRUM_STATUS
     blocks_parsed = parse_graph_group(
         graphs_paths_found,
-        lambda x: (x.scrum_status in target_scrum_status) or (len(x.clocks) > 0),
+        filter=lambda x: (x.scrum_status in target_scrum_status) or (len(x.clocks) > 0),
     )
 
     blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
@@ -177,9 +177,9 @@ def scrum(
     table.add_column("Bloque", justify="left")
     table.add_column("Estado", justify="center")
     table.add_column("P", justify="center")
-    table.add_column("TP", justify="center")
-    table.add_column("TE", justify="center")
-    table.add_column("TD", justify="center")
+    table.add_column("ET", justify="center")
+    table.add_column("WT", justify="center")
+    table.add_column("LT", justify="center")
     table.add_column("%", justify="center")
 
     # An index to shade rows
@@ -257,7 +257,7 @@ def scrum(
     console.print(table)
 
     print(
-        " P: Prioridad, TP: tiempo programado, TE: tiempo empleado, TD: tiempo disponible, %: Porcentaje completado"
+        " P: Priority, ET: estimated time, WT: work time , LT: left time, %: completiness"
     )
 
     print()
@@ -265,12 +265,12 @@ def scrum(
     table = Table(show_header=False, show_lines=False, show_edge=False, pad_edge=False)
 
     table.add_row(
-        f" Velocidad media últimas [red bold]{weeks}[/] semanas",
+        f" Mean speed in the last [red bold]{weeks}[/] weeks",
         f"[red bold]{round(mean_speed, 1)}[/]",
     )
 
     table.add_row(
-        " Semanas estimadas para conclusión de tiempo restante",
+        " # weeks to complete all LT",
         f"[red bold]{round(blocks['remaining_time'].sum() / mean_speed, 1)}[/]",
     )
 

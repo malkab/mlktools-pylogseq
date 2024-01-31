@@ -82,18 +82,18 @@ def grep(
     table_title: list[str] = []
 
     # Check for title search
-    if title is not None:
+    if len(title) > 0:
         for t in title:
             lam.append(lambda x: t in x.title)
-            table_title.append(f"[green bold]'{t}'[/] en el título")
+            table_title.append(f"[green bold]'{t}'[/] in the title")
 
-    if content is not None:
+    if len(content) > 0:
         for c in content:
             lam.append(lambda x: c in x.content)
-            table_title.append(f"[green bold]'{c}'[/] en el contenido")
+            table_title.append(f"[green bold]'{c}'[/] in the content")
 
-    if title is None and content is None:
-        pprint("[red bold]Error:[/] no se ha proporcionado un término de búsqueda.")
+    if len(title) == 0 and len(content) == 0:
+        pprint("[red bold]Error:[/] no search term provided")
         sys.exit(0)
 
     # Final blocks
@@ -104,6 +104,11 @@ def grep(
 
     # Transform blocks into a DataFrame
     blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
+
+    # No blocks
+    if len(blocks) == 0:
+        pprint("[red bold]No blocks found.[/]")
+        sys.exit(0)
 
     # Add new columns
     # For sorting
@@ -132,15 +137,15 @@ def grep(
     console = Console()
 
     table = Table(
-        title=f"Bloques con {' + '.join(table_title)}",
+        title=f"Blocks with {' + '.join(table_title)}",
         title_style=STYLE_TABLE_NAME,
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Grafo", justify="left")
-    table.add_column("Página", justify="left")
-    table.add_column("Bloque", justify="left")
-    table.add_column("R", justify="center")
+    table.add_column("Graph", justify="left")
+    table.add_column("Page", justify="left")
+    table.add_column("Block", justify="left")
+    table.add_column("S", justify="center")
     table.add_column("P", justify="center")
 
     # An index to shade rows
@@ -166,6 +171,6 @@ def grep(
 
     console.print(table)
 
-    print(" R: repetitiva, P: máxima prioridad")
+    print(" S: SCHEDULED, P: highest priority")
 
     print()

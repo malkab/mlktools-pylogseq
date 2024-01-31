@@ -67,18 +67,20 @@ def speed(
         [i["block"] for i in blocks_parsed], weeks=weeks
     )
 
+    print()
+
     # Data visualization
     console = Console()
 
     table = Table(
-        title=f"Velocidades de las últimas {weeks} semanas",
+        title=f"Speed in the last {weeks} weeks",
         title_style=STYLE_TABLE_NAME,
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Semana", justify="center")
-    table.add_column("Periodo", justify="left")
-    table.add_column("Velocidad", justify="center")
+    table.add_column("Week", justify="center")
+    table.add_column("Time Span", justify="left")
+    table.add_column("Speed", justify="center")
 
     # An index to count weeks backwards
     week_n: int = 1
@@ -90,7 +92,7 @@ def speed(
 
     # Mean final row
     table.add_row(
-        "MEDIA",
+        "MEAN",
         "",
         str(round(mean, 1)),
         style=STYLE_TOTAL,

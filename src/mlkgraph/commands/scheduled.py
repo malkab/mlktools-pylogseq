@@ -94,7 +94,7 @@ def scheduled(
 
     # Check if there are blocks
     if blocks.empty is True:
-        pprint("[red bold]No SCRUM blocks found[/]")
+        pprint("[red bold]No SCHEDULED blocks found[/]")
         sys.exit(0)
 
     # Date
@@ -117,16 +117,16 @@ def scheduled(
     console = Console()
 
     table = Table(
-        title="Repetitivas prioritarias"
+        title="Priority SCHEDULED"
         if non_priority is False
-        else "Repetitivas no prioritarias",
+        else "Non-Priority SCHEDULED",
         title_style=STYLE_TABLE_NAME,
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Grafo", justify="left")
-    table.add_column("Bloque", justify="left")
-    table.add_column("Fecha", justify="center")
+    table.add_column("Graph", justify="left")
+    table.add_column("Block", justify="left")
+    table.add_column("Scheduled", justify="center")
     table.add_column("P", justify="center")
     table.add_column("S", justify="center")
 
@@ -162,6 +162,6 @@ def scheduled(
 
     console.print(table)
 
-    print(" P: periodicidad en semanas, S: puntuación de retraso")
+    print(" P: period in weeks, S: delay score")
 
     print()

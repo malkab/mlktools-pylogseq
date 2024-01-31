@@ -12,30 +12,36 @@
 
 # ---
 #
-# sprint command
+# clock command
 #
 # ---
 
-# # Sprint help
-# ./mlkgraph_cli.py sprint --help
+# # clock help
+# ./mlkgraph_cli.py clock --help
 
-# # Sprint without options, should return results for current
-# # folder at graph level
-# ./mlkgraph_cli.py sprint
+# clock without options, should return results for current
+# folder at graph level
+./mlkgraph_cli.py clock
 
-# # Sprint without options, should return results for current
+# clock with start and end dates
+./mlkgraph_cli.py clock -s 2023-01-01 -e 2023-10-15
+
+# clock with start and end dates
+./mlkgraph_cli.py clock -f "today" -b
+
+# # clock without options, should return results for current
 # # folder at block level
-# ./mlkgraph_cli.py sprint -b
+# ./mlkgraph_cli.py clock -b
 
-# # Sprint with blocks and options
-# ./mlkgraph_cli.py sprint -b \
+# # clock with blocks and options
+# ./mlkgraph_cli.py clock -b \
 #     -i **/graph_b,**/graph_a \
 #     -i "tests/**" \
 #     -g "tests/**,tests/graph_b" \
 #     -p profile_a_folder
 
-# # Sprint without blocks and options
-# ./mlkgraph_cli.py sprint \
+# # clock without blocks and options
+# ./mlkgraph_cli.py clock \
 #     -p profile_b
 #     # -i **/graph_b,**/graph_a \
 #     # -i "tests/**" \
@@ -153,10 +159,11 @@
 # # grep help
 # ./mlkgraph_cli.py grep --help
 
-# No options
-./mlkgraph_cli.py grep
+# # No options
+# ./mlkgraph_cli.py grep
 
 # # Full options
 # ./mlkgraph_cli.py grep \
+#     -t Coursera \
 #     -p profile_a_folder \
 #     -i "./**/**b"
