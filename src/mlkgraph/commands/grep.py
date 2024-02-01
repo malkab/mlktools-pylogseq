@@ -171,6 +171,6 @@ def grep(
 
     console.print(table)
 
-    print(" S: SCHEDULED, P: highest priority")
+    print("  S: SCHEDULED, P: highest priority")
 
     print()

@@ -19,15 +19,15 @@
 # # clock help
 # ./mlkgraph_cli.py clock --help
 
-# clock without options, should return results for current
-# folder at graph level
-./mlkgraph_cli.py clock
+# # clock without options, should return results for current
+# # folder at graph level
+# ./mlkgraph_cli.py clock
 
-# clock with start and end dates
-./mlkgraph_cli.py clock -s 2023-01-01 -e 2023-10-15
+# # clock with start and end dates
+# ./mlkgraph_cli.py clock -s 2023-01-01 -e 2023-10-15
 
-# clock with start and end dates
-./mlkgraph_cli.py clock -f "today" -b
+# # clock with start and end dates
+# ./mlkgraph_cli.py clock -f "today" -b
 
 # # clock without options, should return results for current
 # # folder at block level
@@ -81,8 +81,8 @@
 # # scrum command help
 # ./mlkgraph_cli.py scrum --help
 
-# # scrum without options, should return results for current folder
-# ./mlkgraph_cli.py scrum -w 10
+# scrum without options, should return results for current folder
+./mlkgraph_cli.py scrum
 
 # # scrum with -b option, should return results for current folder
 # ./mlkgraph_cli.py scrum -b
@@ -164,6 +164,7 @@
 
 # # Full options
 # ./mlkgraph_cli.py grep \
-#     -t Coursera \
-#     -p profile_a_folder \
-#     -i "./**/**b"
+#     -c a
+#     # -t Coursera \
+#     # -p profile_a_folder \
+#     # -i "./**/**b"

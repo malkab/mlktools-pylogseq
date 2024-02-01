@@ -39,7 +39,12 @@ from rich.text import Text
 #
 # ----------------------
 def scrum(
-    backlog: bool = typer.Option(False, "--backlog", "-b", help="Show backlog."),
+    current: bool = typer.Option(
+        False,
+        "--current",
+        "-u",
+        help="Show only current status and up, ignoring Backlog.",
+    ),
     icebox: bool = typer.Option(False, "--icebox", "-c", help="Show icebox."),
     weeks: int = typer.Option(
         4, "--weeks", "-w", help="Number of weeks to analyze speed"
@@ -80,18 +85,22 @@ def scrum(
             pprint(f"[red bold]{e}[/]")
             sys.exit(1)
 
-    # Determine target SCRUM_STATUS
-    target_scrum_status: list[SCRUM_STATUS] = []
-
-    if backlog is True:
-        target_scrum_status.append(SCRUM_STATUS.BACKLOG)
-    elif icebox is True:
-        target_scrum_status.append(SCRUM_STATUS.ICEBOX)
+    # Determine target SCRUM_STATUS. by default, from Backlog up
+    # i.e., everything that has an estimated time (by default an hour)
+    if icebox is True:
+        target_scrum_status = [SCRUM_STATUS.ICEBOX]
+    elif current is True:
+        target_scrum_status = [
+            SCRUM_STATUS.WAITING,
+            SCRUM_STATUS.DOING,
+            SCRUM_STATUS.CURRENT,
+        ]
     else:
         target_scrum_status = [
             SCRUM_STATUS.WAITING,
             SCRUM_STATUS.DOING,
             SCRUM_STATUS.CURRENT,
+            SCRUM_STATUS.BACKLOG,
         ]
 
     # Get graphs in processed paths
@@ -131,7 +140,7 @@ def scrum(
     blocks["scrum_status_name"] = blocks["block"].apply(lambda x: x.scrum_status.name)
 
     # Total time
-    blocks["total_time"] = blocks["block"].apply(
+    blocks["work_time"] = blocks["block"].apply(
         lambda x: x.total_clocked_time.total_seconds() / 3600.0
     )
 
@@ -142,16 +151,16 @@ def scrum(
     blocks["h_priority"] = blocks["block"].apply(lambda x: x.highest_priority)
 
     # Projected time
-    blocks["projected_time"] = blocks["block"].apply(lambda x: x.scrum_time)
+    blocks["estimated_time"] = blocks["block"].apply(lambda x: x.scrum_time)
 
     # Remaining time
-    blocks["remaining_time"] = blocks.apply(
-        lambda x: max(0, (x["projected_time"] - x["total_time"])), axis=1
+    blocks["left_time"] = blocks.apply(
+        lambda x: max(0, (x["estimated_time"] - x["work_time"])), axis=1
     )
 
-    # Percentage of completiness
-    blocks["percentage"] = blocks.apply(
-        lambda row: row["total_time"] / row["block"].scrum_time
+    # wt_et of completiness
+    blocks["wt_et"] = blocks.apply(
+        lambda row: row["work_time"] / row["estimated_time"]
         if row["block"].scrum_time > 0
         else 0,
         axis=1,
@@ -159,28 +168,31 @@ def scrum(
 
     # Sort
     blocks.sort_values(
-        by=["scrum_status_value", "h_priority", "graph_name", "projected_time"],
+        by=["scrum_status_value", "h_priority", "graph_name", "estimated_time"],
         inplace=True,
         ascending=[False, True, True, False],
     )
+
+    print("D: \n", blocks)
 
     # Data visualization
     console = Console()
 
     table = Table(
-        title="Tareas",
+        title="Blocks",
         title_style=STYLE_TABLE_NAME,
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Grafo", justify="left")
-    table.add_column("Bloque", justify="left")
-    table.add_column("Estado", justify="center")
+    table.add_column("Graph", justify="left")
+    table.add_column("Page", justify="left")
+    table.add_column("Block", justify="left")
+    table.add_column("Status", justify="center")
     table.add_column("P", justify="center")
     table.add_column("ET", justify="center")
     table.add_column("WT", justify="center")
     table.add_column("LT", justify="center")
-    table.add_column("%", justify="center")
+    table.add_column("WT/ET", justify="center")
 
     # An index to shade rows
     i: int = 0
@@ -210,25 +222,26 @@ def scrum(
             else:
                 style = STYLE_ROW_HIGHLIGHT
 
-        percentage_highlighted: Text = Text(
+        wt_et_highlighted: Text = Text(
             str(
                 round(
-                    row["percentage"],
+                    row["wt_et"],
                     1,
                 )
             ),
-            style=STYLE_TEXT_HIGHLIGHT if row["percentage"] > 1.0 else style,
+            style=STYLE_TEXT_HIGHLIGHT if row["wt_et"] > 1.0 else style,
         )
 
         table.add_row(
             row["graph"].name,
+            row["page"].title,
             Text(row["block"].clean_title),
             row["scrum_status_name"],
             row["block"].highest_priority,
             str(row["block"].scrum_time),
-            str(round(row["total_time"], 1)),
-            str(round(row["remaining_time"], 1)),
-            percentage_highlighted,
+            str(round(row["work_time"], 1)),
+            str(round(row["left_time"], 1)),
+            wt_et_highlighted,
             style=style,
         )
 
@@ -236,20 +249,21 @@ def scrum(
 
     # Highlight the total % if greater than 1
     total_highlighted: Text = Text(
-        str(round(blocks["total_time"].sum() / blocks["projected_time"].sum(), 1)),
+        str(round(blocks["work_time"].sum() / blocks["estimated_time"].sum(), 1)),
         style=STYLE_TEXT_HIGHLIGHT
-        if round(blocks["total_time"].sum() / blocks["projected_time"].sum(), 1) > 1.0
+        if round(blocks["work_time"].sum() / blocks["estimated_time"].sum(), 1) > 1.0
         else STYLE_TOTAL,
     )
 
     table.add_row(
         "TOTAL",
+        "-",
         str(blocks.shape[0]),
         "-",
         "-",
-        str(blocks["projected_time"].sum()),
-        str(round(blocks["total_time"].sum(), 1)),
-        str(round(blocks["remaining_time"].sum(), 1)),
+        str(blocks["estimated_time"].sum()),
+        str(round(blocks["work_time"].sum(), 1)),
+        str(round(blocks["left_time"].sum(), 1)),
         total_highlighted,
         style=STYLE_TOTAL,
     )
@@ -257,7 +271,7 @@ def scrum(
     console.print(table)
 
     print(
-        " P: Priority, ET: estimated time, WT: work time , LT: left time, %: completiness"
+        "  P: Priority, ET: estimated time, WT: work time , LT: left time, WT/ET: completiness"
     )
 
     print()
@@ -265,13 +279,13 @@ def scrum(
     table = Table(show_header=False, show_lines=False, show_edge=False, pad_edge=False)
 
     table.add_row(
-        f" Mean speed in the last [red bold]{weeks}[/] weeks",
+        f"  Mean speed in the last [red bold]{weeks}[/] weeks",
         f"[red bold]{round(mean_speed, 1)}[/]",
     )
 
     table.add_row(
-        " # weeks to complete all LT",
-        f"[red bold]{round(blocks['remaining_time'].sum() / mean_speed, 1)}[/]",
+        "  # weeks to complete all LT",
+        f"[red bold]{round(blocks['left_time'].sum() / mean_speed, 1)}[/]",
     )
 
     console.print(table)

@@ -328,6 +328,8 @@ class Block:
             # WAITING
             elif self.waiting is True:
                 self.scrum_status = SCRUM_STATUS.WAITING
+                if self.scrum_time == 0:
+                    self.scrum_time = 1
 
             # Icebox, C
             elif self.highest_priority == "C":
@@ -349,9 +351,13 @@ class Block:
 
                 self.scrum_status = SCRUM_STATUS.CURRENT
 
-                # If LATER, it is DOING
-                if self.later is True or self.now is True:
-                    self.scrum_status = SCRUM_STATUS.DOING
+            # If LATER or NOW, it is DOING
+            elif self.later is True or self.now is True:
+                # If there is no T time tag, set to default 1 hour
+                if self.scrum_time == 0:
+                    self.scrum_time = 1
+
+                self.scrum_status = SCRUM_STATUS.DOING
 
     # ----------------------------------
     #

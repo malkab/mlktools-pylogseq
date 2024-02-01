@@ -11,6 +11,8 @@ from lib.constants import (
     STYLE_TABLE_NAME,
     STYLE_ROW_HIGHLIGHT_SHADE_BIS,
     STYLE_ROW_HIGHLIGHT_BIS,
+    STYLE_ROW_WARNING,
+    STYLE_ROW_WARNING_SHADE,
 )
 from lib.libmlkgraph import (
     get_graphs,
@@ -89,7 +91,7 @@ def deadline(
 
     # Days to deadline, substract deadline from today
     blocks["time_to_go"] = blocks["block"].apply(
-        lambda x: (x.deadline - pd.Timestamp.now()).days + 1
+        lambda x: (x.deadline.date() - pd.Timestamp.now().date()).days
     )
 
     # Sort
@@ -109,6 +111,7 @@ def deadline(
         box=box.SIMPLE_HEAD,
     )
     table.add_column("Graph", justify="left")
+    table.add_column("Page", justify="left")
     table.add_column("Block", justify="left")
     table.add_column("Deadline", justify="center")
     table.add_column("Days Left", justify="center")
@@ -124,8 +127,20 @@ def deadline(
         if (i + 1) % 4 == 0:
             style += STYLE_SHADE
 
-        # Check for scores above 1
-        if row["time_to_go"] < 15:
+        # Check times
+        # By default, show time to go
+        t: str = str(row["time_to_go"])
+
+        if row["time_to_go"] < 0:
+            # Shade
+            if (i + 1) % 4 == 0:
+                style = STYLE_ROW_WARNING_SHADE
+            else:
+                style = STYLE_ROW_WARNING
+
+            # Overdue
+            t = "Overdue"
+        elif row["time_to_go"] < 15:
             # Shade
             if (i + 1) % 4 == 0:
                 style = STYLE_ROW_HIGHLIGHT_SHADE_BIS
@@ -140,9 +155,10 @@ def deadline(
 
         table.add_row(
             row["graph"].name,
+            row["page"].title,
             Text(row["block"].clean_title),
             str(row["date"].strftime("%Y-%m-%d")),
-            str(row["time_to_go"]),
+            str(t),
             style=style,
         )
 
