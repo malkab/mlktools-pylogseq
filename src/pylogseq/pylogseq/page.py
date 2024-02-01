@@ -1,6 +1,6 @@
 import os
-import re
 from typing import Any, List
+from urllib.parse import unquote
 
 from pylogseq.block import Block
 
@@ -45,7 +45,11 @@ class Page:
         self.title: str | None = (
             title
             if title
-            else (os.path.split(self.path)[-1].strip(".md") if self.path else None)
+            else (
+                unquote(os.path.split(self.path)[-1].strip(".md"))
+                if self.path
+                else None
+            )
         )
         """Page title: title if given in the constructor, the page file name
         if path is given, None otherwise. This member can be overrided if

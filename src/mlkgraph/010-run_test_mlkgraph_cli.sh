@@ -84,8 +84,8 @@
 # scrum without options, should return results for current folder
 ./mlkgraph_cli.py scrum
 
-# # scrum with -b option, should return results for current folder
-# ./mlkgraph_cli.py scrum -b
+# scrum with -b option, should return results for current folder
+./mlkgraph_cli.py scrum -b
 
 # # scrum with -c option, should return results for current folder
 # ./mlkgraph_cli.py scrum -c

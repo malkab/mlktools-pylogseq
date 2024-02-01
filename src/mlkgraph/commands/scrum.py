@@ -45,6 +45,9 @@ def scrum(
         "-u",
         help="Show only current status and up, ignoring Backlog.",
     ),
+    show_blocks: bool = typer.Option(
+        False, "--blocks", "-b", help="Show time for blocks instead of graphs"
+    ),
     icebox: bool = typer.Option(False, "--icebox", "-c", help="Show icebox."),
     weeks: int = typer.Option(
         4, "--weeks", "-w", help="Number of weeks to analyze speed"
@@ -158,47 +161,89 @@ def scrum(
         lambda x: max(0, (x["estimated_time"] - x["work_time"])), axis=1
     )
 
+    # Check for condensed or detailed block view
+    if show_blocks is True:
+        # Show blocks
+        # Just sort, everything else is done
+        blocks.sort_values(
+            by=["scrum_status_value", "h_priority", "graph_name", "estimated_time"],
+            inplace=True,
+            ascending=[False, True, True, False],
+        )
+    else:
+        # Condensed view, group by graph and status
+        blocks = (
+            blocks.groupby(["graph_name", "scrum_status_value", "scrum_status_name"])
+            .agg(
+                {
+                    "block": "count",
+                    "work_time": "sum",
+                    "estimated_time": "sum",
+                    "left_time": "sum",
+                }
+            )
+            .reset_index()
+        )
+
+        # Sort
+        blocks.sort_values(
+            by=["scrum_status_value", "graph_name", "estimated_time"],
+            inplace=True,
+            ascending=[False, True, False],
+        )
+
     # wt_et of completiness
     blocks["wt_et"] = blocks.apply(
         lambda row: row["work_time"] / row["estimated_time"]
-        if row["block"].scrum_time > 0
+        if row["estimated_time"] > 0
         else 0,
         axis=1,
     )
 
-    # Sort
-    blocks.sort_values(
-        by=["scrum_status_value", "h_priority", "graph_name", "estimated_time"],
-        inplace=True,
-        ascending=[False, True, True, False],
-    )
-
-    print("D: \n", blocks)
-
     # Data visualization
     console = Console()
 
-    table = Table(
-        title="Blocks",
-        title_style=STYLE_TABLE_NAME,
-        header_style=STYLE_TABLE_HEADER,
-        box=box.SIMPLE_HEAD,
-    )
-    table.add_column("Graph", justify="left")
-    table.add_column("Page", justify="left")
-    table.add_column("Block", justify="left")
-    table.add_column("Status", justify="center")
-    table.add_column("P", justify="center")
-    table.add_column("ET", justify="center")
-    table.add_column("WT", justify="center")
-    table.add_column("LT", justify="center")
-    table.add_column("WT/ET", justify="center")
+    # Condensed versus block view
+    if show_blocks is True:
+        # Block view
+        table = Table(
+            title="SCRUM by Graphs",
+            title_style=STYLE_TABLE_NAME,
+            header_style=STYLE_TABLE_HEADER,
+            box=box.SIMPLE_HEAD,
+        )
+        table.add_column("Graph", justify="left")
+        table.add_column("Page", justify="left", max_width=25)
+        table.add_column("Block", justify="left")
+        table.add_column("Status", justify="center")
+        table.add_column("P", justify="center")
+        table.add_column("ET", justify="center")
+        table.add_column("WT", justify="center")
+        table.add_column("LT", justify="center")
+        table.add_column("WT/ET", justify="center")
+    else:
+        # Condensed view
+        table = Table(
+            title="SCRUM by Blocks",
+            title_style=STYLE_TABLE_NAME,
+            header_style=STYLE_TABLE_HEADER,
+            box=box.SIMPLE_HEAD,
+        )
+        table.add_column("Graph", justify="left")
+        table.add_column("Status", justify="center")
+        table.add_column("# Blocks", justify="center")
+        table.add_column("ET", justify="center")
+        table.add_column("WT", justify="center")
+        table.add_column("LT", justify="center")
+        table.add_column("WT/ET", justify="center")
 
     # An index to shade rows
     i: int = 0
 
     # Iterate rows
+    # Once again, depends on the type of view
     for index, row in blocks.iterrows():
+        # Common styles for both views
         if row["scrum_status_name"] == "WAITING":
             style = STYLE_ROW_WAITING
         elif row["scrum_status_name"] == "DOING":
@@ -214,14 +259,6 @@ def scrum(
         if (i + 1) % 4 == 0:
             style += STYLE_SHADE
 
-        # Check for priority A
-        if row["block"].highest_priority == "A":
-            # Shade
-            if (i + 1) % 4 == 0:
-                style = STYLE_ROW_HIGHLIGHT_SHADE
-            else:
-                style = STYLE_ROW_HIGHLIGHT
-
         wt_et_highlighted: Text = Text(
             str(
                 round(
@@ -232,18 +269,39 @@ def scrum(
             style=STYLE_TEXT_HIGHLIGHT if row["wt_et"] > 1.0 else style,
         )
 
-        table.add_row(
-            row["graph"].name,
-            row["page"].title,
-            Text(row["block"].clean_title),
-            row["scrum_status_name"],
-            row["block"].highest_priority,
-            str(row["block"].scrum_time),
-            str(round(row["work_time"], 1)),
-            str(round(row["left_time"], 1)),
-            wt_et_highlighted,
-            style=style,
-        )
+        if show_blocks is True:
+            # Block view
+            priority_highlighted: Text = Text(
+                str(row["h_priority"]) if row["h_priority"] is not None else "",
+                style=STYLE_TEXT_HIGHLIGHT if row["h_priority"] == "A" else style,
+            )
+
+            table.add_row(
+                row["graph_name"],
+                row["page"].title,
+                Text(row["block"].clean_title),
+                row["scrum_status_name"],
+                priority_highlighted,
+                str(row["estimated_time"]),
+                str(round(row["work_time"], 1)),
+                str(round(row["left_time"], 1)),
+                wt_et_highlighted,
+                style=style,
+            )
+
+        else:
+            # Condensed view
+
+            table.add_row(
+                row["graph_name"],
+                row["scrum_status_name"],
+                str(row["block"]),
+                str(row["estimated_time"]),
+                str(round(row["work_time"], 1)),
+                str(round(row["left_time"], 1)),
+                wt_et_highlighted,
+                style=style,
+            )
 
         i += 1
 
@@ -255,18 +313,35 @@ def scrum(
         else STYLE_TOTAL,
     )
 
-    table.add_row(
-        "TOTAL",
-        "-",
-        str(blocks.shape[0]),
-        "-",
-        "-",
-        str(blocks["estimated_time"].sum()),
-        str(round(blocks["work_time"].sum(), 1)),
-        str(round(blocks["left_time"].sum(), 1)),
-        total_highlighted,
-        style=STYLE_TOTAL,
-    )
+    # Total row, view dependant
+    if show_blocks is True:
+        # Block view
+
+        table.add_row(
+            "TOTAL",
+            "-",
+            str(blocks.shape[0]),
+            "-",
+            "-",
+            str(blocks["estimated_time"].sum()),
+            str(round(blocks["work_time"].sum(), 1)),
+            str(round(blocks["left_time"].sum(), 1)),
+            total_highlighted,
+            style=STYLE_TOTAL,
+        )
+
+    else:
+        # Condensed view
+        table.add_row(
+            "TOTAL",
+            "-",
+            str(blocks["block"].sum()),
+            str(blocks["estimated_time"].sum()),
+            str(round(blocks["work_time"].sum(), 1)),
+            str(round(blocks["left_time"].sum(), 1)),
+            total_highlighted,
+            style=STYLE_TOTAL,
+        )
 
     console.print(table)
 
