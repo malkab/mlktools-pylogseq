@@ -15,19 +15,19 @@ from pylogseq.mdlogseq.elements_parsers.logseqwaitingclass import LogseqWaiting
 
 class LogseqParse:
     elements = [
-        LogseqNow,
-        LogseqWaiting,
-        LogseqDone,
-        LogseqLater,
-        LogseqDeadline,
-        LogseqScheduled,
-        LogseqClock,
-        LogseqLogBook,
-        LogseqEnd,
-        LogseqComposedTag,
+        # LogseqClock,
+        # LogseqComposedTag,
+        # LogseqDeadline,
+        # LogseqDone,
+        # LogseqEnd,
+        # LogseqLater,
+        # LogseqLogBook,
+        # LogseqNow,
+        # LogseqPriority,
+        # LogseqScheduled,
+        # LogseqSquareTag,
         LogseqTag,
-        LogseqSquareTag,
-        LogseqPriority,
+        # LogseqWaiting,
     ]
 
     parser_mixins = []
