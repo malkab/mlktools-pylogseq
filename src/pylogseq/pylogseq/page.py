@@ -46,7 +46,7 @@ class Page:
             title
             if title
             else (
-                unquote(os.path.split(self.path)[-1].strip(".md"))
+                unquote(os.path.splitext(os.path.basename(str(self.path)))[0])
                 if self.path
                 else None
             )

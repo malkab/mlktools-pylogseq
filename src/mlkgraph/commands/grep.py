@@ -3,10 +3,15 @@ import sys
 import pandas as pd
 import typer
 from lib.constants import (
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
     STYLE_ROW_NORMAL,
-    STYLE_SHADE,
+    STYLE_ROW_NORMAL_SHADE,
     STYLE_TABLE_HEADER,
     STYLE_TABLE_NAME,
+    COLUMN_WIDTH_GRAPH_NAME,
+    COLUMN_WIDTH_PAGE_NAME,
 )
 from lib.libmlkgraph import (
     get_graphs,
@@ -42,19 +47,19 @@ def grep(
         [],
         "--profile",
         "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        help=HELP_P_OPTION,
     ),
     graphs_paths: list[str] = typer.Option(
         [],
         "--graph",
         "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
+        help=HELP_G_OPTION,
     ),
     ignore_paths: list[str] = typer.Option(
         [],
         "--ignore",
         "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
+        help=HELP_I_OPTION,
     ),
 ):
     # Default path to local
@@ -118,10 +123,10 @@ def grep(
 
     blocks["block_clean_title"] = blocks["block"].apply(lambda x: x.clean_title)
 
-    blocks["repetitive"] = blocks["block"].apply(lambda x: "x" if x.repetitive else "-")
+    blocks["repetitive"] = blocks["block"].apply(lambda x: "x" if x.repetitive else "")
 
     blocks["priority"] = blocks["block"].apply(
-        lambda x: x.highest_priority if x.highest_priority is not None else "-"
+        lambda x: x.highest_priority if x.highest_priority is not None else ""
     )
 
     # Sort
@@ -142,21 +147,18 @@ def grep(
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Graph", justify="left")
-    table.add_column("Page", justify="left")
+    table.add_column("Graph", justify="left", max_width=COLUMN_WIDTH_GRAPH_NAME)
+    table.add_column("Page", justify="left", max_width=COLUMN_WIDTH_PAGE_NAME)
     table.add_column("Block", justify="left")
     table.add_column("S", justify="center")
     table.add_column("P", justify="center")
 
     # An index to shade rows
-    i: int = 0
+    i: int = 1
 
     for index, row in blocks.iterrows():
-        style = STYLE_ROW_NORMAL
-
-        # Add shade for alternate rows
-        if (i + 1) % 4 == 0:
-            style += STYLE_SHADE
+        # Base style
+        style = STYLE_ROW_NORMAL if i % 2 != 0 else STYLE_ROW_NORMAL_SHADE
 
         table.add_row(
             row["graph_name"],

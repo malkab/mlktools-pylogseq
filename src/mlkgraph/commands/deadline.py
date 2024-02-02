@@ -3,16 +3,21 @@ import sys
 import pandas as pd
 import typer
 from lib.constants import (
-    STYLE_ROW_HIGHLIGHT,
-    STYLE_ROW_HIGHLIGHT_SHADE,
+    COLUMN_WIDTH_GRAPH_NAME,
+    COLUMN_WIDTH_PAGE_NAME,
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
+    STYLE_ROW_HIGHLIGHT_A,
+    STYLE_ROW_HIGHLIGHT_A_SHADE,
+    STYLE_ROW_HIGHLIGHT_B,
+    STYLE_ROW_HIGHLIGHT_B_SHADE,
     STYLE_ROW_NORMAL,
-    STYLE_SHADE,
-    STYLE_TABLE_HEADER,
-    STYLE_TABLE_NAME,
-    STYLE_ROW_HIGHLIGHT_SHADE_BIS,
-    STYLE_ROW_HIGHLIGHT_BIS,
+    STYLE_ROW_NORMAL_SHADE,
     STYLE_ROW_WARNING,
     STYLE_ROW_WARNING_SHADE,
+    STYLE_TABLE_HEADER,
+    STYLE_TABLE_NAME,
 )
 from lib.libmlkgraph import (
     get_graphs,
@@ -36,19 +41,19 @@ def deadline(
         [],
         "--profile",
         "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        help=HELP_P_OPTION,
     ),
     graphs_paths: list[str] = typer.Option(
         [],
         "--graph",
         "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
+        help=HELP_G_OPTION,
     ),
     ignore_paths: list[str] = typer.Option(
         [],
         "--ignore",
         "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
+        help=HELP_I_OPTION,
     ),
 ):
     # Default path to local folder
@@ -110,22 +115,19 @@ def deadline(
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Graph", justify="left")
-    table.add_column("Page", justify="left")
+    table.add_column("Graph", justify="left", max_width=COLUMN_WIDTH_GRAPH_NAME)
+    table.add_column("Page", justify="left", max_width=COLUMN_WIDTH_PAGE_NAME)
     table.add_column("Block", justify="left")
     table.add_column("Deadline", justify="center")
     table.add_column("Days Left", justify="center")
 
     # An index to shade rows
-    i: int = 0
+    i: int = 1
 
     # Iterate rows
     for index, row in blocks.iterrows():
-        style = STYLE_ROW_NORMAL
-
-        # Add shade for alternate rows
-        if (i + 1) % 4 == 0:
-            style += STYLE_SHADE
+        # Base style
+        style = STYLE_ROW_NORMAL if i % 2 != 0 else STYLE_ROW_NORMAL_SHADE
 
         # Check times
         # By default, show time to go
@@ -133,25 +135,17 @@ def deadline(
 
         if row["time_to_go"] < 0:
             # Shade
-            if (i + 1) % 4 == 0:
-                style = STYLE_ROW_WARNING_SHADE
-            else:
-                style = STYLE_ROW_WARNING
+            style = STYLE_ROW_WARNING if i % 2 != 0 else STYLE_ROW_WARNING_SHADE
 
             # Overdue
             t = "Overdue"
         elif row["time_to_go"] < 15:
             # Shade
-            if (i + 1) % 4 == 0:
-                style = STYLE_ROW_HIGHLIGHT_SHADE_BIS
-            else:
-                style = STYLE_ROW_HIGHLIGHT_BIS
+            style = STYLE_ROW_HIGHLIGHT_B if i % 2 != 0 else STYLE_ROW_HIGHLIGHT_B_SHADE
+
         elif row["time_to_go"] < 30:
             # Shade
-            if (i + 1) % 4 == 0:
-                style = STYLE_ROW_HIGHLIGHT_SHADE
-            else:
-                style = STYLE_ROW_HIGHLIGHT
+            style = STYLE_ROW_HIGHLIGHT_A if i % 2 != 0 else STYLE_ROW_HIGHLIGHT_A_SHADE
 
         table.add_row(
             row["graph"].name,

@@ -4,12 +4,15 @@ import sys
 from typing import Any, Callable
 
 import arrow
+from numpy import full
 import pandas as pd
 import typer
 from pylogseq import Block, Clock, Graph, Page, PageParserError
 from rich import print as pprint
 
 from .profiles import Profiles
+
+import math
 
 # TODO: documentar a fondo
 

@@ -2,7 +2,15 @@ import sys
 
 import pandas as pd
 import typer
-from lib.constants import STYLE_TABLE_HEADER, STYLE_TABLE_NAME
+from lib.constants import (
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
+    STYLE_ROW_NORMAL,
+    STYLE_ROW_NORMAL_SHADE,
+    STYLE_TABLE_HEADER,
+    STYLE_TABLE_NAME,
+)
 from lib.libmlkgraph import (
     get_graphs,
     process_p_g_i_graph_paths,
@@ -19,7 +27,7 @@ from rich.table import Table
 # profiles command
 #
 # ----------------------
-def profiles(
+def profile(
     debug: bool = typer.Option(
         False,
         "--debug",
@@ -30,19 +38,19 @@ def profiles(
         [],
         "--profile",
         "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        help=HELP_P_OPTION,
     ),
     graphs_paths: list[str] = typer.Option(
         [],
         "--graph",
         "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
+        help=HELP_G_OPTION,
     ),
     ignore_paths: list[str] = typer.Option(
         [],
         "--ignore",
         "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
+        help=HELP_I_OPTION,
     ),
 ):
     # List profiles if no -pgi option is given
@@ -74,9 +82,17 @@ def profiles(
 
         # Check if there are profiles in the DataFrame
         if df.shape[0] > 0:
+            # An index to shade rows
+            i: int = 1
+
             # Index for shading
             for k, v in df.iterrows():
-                table.add_row(str(k), v["description"])
+                # Base style
+                style = STYLE_ROW_NORMAL if i % 2 != 0 else STYLE_ROW_NORMAL_SHADE
+
+                table.add_row(str(k), v["description"], style=style)
+
+                i += 1
 
             print()
 

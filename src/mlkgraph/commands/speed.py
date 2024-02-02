@@ -1,7 +1,16 @@
 import sys
 
 import typer
-from lib.constants import STYLE_TABLE_HEADER, STYLE_TABLE_NAME, STYLE_TOTAL
+from lib.constants import (
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
+    STYLE_ROW_NORMAL,
+    STYLE_ROW_NORMAL_SHADE,
+    STYLE_TABLE_HEADER,
+    STYLE_TABLE_NAME,
+    STYLE_TOTAL,
+)
 from lib.libmlkgraph import (
     calculate_speed,
     get_graphs,
@@ -22,23 +31,10 @@ from rich.table import Table
 def speed(
     weeks: int = typer.Option(4, "--weeks", "-w", help="Number of weeks to analyze"),
     selected_profiles: list[str] = typer.Option(
-        [],
-        "--profile",
-        "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        [], "--profile", "-p", help=HELP_P_OPTION
     ),
-    graphs_paths: list[str] = typer.Option(
-        [],
-        "--graph",
-        "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
-    ),
-    ignore_paths: list[str] = typer.Option(
-        [],
-        "--ignore",
-        "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
-    ),
+    graphs_paths: list[str] = typer.Option([], "--graph", "-g", help=HELP_G_OPTION),
+    ignore_paths: list[str] = typer.Option([], "--ignore", "-i", help=HELP_I_OPTION),
 ):
     # Default path to local folder
     paths = ["."]
@@ -85,10 +81,19 @@ def speed(
     # An index to count weeks backwards
     week_n: int = 1
 
+    # An index to shade rows
+    s: int = 1
+
     # Add columns
     for i in week_speeds:
-        table.add_row(str(-week_n), i["week_id"], str(round(i["speed"], 1)))
+        # Base style
+        style = STYLE_ROW_NORMAL if s % 2 != 0 else STYLE_ROW_NORMAL_SHADE
+
+        table.add_row(
+            str(-week_n), i["week_id"], str(round(i["speed"], 1)), style=style
+        )
         week_n += 1
+        s += 1
 
     # Mean final row
     table.add_row(

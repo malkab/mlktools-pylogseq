@@ -19,9 +19,9 @@
 # # clock help
 # ./mlkgraph_cli.py clock --help
 
-# # clock without options, should return results for current
-# # folder at graph level
-# ./mlkgraph_cli.py clock
+# clock without options, should return results for current
+# folder at graph level
+./mlkgraph_cli.py clock
 
 # # clock with start and end dates
 # ./mlkgraph_cli.py clock -s 2023-01-01 -e 2023-10-15
@@ -81,11 +81,11 @@
 # # scrum command help
 # ./mlkgraph_cli.py scrum --help
 
-# scrum without options, should return results for current folder
-./mlkgraph_cli.py scrum
+# # scrum without options, should return results for current folder
+# ./mlkgraph_cli.py scrum
 
-# scrum with -b option, should return results for current folder
-./mlkgraph_cli.py scrum -b
+# # scrum with -b option, should return results for current folder
+# ./mlkgraph_cli.py scrum -b
 
 # # scrum with -c option, should return results for current folder
 # ./mlkgraph_cli.py scrum -c

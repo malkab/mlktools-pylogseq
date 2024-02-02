@@ -1,11 +1,17 @@
+import datetime
 import sys
 
 import arrow
 import pandas as pd
 import typer
 from lib.constants import (
+    COLUMN_WIDTH_GRAPH_NAME,
+    HELP_B_OPTION,
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
     STYLE_ROW_NORMAL,
-    STYLE_SHADE,
+    STYLE_ROW_NORMAL_SHADE,
     STYLE_TABLE_HEADER,
     STYLE_TABLE_NAME,
     STYLE_TOTAL,
@@ -20,7 +26,6 @@ from rich import box
 from rich import print as pprint
 from rich.console import Console
 from rich.table import Table
-import datetime
 
 
 # ----------------------
@@ -29,29 +34,29 @@ import datetime
 #
 # ----------------------
 def clock(
-    show_blocks: bool = typer.Option(
-        False, "--blocks", "-b", help="Show time for blocks instead of graphs"
+    show_blocks: bool = typer.Option(False, "--blocks", "-b", help=HELP_B_OPTION),
+    span_start: str = typer.Option(
+        "", "--start", "-s", help="Start date for the span."
     ),
-    span_start: str = typer.Option("", "--start", "-s", help="Start date for the span"),
-    span_end: str = typer.Option("", "--end", "-e", help="End date for the span"),
-    shift: str = typer.Option("", "--shift", "-f", help="Span time segmentation"),
+    span_end: str = typer.Option("", "--end", "-e", help="End date for the span."),
+    shift: str = typer.Option("", "--shift", "-f", help="Span time segmentation."),
     selected_profiles: list[str] = typer.Option(
         [],
         "--profile",
         "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        help=HELP_P_OPTION,
     ),
     graphs_paths: list[str] = typer.Option(
         [],
         "--graph",
         "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
+        help=HELP_G_OPTION,
     ),
     ignore_paths: list[str] = typer.Option(
         [],
         "--ignore",
         "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
+        help=HELP_I_OPTION,
     ),
 ):
     # Default path to local folder
@@ -84,7 +89,7 @@ def clock(
     if span_end != "":
         span_end_date: datetime.datetime = arrow.get(span_end, "YYYY-MM-DD").naive
     else:
-        span_end_date: datetime.datetime = arrow.now().ceil("week").naive
+        span_end_date: datetime.datetime = arrow.now().naive
 
     # Table title time particle
     time_particle: str = ""
@@ -128,8 +133,14 @@ def clock(
             shift_error(shift)
 
         # Extract number and unit
-        shift_number: int = int(shift_split[0])
-        shift_unit: str = shift_split[1]
+        shift_number: int = 0
+        shift_unit: str = ""
+
+        try:
+            shift_number = int(shift_split[0])
+            shift_unit = shift_split[1]
+        except Exception:
+            shift_error(shift)
 
         # Try to calculate the shift
         try:
@@ -145,11 +156,17 @@ def clock(
             shift_error(shift)
 
         span_start_date = shift_date.floor(shift_unit).naive  # type: ignore
-        span_end_date = shift_date.ceil(shift_unit).naive  # type: ignore
+
+        # If the shift is a current time span (year, month, week, today), the end is now
+        # If not, it is the end of the indicated time span
+        if shift_split[0] == "0":
+            span_end_date = datetime.datetime = arrow.now().naive
+        else:
+            span_end_date = shift_date.ceil(shift_unit).naive  # type: ignore
 
     # Time particle for the title if there are no options
     if span_start == "" and span_end == "" and shift == "":
-        time_particle = "this week"
+        time_particle = "to this point of the week"
 
     clock = Clock(span_start_date, span_end_date)
 
@@ -171,7 +188,7 @@ def clock(
         sys.exit(0)
 
     # Transform blocks into a DataFrame
-    blocks: pd.DataFrame = pd.DataFrame(blocks_parsed)
+    blocks: pd.DataFrame = pd.DataFrame(blocks_parsed, index=None)
 
     # Process dataframe columns
     blocks["graph"] = blocks["graph"].apply(lambda x: x.name)
@@ -185,8 +202,8 @@ def clock(
 
     if show_blocks is True:
         blocks = (
-            blocks[["graph", "block_name", "total_time"]]
-            .groupby(["graph", "block_name"])  # type: ignore
+            blocks[["graph", "page", "block_name", "total_time"]]
+            .groupby(["graph", "page", "block_name"])  # type: ignore
             .sum()
         )
     else:
@@ -216,7 +233,8 @@ def clock(
     )
 
     if show_blocks is True:
-        table.add_column("Graph", justify="left")
+        table.add_column("Graph", justify="left", max_width=COLUMN_WIDTH_GRAPH_NAME)
+        table.add_column("Page", justify="left", max_width=COLUMN_WIDTH_GRAPH_NAME)
         table.add_column("Block", justify="left")
         table.add_column("Hours", justify="center")
         table.add_column("%", justify="center")
@@ -229,20 +247,18 @@ def clock(
     blocks.sort_values("total_time", ascending=False, inplace=True)
 
     # An index to shade rows
-    i: int = 0
+    i: int = 1
 
     # Iterate rows
     for index, row in blocks.iterrows():
-        style = STYLE_ROW_NORMAL
-
-        # Add shade for alternate rows
-        if (i + 1) % 4 == 0:
-            style += STYLE_SHADE
+        # Shading alternate rows
+        style = STYLE_ROW_NORMAL if i % 2 != 0 else STYLE_ROW_NORMAL_SHADE
 
         if show_blocks is True:
             table.add_row(
                 str(index[0]),  # type: ignore
                 str(index[1]),  # type: ignore
+                str(index[2]),  # type: ignore
                 str(round(row["total_time"], 1)),
                 str(round(row["total_time"] / total_hours, 1)),
                 style=style,
@@ -262,15 +278,16 @@ def clock(
         table.add_row(
             "TOTAL",
             "",
+            "",
             str(round(total_hours, 1)),
-            "-",
+            "",
             style=STYLE_TOTAL,
         )
     else:
         table.add_row(
             "TOTAL",
             str(round(total_hours, 1)),
-            "-",
+            "",
             style=STYLE_TOTAL,
         )
 

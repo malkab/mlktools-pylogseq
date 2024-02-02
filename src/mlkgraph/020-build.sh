@@ -5,4 +5,8 @@
 # Build script.
 #
 # -----------------------------------------------------------------
-pyinstaller --onefile --clean mlkgraph_cli.py
+pyinstaller \
+    --onefile \
+    --clean \
+    --collect-submodules shellingham \
+    mlkgraph_cli.py

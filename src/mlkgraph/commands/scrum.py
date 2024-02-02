@@ -3,14 +3,19 @@ import sys
 import pandas as pd
 import typer
 from lib.constants import (
-    STYLE_ROW_BACKLOG,
-    STYLE_ROW_CURRENT,
-    STYLE_ROW_DOING,
-    STYLE_ROW_HIGHLIGHT,
-    STYLE_ROW_HIGHLIGHT_SHADE,
+    COLUMN_WIDTH_GRAPH_NAME,
+    COLUMN_WIDTH_PAGE_NAME,
+    HELP_B_OPTION,
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
     STYLE_ROW_NORMAL,
-    STYLE_ROW_WAITING,
-    STYLE_SHADE,
+    STYLE_ROW_NORMAL_SHADE,
+    STYLE_ROW_NORMAL_SHADE_MODIFIER,
+    STYLE_ROW_SCRUM_BACKLOG,
+    STYLE_ROW_SCRUM_CURRENT,
+    STYLE_ROW_SCRUM_DOING,
+    STYLE_ROW_SCRUM_WAITING,
     STYLE_TABLE_HEADER,
     STYLE_TABLE_NAME,
     STYLE_TEXT_HIGHLIGHT,
@@ -45,31 +50,16 @@ def scrum(
         "-u",
         help="Show only current status and up, ignoring Backlog.",
     ),
-    show_blocks: bool = typer.Option(
-        False, "--blocks", "-b", help="Show time for blocks instead of graphs"
-    ),
     icebox: bool = typer.Option(False, "--icebox", "-c", help="Show icebox."),
+    show_blocks: bool = typer.Option(False, "--blocks", "-b", help=HELP_B_OPTION),
     weeks: int = typer.Option(
         4, "--weeks", "-w", help="Number of weeks to analyze speed"
     ),
     selected_profiles: list[str] = typer.Option(
-        [],
-        "--profile",
-        "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        [], "--profile", "-p", help=HELP_P_OPTION
     ),
-    graphs_paths: list[str] = typer.Option(
-        [],
-        "--graph",
-        "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
-    ),
-    ignore_paths: list[str] = typer.Option(
-        [],
-        "--ignore",
-        "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
-    ),
+    graphs_paths: list[str] = typer.Option([], "--graph", "-g", help=HELP_G_OPTION),
+    ignore_paths: list[str] = typer.Option([], "--ignore", "-i", help=HELP_I_OPTION),
 ):
     # Default path to local
     paths = ["."]
@@ -207,13 +197,13 @@ def scrum(
     if show_blocks is True:
         # Block view
         table = Table(
-            title="SCRUM by Graphs",
+            title="SCRUM by Blocks",
             title_style=STYLE_TABLE_NAME,
             header_style=STYLE_TABLE_HEADER,
             box=box.SIMPLE_HEAD,
         )
-        table.add_column("Graph", justify="left")
-        table.add_column("Page", justify="left", max_width=25)
+        table.add_column("Graph", justify="left", max_width=COLUMN_WIDTH_GRAPH_NAME)
+        table.add_column("Page", justify="left", max_width=COLUMN_WIDTH_PAGE_NAME)
         table.add_column("Block", justify="left")
         table.add_column("Status", justify="center")
         table.add_column("P", justify="center")
@@ -224,7 +214,7 @@ def scrum(
     else:
         # Condensed view
         table = Table(
-            title="SCRUM by Blocks",
+            title="SCRUM by Graphs",
             title_style=STYLE_TABLE_NAME,
             header_style=STYLE_TABLE_HEADER,
             box=box.SIMPLE_HEAD,
@@ -238,26 +228,26 @@ def scrum(
         table.add_column("WT/ET", justify="center")
 
     # An index to shade rows
-    i: int = 0
+    i: int = 1
 
     # Iterate rows
     # Once again, depends on the type of view
     for index, row in blocks.iterrows():
         # Common styles for both views
         if row["scrum_status_name"] == "WAITING":
-            style = STYLE_ROW_WAITING
+            style = STYLE_ROW_SCRUM_WAITING
         elif row["scrum_status_name"] == "DOING":
-            style = STYLE_ROW_DOING
+            style = STYLE_ROW_SCRUM_DOING
         elif row["scrum_status_name"] == "CURRENT":
-            style = STYLE_ROW_CURRENT
+            style = STYLE_ROW_SCRUM_CURRENT
         elif row["scrum_status_name"] == "BACKLOG":
-            style = STYLE_ROW_BACKLOG
+            style = STYLE_ROW_SCRUM_BACKLOG
         else:
             style = STYLE_ROW_NORMAL
 
         # Add shade for alternate rows
-        if (i + 1) % 4 == 0:
-            style += STYLE_SHADE
+        if i % 2 == 0:
+            style += STYLE_ROW_NORMAL_SHADE_MODIFIER
 
         wt_et_highlighted: Text = Text(
             str(
@@ -319,10 +309,10 @@ def scrum(
 
         table.add_row(
             "TOTAL",
-            "-",
+            "",
             str(blocks.shape[0]),
-            "-",
-            "-",
+            "",
+            "",
             str(blocks["estimated_time"].sum()),
             str(round(blocks["work_time"].sum(), 1)),
             str(round(blocks["left_time"].sum(), 1)),
@@ -334,7 +324,7 @@ def scrum(
         # Condensed view
         table.add_row(
             "TOTAL",
-            "-",
+            "",
             str(blocks["block"].sum()),
             str(blocks["estimated_time"].sum()),
             str(round(blocks["work_time"].sum(), 1)),

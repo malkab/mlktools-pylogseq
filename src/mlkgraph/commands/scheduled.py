@@ -3,12 +3,15 @@ import sys
 import pandas as pd
 import typer
 from lib.constants import (
-    STYLE_ROW_HIGHLIGHT,
-    STYLE_ROW_HIGHLIGHT_SHADE,
+    COLUMN_WIDTH_GRAPH_NAME,
+    HELP_G_OPTION,
+    HELP_I_OPTION,
+    HELP_P_OPTION,
     STYLE_ROW_NORMAL,
-    STYLE_SHADE,
+    STYLE_ROW_NORMAL_SHADE,
     STYLE_TABLE_HEADER,
     STYLE_TABLE_NAME,
+    STYLE_TEXT_HIGHLIGHT,
 )
 from lib.libmlkgraph import (
     get_graphs,
@@ -35,19 +38,19 @@ def scheduled(
         [],
         "--profile",
         "-p",
-        help="Profiles to apply, in order, comma-separated. Multiple -p allowed.",
+        help=HELP_P_OPTION,
     ),
     graphs_paths: list[str] = typer.Option(
         [],
         "--graph",
         "-g",
-        help="Graphs to analyze, comma-separated. Multiple -g allowed. Globs can be provided.",
+        help=HELP_G_OPTION,
     ),
     ignore_paths: list[str] = typer.Option(
         [],
         "--ignore",
         "-i",
-        help="Graph paths to ignore, comma-separated. Multiple -i allowed. Globs can be provided.",
+        help=HELP_I_OPTION,
     ),
 ):
     # Default path to local folder
@@ -124,37 +127,37 @@ def scheduled(
         header_style=STYLE_TABLE_HEADER,
         box=box.SIMPLE_HEAD,
     )
-    table.add_column("Graph", justify="left")
+    table.add_column("Graph", justify="left", max_width=COLUMN_WIDTH_GRAPH_NAME)
     table.add_column("Block", justify="left")
     table.add_column("Scheduled", justify="center")
     table.add_column("P", justify="center")
     table.add_column("S", justify="center")
 
     # An index to shade rows
-    i: int = 0
+    i: int = 1
 
     # Iterate rows
     for index, row in blocks.iterrows():
-        style = STYLE_ROW_NORMAL
+        # Base style
+        style = STYLE_ROW_NORMAL if i % 2 != 0 else STYLE_ROW_NORMAL_SHADE
 
-        # Add shade for alternate rows
-        if (i + 1) % 4 == 0:
-            style += STYLE_SHADE
-
-        # Check for scores above 1
-        if row["score"] >= 1.0:
-            # Shade
-            if (i + 1) % 4 == 0:
-                style = STYLE_ROW_HIGHLIGHT_SHADE
-            else:
-                style = STYLE_ROW_HIGHLIGHT
+        score_hightlighted: Text = Text(
+            str(
+                round(
+                    row["score"],
+                    1,
+                )
+            ),
+            style=STYLE_TEXT_HIGHLIGHT if row["score"] >= 1.0 else style,
+        )
 
         table.add_row(
             row["graph"].name,
             Text(row["block"].clean_title),
             str(row["date"].strftime("%Y-%m-%d")),
             str(row["period"]),
-            str(round(row["score"], 1)),
+            # str(round(row["score"], 1)),
+            score_hightlighted,
             style=style,
         )
 
@@ -162,6 +165,6 @@ def scheduled(
 
     console.print(table)
 
-    print(" P: period in weeks, S: delay score")
+    print("  P: period in weeks, S: delay score")
 
     print()
