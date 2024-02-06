@@ -1,4 +1,4 @@
-from pylogseq.page import Page
+from pylogseq.pylogseq.page import Page
 
 # TODO: DOCUMENT
 

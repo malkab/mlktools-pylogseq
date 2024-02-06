@@ -1,0 +1,1 @@
+Un directorio dummy para que se detecte que no es un grafo.

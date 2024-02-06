@@ -1,13 +1,16 @@
-import sys
-import os
+# import sys
+# import os
 
 # TODO: DOCUMENT
 
-from marko import inline
-from datetime import datetime
-from pylogseq.mdlogseq.exceptions.errorclock import ErrorClock
-from pylogseq.clock import Clock
 import re
+from datetime import datetime
+
+from marko import inline
+
+from pylogseq.pylogseq.clock import Clock
+from pylogseq.pylogseq.mdlogseq.exceptions.errorclock import ErrorClock
+
 
 # --------------------------------------
 #
@@ -72,24 +75,32 @@ class LogseqClock(inline.InlineElement):
         if m != None:
             # Unparseable start time
             try:
-                start = datetime.strptime("%s %s" %
-                    (m.group(2), m.group(4)), '%Y-%m-%d %H:%M:%S')
+                start = datetime.strptime(
+                    "%s %s" % (m.group(2), m.group(4)), "%Y-%m-%d %H:%M:%S"
+                )
             except:
-                raise ErrorClock("CLOCK error: unparseable start timestamp %s %s" %
-                    (m.group(2), m.group(4)))
+                raise ErrorClock(
+                    "CLOCK error: unparseable start timestamp %s %s"
+                    % (m.group(2), m.group(4))
+                )
 
             # Unparseable end time
             try:
-                end = datetime.strptime("%s %s" % \
-                    (m.group(5), m.group(7)), '%Y-%m-%d %H:%M:%S')
+                end = datetime.strptime(
+                    "%s %s" % (m.group(5), m.group(7)), "%Y-%m-%d %H:%M:%S"
+                )
             except:
-                raise ErrorClock("CLOCK error: unparseable ending timestamp %s %s" %
-                    (m.group(5), m.group(7)))
+                raise ErrorClock(
+                    "CLOCK error: unparseable ending timestamp %s %s"
+                    % (m.group(5), m.group(7))
+                )
 
             # Check different days clocking
-            if end<start:
-                raise ErrorClock("CLOCK error: start time bigger than end time %s > %s" % (
-                    start, end))
+            if end < start:
+                raise ErrorClock(
+                    "CLOCK error: start time bigger than end time %s > %s"
+                    % (start, end)
+                )
             else:
                 self.target = Clock(start, end)
 

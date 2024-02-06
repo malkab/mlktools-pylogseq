@@ -11,18 +11,13 @@ name: pylogseq
 root: <%= GITDIRF %>/mlktools/mlktools-pylogseq
 
 windows:
-  - test_pylogseq: >
+  - test_pytest: >
       cd .devcontainer/scripts ;
       sleep 0.2 ;
       clear ;
-      echo Run dev environment at 010 to test the pylogseq package
-  - test_mlkgraph: >
+      echo Run dev environment at 010 to run PyTest tests
+  - test_scripts: >
       cd .devcontainer/scripts ;
       sleep 0.2 ;
       clear ;
-      echo Run dev environment at 010 to test the mlkgraph CLI app
-  - test_libmlkgraph: >
-      cd .devcontainer/scripts ;
-      sleep 0.2 ;
-      clear ;
-      echo Run dev environment at 015 to test the libmlkgraph module
+      echo Run dev environment at 010 to test scripts

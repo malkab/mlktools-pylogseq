@@ -15,24 +15,30 @@ from typing import Any
 import marko
 import marko.inline as marko_inline
 
-from pylogseq.clock import Clock
-from pylogseq.mdlogseq.elements_parsers import (
+from pylogseq.pylogseq.clock import Clock
+from pylogseq.pylogseq.mdlogseq.elements_parsers import (
     LogseqComposedTag,
     LogseqSquareTag,
     LogseqTag,
 )
-from pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
-from pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import LogseqDeadline
-from pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
-from pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
-from pylogseq.mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
-from pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
-from pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
-from pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import LogseqPriority
-from pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import LogseqScheduled
-from pylogseq.mdlogseq.elements_parsers.logseqwaitingclass import LogseqWaiting
-from pylogseq.parser import Parser
-from pylogseq.scrum_status import SCRUM_STATUS
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqclockclass import LogseqClock
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqdeadlineclass import (
+    LogseqDeadline,
+)
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqdoneclass import LogseqDone
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqendclass import LogseqEnd
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqlaterclass import LogseqLater
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqlogbookclass import LogseqLogBook
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqnowclass import LogseqNow
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqpriorityclass import (
+    LogseqPriority,
+)
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqscheduledclass import (
+    LogseqScheduled,
+)
+from pylogseq.pylogseq.mdlogseq.elements_parsers.logseqwaitingclass import LogseqWaiting
+from pylogseq.pylogseq.parser import Parser
+from pylogseq.pylogseq.scrum_status import SCRUM_STATUS
 
 # TODO: revisar los imports y documentar
 

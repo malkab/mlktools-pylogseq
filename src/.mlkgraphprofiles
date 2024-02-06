@@ -1,0 +1,23 @@
+# Example of profile configuration file for mlkgraph
+# Either in the current folder or at home of user
+# GLOBS must be quoted
+# Don't use commas in globs for clarity
+
+profile_a_folder:
+  description: "Profile A description"
+  root: .
+  include:
+    - tests/assets/graph_b
+    - tests/assets/**
+  exclude:
+    - tests/assets/**/graph_b
+    - tests/assets/graph_a
+
+profile_b:
+  description: "Profile B description"
+  root: .
+  include:
+    - tests/assets/graph_b
+    - tests/assets/**
+  exclude:
+    - tests/assets/graph_b

@@ -1,0 +1,1 @@
+Módulo con la librería básica que gestiona los grafos.

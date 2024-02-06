@@ -1,10 +1,10 @@
-from pylogseq.parser import Parser
-from pylogseq.block import Block
-from pylogseq.page import Page
-from pylogseq.graph import Graph
-from pylogseq.pageparsererror import PageParserError
-from pylogseq.clock import Clock
-from pylogseq.scrum_status import SCRUM_STATUS
+from pylogseq.pylogseq.parser import Parser
+from pylogseq.pylogseq.block import Block
+from pylogseq.pylogseq.page import Page
+from pylogseq.pylogseq.graph import Graph
+from pylogseq.pylogseq.pageparsererror import PageParserError
+from pylogseq.pylogseq.clock import Clock
+from pylogseq.pylogseq.scrum_status import SCRUM_STATUS
 
 __all__ = [
     "Parser",

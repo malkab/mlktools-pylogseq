@@ -1,8 +1,9 @@
-import os
 import fnmatch
-from pylogseq.block import Block
-from pylogseq.page import Page
-from typing import Self, Generator
+import os
+from typing import Generator, Self
+
+from pylogseq.pylogseq.block import Block
+from pylogseq.pylogseq.page import Page
 
 # TODO: DOCUMENT
 

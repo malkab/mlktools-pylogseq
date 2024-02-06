@@ -2,7 +2,7 @@ import os
 from typing import Any, List
 from urllib.parse import unquote
 
-from pylogseq.block import Block
+from pylogseq.pylogseq.block import Block
 
 # TODO: DOCUMENT
 
@@ -72,7 +72,7 @@ class Page:
             any: The parsed document.
         """
 
-        from pylogseq.pageparsererror import PageParserError
+        from pylogseq.pylogseq.pageparsererror import PageParserError
 
         blocks: List[str] = (
             self.content.split("\n- ") if self.content is not None else []
