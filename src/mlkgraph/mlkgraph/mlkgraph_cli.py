@@ -2,14 +2,14 @@
 # coding=UTF8
 
 import typer
-from commands.clock import clock
-from commands.deadline import deadline
-from commands.grep import grep
-from commands.profile import profile
-from commands.scheduled import scheduled
-from commands.scrum import scrum
-from commands.speed import speed
-from lib.constants import (
+from mlkgraph.commands.clock import clock
+from mlkgraph.commands.deadline import deadline
+from mlkgraph.commands.grep import grep
+from mlkgraph.commands.profile import profile
+from mlkgraph.commands.scheduled import scheduled
+from mlkgraph.commands.scrum import scrum
+from mlkgraph.commands.speed import speed
+from mlkgraph.lib.constants import (
     HELP_PGI_GENERAL,
 )
 

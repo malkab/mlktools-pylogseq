@@ -2,7 +2,7 @@ import sys
 
 import pandas as pd
 import typer
-from lib.constants import (
+from mlkgraph.lib.constants import (
     COLUMN_WIDTH_GRAPH_NAME,
     COLUMN_WIDTH_PAGE_NAME,
     HELP_B_OPTION,
@@ -10,7 +10,6 @@ from lib.constants import (
     HELP_I_OPTION,
     HELP_P_OPTION,
     STYLE_ROW_NORMAL,
-    STYLE_ROW_NORMAL_SHADE,
     STYLE_ROW_NORMAL_SHADE_MODIFIER,
     STYLE_ROW_SCRUM_BACKLOG,
     STYLE_ROW_SCRUM_CURRENT,
@@ -21,7 +20,7 @@ from lib.constants import (
     STYLE_TEXT_HIGHLIGHT,
     STYLE_TOTAL,
 )
-from lib.libmlkgraph import (
+from mlkgraph.lib.libmlkgraph import (
     calculate_speed,
     get_graphs,
     parse_graph_group,

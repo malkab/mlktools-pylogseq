@@ -2,7 +2,7 @@ import sys
 
 import pandas as pd
 import typer
-from lib.constants import (
+from mlkgraph.lib.constants import (
     HELP_G_OPTION,
     HELP_I_OPTION,
     HELP_P_OPTION,
@@ -11,11 +11,11 @@ from lib.constants import (
     STYLE_TABLE_HEADER,
     STYLE_TABLE_NAME,
 )
-from lib.libmlkgraph import (
+from mlkgraph.lib.libmlkgraph import (
     get_graphs,
     process_p_g_i_graph_paths,
 )
-from lib.profiles import Profiles
+from mlkgraph.lib.profiles import Profiles
 from rich import box
 from rich import print as pprint
 from rich.console import Console

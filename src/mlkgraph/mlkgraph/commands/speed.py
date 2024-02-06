@@ -1,7 +1,7 @@
 import sys
 
 import typer
-from lib.constants import (
+from mlkgraph.lib.constants import (
     HELP_G_OPTION,
     HELP_I_OPTION,
     HELP_P_OPTION,
@@ -11,7 +11,7 @@ from lib.constants import (
     STYLE_TABLE_NAME,
     STYLE_TOTAL,
 )
-from lib.libmlkgraph import (
+from mlkgraph.lib.libmlkgraph import (
     calculate_speed,
     get_graphs,
     parse_graph_group,

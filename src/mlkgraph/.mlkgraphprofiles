@@ -7,17 +7,17 @@ profile_a_folder:
   description: "Profile A description"
   root: .
   include:
-    - mlkgraph_tests/graph_b
-    - mlkgraph_tests/**
+    - tests/mlkgraph_tests/graph_b
+    - tests/mlkgraph_tests/**
   exclude:
-    - mlkgraph_tests/**/graph_b
-    - mlkgraph_tests/graph_a
+    - tests/mlkgraph_tests/**/graph_b
+    - tests/mlkgraph_tests/graph_a
 
 profile_b:
   description: "Profile B description"
   root: .
   include:
-    - mlkgraph_tests/graph_b
-    - mlkgraph_tests/**
+    - tests/mlkgraph_tests/graph_b
+    - tests/mlkgraph_tests/**
   exclude:
-    - mlkgraph_tests/graph_b
+    - tests/mlkgraph_tests/graph_b

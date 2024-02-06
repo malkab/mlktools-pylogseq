@@ -1,5 +1,5 @@
 import pytest
-from lib.libmlkgraph import get_graphs, process_p_g_i_graph_paths
+from mlkgraph.lib.libmlkgraph import get_graphs, process_p_g_i_graph_paths
 
 
 # @pytest.mark.skip
@@ -31,9 +31,9 @@ class TestLib:
         graphs = process_p_g_i_graph_paths(p_options=p_options)
 
         assert sorted(graphs) == [
-            "./mlkgraph_tests/graph_b",
-            "./mlkgraph_tests/no_es_grafo",
-            "./mlkgraph_tests/pylogseq_test_graph",
+            "./tests/mlkgraph_tests/graph_b",
+            "./tests/mlkgraph_tests/no_es_grafo",
+            "./tests/mlkgraph_tests/pylogseq_test_graph",
         ]
 
         # Multiple existing profiles
@@ -42,32 +42,35 @@ class TestLib:
         graphs = process_p_g_i_graph_paths(p_options=p_options)
 
         assert sorted(graphs) == [
-            "./mlkgraph_tests/graph_a",
-            "./mlkgraph_tests/no_es_grafo",
-            "./mlkgraph_tests/pylogseq_test_graph",
+            "./tests/mlkgraph_tests/graph_a",
+            "./tests/mlkgraph_tests/no_es_grafo",
+            "./tests/mlkgraph_tests/pylogseq_test_graph",
         ]
 
         # Single -g option
-        g_options = ["mlkgraph_tests/**"]
+        g_options = ["tests/mlkgraph_tests/**"]
 
         graphs = process_p_g_i_graph_paths(g_options=g_options)
 
         assert sorted(graphs) == [
-            "mlkgraph_tests/graph_a",
-            "mlkgraph_tests/graph_b",
-            "mlkgraph_tests/no_es_grafo",
-            "mlkgraph_tests/pylogseq_test_graph",
+            "tests/mlkgraph_tests/graph_a",
+            "tests/mlkgraph_tests/graph_b",
+            "tests/mlkgraph_tests/no_es_grafo",
+            "tests/mlkgraph_tests/pylogseq_test_graph",
         ]
 
         # Multiple -g option
-        g_options = ["mlkgraph_tests/graph_*", "mlkgraph_tests/pylogseq_test_graph"]
+        g_options = [
+            "tests/mlkgraph_tests/graph_*",
+            "tests/mlkgraph_tests/pylogseq_test_graph",
+        ]
 
         graphs = process_p_g_i_graph_paths(g_options=g_options)
 
         assert sorted(graphs) == [
-            "mlkgraph_tests/graph_a",
-            "mlkgraph_tests/graph_b",
-            "mlkgraph_tests/pylogseq_test_graph",
+            "tests/mlkgraph_tests/graph_a",
+            "tests/mlkgraph_tests/graph_b",
+            "tests/mlkgraph_tests/pylogseq_test_graph",
         ]
 
         # Single -i option
@@ -93,12 +96,18 @@ class TestLib:
         """Tests the get_graphs method."""
 
         # Get graphs
-        g_options = ["mlkgraph_tests/graph_*"]
+        g_options = ["tests/mlkgraph_tests/graph_*"]
 
         graphs = process_p_g_i_graph_paths(g_options=g_options)
 
-        assert sorted(graphs) == ["mlkgraph_tests/graph_a", "mlkgraph_tests/graph_b"]
+        assert sorted(graphs) == [
+            "tests/mlkgraph_tests/graph_a",
+            "tests/mlkgraph_tests/graph_b",
+        ]
 
         g = get_graphs(graphs)
 
-        assert sorted(g) == ["mlkgraph_tests/graph_a", "mlkgraph_tests/graph_b"]
+        assert sorted(g) == [
+            "tests/mlkgraph_tests/graph_a",
+            "tests/mlkgraph_tests/graph_b",
+        ]

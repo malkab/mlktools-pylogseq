@@ -2,7 +2,7 @@ import sys
 
 import pandas as pd
 import typer
-from lib.constants import (
+from mlkgraph.lib.constants import (
     COLUMN_WIDTH_GRAPH_NAME,
     HELP_G_OPTION,
     HELP_I_OPTION,
@@ -13,7 +13,7 @@ from lib.constants import (
     STYLE_TABLE_NAME,
     STYLE_TEXT_HIGHLIGHT,
 )
-from lib.libmlkgraph import (
+from mlkgraph.lib.libmlkgraph import (
     get_graphs,
     parse_graph_group,
     process_p_g_i_graph_paths,
